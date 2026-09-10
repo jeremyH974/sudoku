@@ -79,10 +79,21 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
 - La couleur n'est **jamais** le seul porteur d'information (daltonisme, impression N&B).
 - Contraste minimum 4,5:1. Palette bleu/orange, jamais rouge/vert seuls.
 - Cibles tactiles ≥ 44 px.
-- Toute l'interface est dimensionnée en `rem` depuis `html { font-size }` — c'est le point
-  d'ancrage du futur réglage « gros caractères », attendu par un public senior très large.
+- Toute l'interface est dimensionnée en `rem` depuis `html { font-size }`. **Aucune unité de
+  fenêtre** (`vw`, `vh`, `dvh`…) dans `packages/app/src` : c'est ce qui avait rendu le réglage
+  « gros caractères » totalement inopérant sur téléphone — la grille et ses chiffres se mesuraient
+  contre la fenêtre, donc n'obéissaient plus à l'ancrage. La bonne mesure est `cqi` (une fraction
+  du conteneur) ou `rem`. `packages/cli/src/appStyles.test.ts` le vérifie ; le modifier exige une
+  raison écrite, pas un contournement.
+- Le réglage de taille agit sur **deux** leviers, et il faut les deux : `font-size` sur la racine
+  pour tout ce qui est en `rem`, et `--text-scale` pour les chiffres à l'intérieur d'une grille
+  dont la largeur est déjà bornée par l'écran.
 - `role="grid"` est signalé comme anti-pattern potentiel hors données tabulaires : à valider par
-  un test réel avec un lecteur d'écran avant de le considérer comme acquis.
+  un test réel avec un lecteur d'écran avant de le considérer comme acquis. **`axe` ne peut pas le
+  faire** — et plus généralement, un DOM simulé ne calcule aucune mise en page : les tests
+  `*.a11y.test.ts` voient les rôles, les noms accessibles et l'ordre des titres, **jamais le
+  contraste ni la taille des cibles**. Ces deux-là se mesurent à la main, et une CI verte ne vaut
+  pas mesure.
 - Le thème a **trois** états (clair, sombre, système) ; « système » retire l'attribut au lieu
   d'écrire une valeur. Tout accès à `localStorage` est enveloppé dans un `try` : en navigation
   privée, il lève.
@@ -115,6 +126,31 @@ Même règle, appliquée aux chiffres de l'onglet Progression :
   définissable ;
 - **aucun compteur n'est persisté** (série, nombre de défis). Tout se recalcule depuis
   l'historique : deux sources de vérité finissent toujours par se contredire.
+
+## Enseigner sans mentir
+
+La campagne d'apprentissage suit la même règle que la difficulté : **on n'invente pas un
+exercice.**
+
+- Une grille d'exercice doit avoir la technique enseignée pour **technique la plus difficile**,
+  vérifié à la génération et rejoué à chaque exécution des tests. Une technique sans grille reçoit
+  un tableau vide, et l'interface explique pourquoi — elle ne fabrique pas un exercice où la
+  technique ne serait pas nécessaire.
+- Le raccourci tentant, à refuser : appeler le `findAll` d'une technique sur une position
+  quelconque produirait toujours un motif sain. Mais si une technique moins chère s'applique au
+  même endroit, la leçon enseignerait « ici il faut un quadruplet nu » alors qu'il n'en faut pas.
+- **Une position n'a pas de niveau.** Un exercice affiche la technique qu'il enseigne, jamais la
+  difficulté de la grille dont il est extrait.
+- Le corpus des leçons ne porte **que la grille** : ni score, ni niveau, ni index d'étape. Un index
+  figé pointerait silencieusement ailleurs après un changement de barème ; on cherche donc la
+  première étape qui emploie la technique, et l'absence se dit.
+- Les exercices sont **exclus** des statistiques par niveau : quarante secondes et quarante minutes
+  dans la même médiane produiraient un chiffre qui a l'air mesuré et ne l'est pas.
+
+> ⚠ **Ne pas conclure trop vite à l'impossible.** Deux sondes avaient établi que le quadruplet nu
+> était hors d'atteinte — zéro occurrence sur ~22 000 échanges — et la conclusion était fausse.
+> Plusieurs graines, l'abandon de la symétrie et la récolte au vol en produisent trois en
+> 55 secondes. Une mesure négative sur une configuration ne vaut que pour cette configuration.
 
 ## Vérification avant de conclure
 

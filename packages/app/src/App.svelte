@@ -1348,8 +1348,33 @@
     }
 
     .tabs button {
-      padding: 0.6rem 0.55rem;
-      font-size: 0.85rem;
+      padding: 0.6rem 0.5rem;
+      font-size: 0.82rem;
+    }
+
+    /*
+      Les réglages se resserrent pour tenir sur la ligne du titre.
+
+      Sans cela ils occupaient une rangée à eux seuls, et le cinquième onglet en
+      ajoutait une seconde : la grille commençait à 226 px au lieu de 178 px, sur
+      un écran qui n'en offre que 667. Les cibles restent à 44 px — c'est le
+      cadre décoratif autour des groupes qui disparaît, pas la zone touchable.
+    */
+    .preferences {
+      gap: 0.35rem;
+    }
+
+    .text-size,
+    .theme {
+      padding: 0;
+      border: none;
+      background: none;
+    }
+
+    .size-option,
+    .theme-option {
+      min-width: 2.75rem;
+      padding-inline: 0.15rem;
     }
   }
 </style>

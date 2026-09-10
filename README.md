@@ -94,6 +94,81 @@ lève), et une sauvegarde corrompue fait repartir sur une partie neuve plutôt q
 L'écriture est **différée** de 400 ms, avec un enregistrement immédiat quand l'onglet passe en
 arrière-plan : sauvegarder à chaque frappe sérialiserait la partie des dizaines de fois par minute.
 
+## Apprendre technique par technique
+
+Les indices savaient déjà **nommer** une technique et expliquer la déduction. Ils ne savaient pas
+l'**enseigner** : rien ne permettait de produire une grille qui exige une technique précise et rien
+de plus difficile.
+
+L'onglet **Apprendre** couvre les vingt-quatre techniques du registre, en quatre chapitres coupés
+là où le genre de raisonnement change — voir à l'œil, écarter au lieu de poser, réserver des cases
+ou des chiffres, raisonner à distance. Chaque technique se lit, puis se pratique.
+
+### L'exercice commence au moment intéressant
+
+Le défaut des tutoriels existants est de faire poser quarante singles avant de rencontrer le motif
+annoncé. Ici, l'exercice **reprend la grille à l'instant précis où la technique devient
+nécessaire** : les cases déjà déduites sont posées, les candidats sont écrits, et il ne reste que
+le raisonnement à trouver.
+
+Le mécanisme naïf — figer les valeurs de cette position en une nouvelle grille — ne marche pas, et
+la mesure a été nette : **sur treize techniques, il ne tient que quatre fois**. Une position en
+cours de résolution porte des candidats déjà écartés par les étapes précédentes, et ce sont
+précisément ces éliminations qui rendent la technique nécessaire. Les redériver depuis les valeurs
+les fait réapparaître, et une technique plus simple redevient applicable : l'amorce « X-Wing »
+s'ouvrait alors sur une paire pointante. La position transporte donc ses candidats — et c'est
+aussi ce qui empêche l'indice de contredire la leçon sur l'écran même qui prétend l'enseigner.
+
+### Ce que la génération par technique a demandé
+
+Les paliers ne suffisent pas : ce sont des bandes de scores, et une bande contient plusieurs
+techniques. Sur vingt-quatre tirages ciblés par palier, le X-Wing sortait dix fois en Expert,
+mais le Swordfish, le triplet caché, le XYZ-Wing et le Jellyfish **jamais**.
+
+Deux mesures ont façonné la solution, toutes deux contre-intuitives :
+
+- **un plafond serré vaut mieux qu'une marche libre.** À plafond ouvert, le triplet nu, le
+  Swordfish et le Jellyfish échouent tous les trois en 45 s ; à leur propre difficulté, ils
+  sortent en 3,7 s, 6,9 s et 39 s. Le plafond ne fait pas que filtrer la sortie : il **retient**
+  la marche dans la région utile au lieu de la laisser fuir vers 4,2, où les wings abondent ;
+- **récolter au vol** tout candidat qui convient déjà, au lieu de ne juger que le point d'arrivée
+  de la marche, transforme un échec en 45 s en une réussite en 3,5 s.
+
+Deux sondes préparatoires avaient conclu que le **quadruplet nu était structurellement hors
+d'atteinte** — zéro occurrence sur près de 22 000 échanges. La génération complète en produit
+**trois en 55 secondes**. La différence tient à trois choses : plusieurs graines, l'abandon de la
+symétrie (décorative, mais très contraignante), et la récolte au vol. Les vingt-quatre techniques
+ont donc un exercice, et ce nombre est une **mesure**, pas une intention : un test le vérifie et
+tomberait si une évolution du registre en rendait une inatteignable.
+
+### Le corpus, et ce qu'il ne porte pas
+
+72 grilles, **2,1 Ko compressés**, figées et versionnées pour les deux raisons déjà connues du
+défi quotidien : la génération dépend du barème *et* de la vitesse de la machine. Il ne porte que
+**la grille** — ni le score, ni le niveau, ni l'index de l'étape. Ce dernier point est le plus
+important : figer « la technique est à l'étape 41 » paraît économique, mais un changement de
+barème ferait pointer cet index sur autre chose, en silence. En cherchant la première étape qui
+emploie la technique, on obtient soit une vraie occurrence, soit rien — et « rien » se dit.
+
+`pnpm lessons` régénère le corpus en cinq minutes.
+
+### Une progression qui ne compte que ce qu'elle observe
+
+Par technique : le nombre d'exercices terminés, et combien l'ont été sans indice. Rien d'autre.
+
+- **aucun pourcentage de maîtrise** : il faudrait un dénominateur — les exercices *tentés* — que
+  rien n'observe, puisqu'il n'y a pas de bouton « j'abandonne ». C'est la raison qui avait déjà
+  fait écarter le taux de réussite ;
+- **aucune médiane par technique** : cinq échantillons d'une tâche de trente secondes ne portent
+  rien, et surtout les exercices d'une même technique **partent de positions différentes**. Leurs
+  durées ne sont pas comparables entre elles, même en principe ;
+- **aucune barre « 21 sur 24 »** : elle compterait comme des échecs des techniques que le joueur
+  ne peut pas pratiquer.
+
+Et les exercices sont **exclus** des statistiques par niveau. Un exercice de quarante secondes
+dans la même médiane qu'une Diabolique de quarante minutes produirait un chiffre qui a l'air
+mesuré et ne l'est pas.
+
 ## La progression, et le défi quotidien
 
 Six grilles par jour, **une par niveau**. L'argument du « tout le monde résout la même grille »
@@ -162,6 +237,73 @@ laisse `prefers-color-scheme` reprendre la main et suivre un basculement sans re
 La préférence est appliquée par un script inline **avant le premier rendu** : sans cela, la page
 s'afficherait une fraction de seconde en clair avant de basculer — un flash blanc en pleine nuit.
 
+## Sur un téléphone, et pour qui en a besoin
+
+L'incrément 8 a commencé par un audit, et l'audit a trouvé pire que ce qui était consigné.
+
+| Constat, mesuré sur 375 × 667 | Après |
+|---|---|
+| La grille débordait horizontalement de 2 px sous 400 px — elle se mesurait contre la **fenêtre**, alors que sa boîte est la fenêtre moins le remplissage de page | Elle se mesure contre son conteneur. C'est la classe de défaut qui disparaît, pas l'occurrence |
+| Le pavé de saisie était **entièrement sous la ligne de flottaison** : bord haut à 590 px pour 553 px visibles | Il quitte le flux et se pose sous le pouce, en cinq colonnes sur deux rangées |
+| Le réglage « gros caractères » n'avait **aucun effet** sur la grille : plateau et chiffres étaient verrouillés à la fenêtre entre 338 et 585 px | Chiffres de 21,0 à 26,6 px sur le même téléphone |
+| Des cibles tactiles à 36 px, sous un commentaire affirmant tenir les 44 | 44 px partout, mesuré bouton par bouton |
+
+### Le pavé quitte le flux, et pourquoi c'était inévitable
+
+L'arithmétique commande : en-tête, onglets, grille et ligne d'état consomment 543 px pour 553 px
+visibles. **Aucune disposition** ne fait tenir en plus un pavé de saisie, et rétrécir la grille
+donnerait des cases de 17 px. La barre se détache donc sur un critère de **hauteur** et non de
+largeur — une tablette de 768 × 1024 a de la place et garde la disposition empilée, un téléphone
+en paysage n'en a pas.
+
+Ce qui reste, dit franchement : avec cinq onglets sur deux rangées et le bandeau des marques
+ouvert, la grille commence à 218 px et il en reste 440 au-dessus de la barre. Une ou deux rangées
+se font donc défiler. C'est le prix d'une grille carrée de 343 px sur un écran de 667, tenu sans
+rogner une seule cible tactile.
+
+### Deux leviers pour la taille du texte
+
+Le réglage a trois paliers nommés, et agit sur deux choses à la fois, parce qu'un seul levier ne
+suffisait pas : `html { font-size }` fait grandir tout ce qui est en `rem` — **y compris la
+grille** là où l'écran le permet — et `--text-scale` fait grandir les chiffres **à l'intérieur**
+d'une grille dont la largeur est déjà bornée par le téléphone. C'est le second qui sert au public
+senior, et c'est exactement celui qui manquait.
+
+Aucune unité de fenêtre ne subsiste dans les styles de l'application. **Un test le vérifie** :
+c'est ce qui avait laissé l'ancrage `rem` pourrir sans que rien ne le signale.
+
+### Colorier un candidat, pas une case
+
+Réclamée depuis des années, absente presque partout. Trois marques, nommées **A**, **B** et **C** —
+jamais par leur couleur. Chacune porte en plus un tracé distinct et **son nom dans le libellé lu à
+voix haute** : « notes 5 7, 5 marqué A, 7 marqué C ». C'est le seul porteur qui ne se dégrade ni à
+huit pixels, ni en noir et blanc, ni pour un daltonien.
+
+À 375 px, un candidat occupe 12 px : **une cible de 44 px ne peut pas exister dans la grille.**
+Rien ne demande donc d'en viser une — on touche la case, puis la touche de marque (109 × 46 px),
+puis le chiffre. Le bandeau des marques n'apparaît qu'en mode notes, ce qui rend le lien visible
+au lieu de l'expliquer.
+
+Le modèle de données n'est pas celui auquel on pense : empiler les marques dans le tableau des
+notes le porterait à 36 bits, au-delà d'un entier 32 — et ce tableau **est** le masque de
+candidats transmis au moteur. Un second tableau de 81 nombres, deux bits par chiffre, garde le
+premier intact et reste **additif** en sauvegarde : personne ne perd sa partie en cours à la mise
+à jour. Un test relit une sauvegarde écrite avant l'existence des marques.
+
+### Ce que les tests d'accessibilité vérifient, et ce qu'ils ne vérifient pas
+
+`axe-core` tourne sur les cinq onglets à chaque `pnpm test` : rôles, noms accessibles, ordre des
+titres, repères, validité ARIA. Il a déjà trouvé un enchaînement de titres rompu depuis
+l'incrément 2, et un second `h1` sur la feuille imprimée.
+
+**Il ne voit ni le contraste ni la taille des cibles** — aucun DOM simulé ne calcule de mise en
+page. Ces deux règles restent vérifiées à la main, exactement comme l'impression : « manuel et
+assumé ». Une exécution verte ne vaut pas mesure, et le code le dit à l'endroit où on pourrait
+l'oublier.
+
+Les avertissements d'accessibilité du compilateur Svelte sont désormais **bloquants**. Ils étaient
+au nombre de zéro : c'est un cliquet gratuit, pas un chantier.
+
 ## Le studio d'impression
 
 Cahiers au format standard ou relié, corrigés groupés **à la fin** sur des pages séparées :
@@ -215,14 +357,19 @@ packages/
 │  ├─ grid/      Géométrie 9×9, masques de candidats, lecture/écriture
 │  ├─ solver/    Solveur brut : propagation de contraintes + backtracking MRV
 │  ├─ logic/     Solveur humain : 24 techniques, chemin de résolution, notation
-│  └─ generate/  Creusement à unicité garantie, puis recherche dirigée par niveau
-├─ cli/          Outillage hors production : oracle de calibration, corpus quotidien
+│  └─ generate/  Creusement à unicité garantie, puis recherche dirigée — par
+│                niveau, ou par **technique** visée
+├─ cli/          Outillage hors production : oracle, corpus quotidien, corpus des leçons
 └─ app/          L'application Svelte 5
    ├─ src/lib/   Logique de partie, grille accessible, panneau d'analyse, Worker
    │             day · dates civiles pures    stopwatch · chronomètre honnête
    │             stats · historique persisté  progress · agrégats purs
-   │             daily · lecture du corpus des défis
-   └─ public/daily/corpus.json   274 jours de défis, figés et précachés
+   │             daily · corpus des défis      learn · corpus des leçons + amorce
+   │             lessons · le texte des 24 leçons
+   │             marks · marques de candidats  textSize · taille du texte
+   ├─ src/test/  Montage de composants et exécution d'axe, pour les tests de DOM
+   ├─ public/daily/corpus.json   274 jours de défis, figés et précachés
+   └─ public/learn/corpus.json   72 grilles d'exercice, une par technique
 ```
 
 Le moteur ne connaît ni le DOM, ni le navigateur, ni le framework, ni le stockage. Cette pureté
@@ -239,6 +386,8 @@ est **vérifiée mécaniquement** : il compile avec `lib: ["ES2023"]` seul, donc
 | Diversité des grilles | Solution complète tirée à chaque fois | Transformer une grille germe ne produit que des grilles **isomorphes** — une classe d'équivalence sur 5 472 730 538. |
 | Web Worker | Oui, depuis l'incrément 2 | La génération d'un niveau élevé prend de 1,5 à 8 secondes. |
 | Dépendances | **Zéro copyleft** | HoDoKu est en GPLv3, le portage Rust de jczsolve en AGPL, Sudoku Explainer en LGPL. Tout est réimplémenté depuis les algorithmes publiés. |
+| Génération par technique | Bande resserrée autour de la difficulté visée, **récolte au vol** | Mesuré : à plafond ouvert, triplet nu, Swordfish et Jellyfish échouent en 45 s ; à plafond serré ils sortent en 3,7 s, 6,9 s et 39 s. Le plafond retient la marche dans la région utile. |
+| Position d'exercice | Valeurs **et** candidats, jamais les valeurs seules | Mesuré sur 13 techniques : figer les valeurs ne préserve l'étape attendue que 4 fois. Les éliminations déjà acquises sont ce qui rend la technique nécessaire. |
 | Web Components | **Non**, composants Svelte standards | Le Shadow DOM empêche `aria-labelledby` et `<label for>` de traverser sa frontière — en conflit frontal avec l'accessibilité de la grille. |
 
 ### Performance mesurée
@@ -275,6 +424,18 @@ en dessous, ils le dépassaient. Une fois le plafond transmis à la marche, Diff
 
 Quand le niveau n'est pas atteint, l'application le **dit** et propose la grille la plus proche,
 plutôt que de mal l'étiqueter.
+
+L'incrément 8 a corrigé un second défaut de la même marche : **le point de départ devenait la
+référence même quand il était inutilisable.** Une grille creusée qui se bloque porte quand même un
+score — celui de l'étape la plus dure atteinte avant le blocage, souvent élevé — et 13 % des
+creusements sortent ainsi. La promotion exigeant un score strictement supérieur, une grille résolue
+à 3,2 ne pouvait jamais déloger un départ bloqué à 4,0 : la marche brûlait ses quatre cents
+échanges et le budget de temps partagé, donc aussi les tentatives suivantes. Mesuré sur les mêmes
+graines à « Expert » : **52,9 s → 44,7 s**, à taux de réussite égal.
+
+Production d'un corpus complet de leçons — 24 techniques, 3 grilles chacune : **5 minutes**. Le
+Swordfish demande 44 s, le Jellyfish jusqu'à deux minutes ; tout le reste sort en quelques
+secondes.
 
 ## La calibration
 
@@ -360,6 +521,14 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   dernière case le fait osciller, et un enregistrement branché dessus écrirait trois parties là où
   il y en a une. Un verrou fixe le moment de l'écriture, et un test l'exige.
 - **Une durée non mesurable vaut `null`**, jamais une approximation.
+- **Chaque grille du corpus des leçons est renotée à chaque exécution des tests** : décodée,
+  vérifiée unique, et sa technique la plus difficile comparée à la leçon qu'elle illustre.
+- **Aucune unité de fenêtre dans les styles de l'application** — c'est ce qui rendait le réglage
+  de taille du texte inopérant là où il sert le plus.
+- **Une position n'a pas de niveau, et n'en reçoit aucun.** Un exercice affiche la technique qu'il
+  enseigne, jamais la difficulté de la grille dont il est extrait.
+- **La structure d'accessibilité est vérifiée par axe sur les cinq onglets** — mais ni le
+  contraste ni la taille des cibles, qui restent mesurés à la main.
 
 > **Attention à la reproductibilité par graine.** Le PRNG est figé par des snapshots, mais cela ne
 > suffit pas : `generateAtLevel` dépend de `RATING_VERSION` *et* du temps réel écoulé sur la
@@ -378,12 +547,14 @@ serveur avant de recharger. Relevé depuis la page elle-même, serveur arrêté 
 | Requête réseau depuis la page | `TypeError: Failed to fetch` — le serveur est bien coupé |
 | Service worker | `activated`, portée `/`, script `/sw.js` |
 | Page servie par le service worker | oui (`navigator.serviceWorker.controller`) |
-| Entrées en cache | 11, dont le corpus des défis quotidiens |
+| Entrées en cache | 12, dont les deux corpus — défis quotidiens **et** leçons |
 | Défi du jour ouvert hors ligne | 274 jours lus depuis le cache, grille rendue, niveau mesuré |
-| Grille rendue | 81 cases |
+| Onglet Apprendre hors ligne | 24 techniques listées, exercice Swordfish ouvert |
+| Grille rendue | 81 cases, 53 portant des candidats |
 
 Le précache couvre l'intégralité de l'application : le HTML, la feuille de style, le bundle, le
-Worker du moteur, le manifeste, les quatre icônes — **et les 274 jours de défis quotidiens**. À ce format — une cinquantaine de kilo-octets
+Worker du moteur, le manifeste, les quatre icônes — **et les deux corpus**, 274 jours de défis et
+72 grilles d'exercice. À ce format — une cinquantaine de kilo-octets
 compressés, moteur compris — il n'y a rien à arbitrer entre ce qu'on met en cache et ce qu'on
 laisse au réseau : il n'y a aucun réseau à solliciter une fois la page chargée. La mise à jour
 passe par une bannière plutôt que par un rechargement forcé, car recharger la page sous les doigts
@@ -424,16 +595,17 @@ Ce qui reste ouvert, par ordre de valeur :
   score pic s'en ressent. C'est désormais la source dominante des écarts restants.
 - **Unique Rectangle** (4,5 et au-delà) : la seule grille encore refusée à tort en réclame une.
   Famille distincte, fondée sur l'unicité de la solution plutôt que sur l'élimination directe.
-- **La campagne technique par technique** : générer des grilles dont la technique la plus dure est
-  *exactement* X, et en écrire la progression pédagogique. C'est le prolongement naturel des
-  indices en trois paliers, et le meilleur candidat pour l'incrément suivant.
-- **Finition mobile et accessibilité** : le pavé de saisie passe sous la ligne de flottaison sur
-  un téléphone, il n'existe aucun point de rupture, et le réglage « gros caractères » n'est
-  qu'à moitié en place — tout est en `rem`, mais trois `clamp(…vw…)` annuleraient son effet là où
-  il sert le plus. La coloration individuelle des candidats, réclamée depuis des années et absente
-  presque partout, appartient au même lot.
 - **Le rating Glicko2** : point de couture, pas fonctionnalité. Chaque partie enregistrée porte
-  déjà niveau, score, durée, indices et version du barème.
+  déjà niveau, score, durée, indices, technique enseignée et version du barème.
+- **Le paysage sur téléphone** : la grille à gauche, le pavé à droite. C'est une troisième
+  disposition ; la barre basse s'y dégrade en « il faut un peu défiler », pas en « cassé ».
+- **L'annulation multi-cases** : poser une valeur efface des notes chez jusqu'à vingt voisines
+  sans les enregistrer, donc annuler ne les restaure pas. Le corriger change la forme d'un coup
+  sauvegardé — le seul changement qui imposerait vraiment une montée de version de sauvegarde.
+  À faire seul, délibérément.
+- **La validation au lecteur d'écran de `role="grid"`**, que `CLAUDE.md` exige avant de le
+  considérer comme acquis. axe ne peut pas la fournir, et une CI verte ne doit pas être prise
+  pour elle.
 
 Écarté sur preuve, pas par oubli : **W-Wing** n'apparaît nulle part dans l'oracle. L'implémenter
 nous ferait diverger sans aucune référence à laquelle comparer.

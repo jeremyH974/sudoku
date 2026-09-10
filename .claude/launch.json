@@ -4,8 +4,24 @@
     {
       "name": "sudoku-app",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@sudoku/app", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@sudoku/app",
+        "dev"
+      ],
       "port": 5173
+    },
+    {
+      "name": "sudoku-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@sudoku/app",
+        "preview",
+        "--port",
+        "4180"
+      ],
+      "port": 4180
     }
   ]
 }
