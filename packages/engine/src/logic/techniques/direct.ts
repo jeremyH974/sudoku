@@ -132,6 +132,17 @@ function asDirect(name: string, base: TechniqueEntry, mappings: readonly DirectM
       if (mapping === undefined || step.eliminations.length === 0) continue;
 
       const view = new ViewWithout(state, step.eliminations);
+      /*
+        On s'arrête au PREMIER single trouvé, sans énumérer les suivants.
+
+        C'est contre-intuitif : énumérer tous les singles pour retenir le premier
+        qui découle vraiment des éliminations paraît plus rigoureux, puisqu'un
+        single préexistant peut se présenter en tête et faire rejeter un motif
+        pourtant valable. Cette variante a été implémentée et mesurée — elle
+        éloigne de la référence (89,9 % d'accord contre 90,9 %). L'oracle semble
+        donc s'arrêter lui aussi au premier candidat. La mesure tranche, pas
+        l'intuition.
+      */
       const single = hiddenSingle.find(view) ?? nakedSingle.find(view);
       if (single === null || !isNewlyUnlocked(single, step.eliminations)) continue;
 

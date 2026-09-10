@@ -96,7 +96,7 @@ describe('rate', () => {
   });
 
   it('estampille la version du barème', () => {
-    expect(rate(parseGrid(SOLVED)).ratingVersion).toBe(1);
+    expect(rate(parseGrid(SOLVED)).ratingVersion).toBe(2);
   });
 });
 

@@ -104,12 +104,8 @@ describe('couverture du registre', () => {
       }
     }
 
-    const report = [...seen.entries()].sort((a, b) => b[1] - a[1]);
-    console.log(
-      'Techniques exercées :',
-      report.map(([id, n]) => `${id}=${String(n)}`).join(' '),
-    );
-
+    // Le détail chiffré par technique s'obtient avec `pnpm calibrate` ; ici on
+    // vérifie seulement que le corpus exerce bien ce qu'il prétend exercer.
     for (const expected of ['hidden-single-box', 'hidden-single-line', 'naked-single'] as const) {
       expect(seen.get(expected), `${expected} jamais déclenchée`).toBeGreaterThan(0);
     }
@@ -131,9 +127,9 @@ describe('résolution avec le registre complet', () => {
     const solvedCount = HARD_CORPUS.filter(
       ({ puzzle }) => solveLogically(puzzle).outcome === 'solved',
     ).length;
-    // Le registre complet doit apporter un gain net sur les grilles creusées.
-    expect(solvedCount).toBeGreaterThan(0);
-    console.log(`Grilles creusées résolues logiquement : ${String(solvedCount)}/${String(HARD_CORPUS.length)}`);
+    // Le registre complet doit apporter un gain net sur les grilles creusées :
+    // avec les seuls singles, la plupart resteraient bloquées.
+    expect(solvedCount).toBeGreaterThan(HARD_CORPUS.length / 2);
   });
 
   it('retrouve toujours la solution du solveur brut quand il conclut', () => {

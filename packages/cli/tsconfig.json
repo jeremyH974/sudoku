@@ -1,0 +1,17 @@
+{
+  // Projet d'outillage, comme `packages/engine/tsconfig.scripts.json` : il a
+  // besoin de Node (processus, fichiers, console), que le moteur n'a le droit
+  // d'utiliser nulle part. Non « composite » car jamais compilé par tsc — il
+  // est exécuté directement par tsx.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["src/**/*.ts"]
+}

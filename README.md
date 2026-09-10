@@ -3,9 +3,9 @@
 Générateur et jeu de Sudoku **sans rien à installer** : tout tourne dans le navigateur.
 Aucune publicité, aucun compte, aucun suivi, aucune requête réseau après le chargement.
 
-> **État : incrément 2 terminé.** Le moteur génère des grilles à niveau ciblé, mesure la
-> difficulté par les techniques réellement nécessaires, explique chaque déduction, et propose
-> des indices qui enseignent au lieu de donner la réponse.
+> **État : incrément 3 terminé.** La notation est désormais **calibrée contre Sudoku
+> Explainer**, la référence du domaine : 91,4 % d'accord exact sur le domaine où il est
+> exigible, et un test de non-régression qui tient ce résultat sans dépendre de Java.
 
 ## Démarrer
 
@@ -22,6 +22,8 @@ pnpm dev
 | `pnpm check` | Les trois ci-dessus, dans l'ordre |
 | `pnpm measure` | Mesures de performance (hors CI, dépend de la machine) |
 | `pnpm build` | Build de production de l'application |
+| `pnpm calibrate` | Compare notre notation à celle de l'oracle (nécessite Java, hors CI) |
+| `pnpm diagnose <grille>` | Chemin de résolution détaillé d'une grille |
 
 ## Le parti pris
 
@@ -109,7 +111,7 @@ est **vérifiée mécaniquement** : il compile avec `lib: ["ES2023"]` seul, donc
 
 | Sujet | Décision | Pourquoi |
 |---|---|---|
-| Ordre des techniques | Figé, **non trié par difficulté** | Sudoku Explainer teste par familles et retient le premier résultat, pas le moins cher. La paire cachée (3,4) passe donc avant la paire nue (3,0). Trier « logiquement » ferait diverger la note dès qu'une position admet plusieurs coups. |
+| Ordre des techniques | Figé, **trié par difficulté croissante** | Corrigé par la calibration. La documentation communautaire décrit un ordre par familles où la paire cachée (3,4) précéderait la paire nue (3,0) ; nous l'avions suivie. La mesure l'a démentie : trier par difficulté a fait passer l'accord de 92,7 % à 97,6 % sur le corpus de rodage. |
 | Propagation | Le solveur logique **ne propage rien** au-delà de la règle du jeu | Le solveur brut pose les singles en cascade pour aller vite. Réutiliser cela ici résoudrait des cases sans créditer la technique qui les justifie : note faussée, indices absurdes. |
 | Génération ciblée | Recherche locale dirigée, pas rejet simple | Mesuré : le rejet trouve une grille facile en 1,4 tirage, une difficile en 63, et **jamais** d'expert en 400. La difficulté vient de la structure, pas du nombre d'indices. |
 | Diversité des grilles | Solution complète tirée à chaque fois | Transformer une grille germe ne produit que des grilles **isomorphes** — une classe d'équivalence sur 5 472 730 538. |
@@ -140,6 +142,42 @@ Génération à niveau ciblé, taux de réussite sur 5 tentatives :
 Diabolique reste aux limites du registre : quand le niveau n'est pas atteint, l'application le
 **dit** et propose la grille la plus proche, plutôt que de mal l'étiqueter.
 
+## La calibration
+
+La notation ne se contente pas de reproduire un barème documenté : elle est **comparée à
+l'oracle**. `pnpm calibrate` génère un corpus, le fait noter par Sudoku Explainer, et compare.
+
+Le critère n'est pas une corrélation mais une **égalité exacte**. L'oracle possède bien plus de
+techniques que nous, mais il les essaie dans un ordre où les nôtres viennent en premier : pour
+une grille que notre registre résout, il devrait rendre le même nombre, pas un nombre proche.
+
+Résultat sur 317 grilles :
+
+| Mesure | Valeur |
+|---|---|
+| Accord exact, toutes grilles | 288/317 — **90,9 %** |
+| Accord exact, score ≤ 4,0 | 288/315 — **91,4 %** |
+| Grilles refusées à tort | 4 (notées 4,0 à 4,4 par l'oracle) |
+
+Ce que la calibration a corrigé, et qu'aucun autre test ne pouvait révéler :
+
+- **L'ordre des techniques était faux.** Voir le tableau ci-dessus.
+- **Le garde-fou de pureté du moteur était cassé** depuis l'installation de `@types/node`, qui
+  rendait `console` et `node:fs` utilisables dans `packages/engine`. Réparé par `types: []`.
+
+Trois hypothèses ont été testées puis **rejetées par la mesure**, ce qui vaut d'être noté :
+restreindre les variantes « Direct » à leur propre unité (89,3 %), les supprimer (79,5 %), et
+énumérer tous les singles au lieu du premier (89,9 %). La dernière est pourtant plus rigoureuse
+en théorie — l'oracle s'arrête donc lui aussi au premier candidat.
+
+Les 4 grilles refusées à tort sont notées 4,0 à 4,4 : elles exigent XY-Wing, XYZ-Wing ou Turbot
+Fish, absentes de notre registre. C'est exactement la zone prédite, et la piste de l'incrément
+suivant.
+
+**La conformité est tenue par un test**, pas par ce rapport : `corpus/oracle-reference.json`
+fige les verdicts de l'oracle grille par grille, et la CI rejoue la comparaison **sans Java**.
+Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
+
 ## Ce qui est garanti, et testé
 
 - **Toute grille générée admet exactement une solution.**
@@ -154,8 +192,8 @@ Diabolique reste aux limites du registre : quand le niveau n'est pas atteint, l'
 
 ## Suite
 
-Incrément 3 : calibration contre l'oracle Sudoku Explainer. Notre notation reproduit un barème
-documenté, mais n'a pas encore été **prouvée conforme** — c'est la différence entre une échelle
-cohérente et une échelle vérifiée.
+Les 4 grilles refusées à tort désignent la prochaine étape : ajouter XY-Wing (4,2), XYZ-Wing
+(4,4), Skyscraper et Turbot Fish. Elles sont purement additives — le registre est fait pour
+ça — et devraient à la fois combler ces refus et resserrer l'accord au-dessus de 4,0.
 
 Le plan complet est dans `docs/plan.md`.

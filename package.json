@@ -15,7 +15,9 @@
     "measure": "vitest run --config vitest.perf.config.ts",
     "dev": "pnpm --filter @sudoku/app dev",
     "build": "pnpm --filter @sudoku/app build",
-    "check": "pnpm typecheck && pnpm lint && pnpm test"
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "calibrate": "tsx packages/cli/src/main.ts",
+    "diagnose": "tsx packages/cli/src/diagnose.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -26,6 +28,7 @@
     "fast-check": "^4.9.0",
     "svelte": "^5.57.0",
     "svelte-check": "^4.7.6",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0",
     "vite": "^8.2.2",

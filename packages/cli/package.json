@@ -1,0 +1,11 @@
+{
+  "name": "@sudoku/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Outillage hors production : calibration de la notation contre l'oracle Sudoku Explainer.",
+  "bin": { "sudoku-oracle": "./src/main.ts" },
+  "dependencies": {
+    "@sudoku/engine": "workspace:*"
+  }
+}

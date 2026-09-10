@@ -3,6 +3,7 @@
   "files": [],
   "references": [
     { "path": "./packages/engine" },
-    { "path": "./packages/engine/tsconfig.scripts.json" }
+    { "path": "./packages/engine/tsconfig.scripts.json" },
+    { "path": "./packages/cli" }
   ]
 }

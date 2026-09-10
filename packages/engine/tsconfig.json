@@ -2,6 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "./src",
+    // Aucun type d'ambiance. Sans cette ligne, @types/node — installé à la
+    // racine pour l'outillage — devient visible ici et rend `console`, `process`
+    // et `node:fs` utilisables dans le moteur. Le garde-fou de pureté serait
+    // alors purement décoratif : il l'a effectivement été jusqu'à ce qu'une
+    // calibration le révèle.
+    "types": [],
     "outDir": "./dist",
     // Le moteur travaille sur des TypedArrays de taille fixe (81 cellules,
     // 27 unites) dont les bornes sont garanties par construction et couvertes

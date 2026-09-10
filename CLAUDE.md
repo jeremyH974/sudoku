@@ -15,7 +15,12 @@
 pas de `console`, pas de `performance`, pas de stockage, pas de framework, aucune dépendance npm.
 
 Ce n'est pas une consigne de style, c'est vérifié mécaniquement : le projet compile avec
-`lib: ["ES2023"]` seul. Un `console.log` oublié casse le typecheck. Les scripts d'outillage qui
+`lib: ["ES2023"]` **et `types: []`**. Un `console.log` oublié casse le typecheck.
+
+⚠ `types: []` est indispensable et facile à perdre de vue. Sans lui, tout `@types/*` installé à
+la racine devient visible ici — c'est arrivé avec `@types/node`, et le garde-fou est resté
+silencieusement inopérant jusqu'à ce qu'une vérification manuelle le révèle. Les tests du moteur
+sont soumis à la même règle : pas de `console.log` dedans. Les scripts d'outillage qui
 ont besoin de ces globals vivent dans `packages/engine/scripts` et ont leur propre `tsconfig`.
 
 ## Zéro dépendance copyleft
@@ -40,9 +45,24 @@ La suite de tests est le garde-fou de qualité du projet, pas une formalité. En
 
 ## Ordre des techniques logiques
 
-Le score de difficulté dépend fortement de **l'ordre dans lequel les techniques sont essayées** :
-deux implémentations divergent sur la même grille. Cet ordre est donc figé, versionné
-(`ratingVersion`) et sérialisé avec chaque grille. Le modifier exige un bump explicite.
+Le score dépend fortement de **l'ordre dans lequel les techniques sont essayées** : deux
+implémentations divergent sur la même grille. L'ordre est donc figé, versionné
+(`RATING_VERSION`) et sérialisé avec chaque grille. Le modifier exige un bump explicite — deux
+tests le vérifient et casseront.
+
+L'ordre retenu est **le tri par difficulté croissante**, établi par la calibration et non par la
+documentation, qui décrivait un ordre par familles et se trouvait fausse. Ne pas le « corriger »
+d'après une source écrite : seul `pnpm calibrate` tranche.
+
+## Conformité à l'oracle
+
+`corpus/oracle-reference.json` fige les verdicts de Sudoku Explainer grille par grille, et
+`packages/cli/src/conformance.test.ts` rejoue la comparaison **sans Java**. Le seuil d'accord
+est un garde-fou : une modification du registre, d'une valeur de difficulté ou d'une détection
+le fait chuter et casse la suite.
+
+Régénérer après un changement délibéré : `pnpm calibrate`, puis vérifier que le taux ne baisse
+pas avant de valider.
 
 ## Accessibilité
 
@@ -69,8 +89,9 @@ Le niveau affiché vient donc du solveur logique, et de lui seul. Trois conséqu
 - une grille que le registre ne sait pas résoudre ne reçoit **aucun** niveau ;
 - quand la génération n'atteint pas le palier demandé, l'application le **dit** et propose la
   grille la plus proche, au lieu de l'étiqueter au jugé ;
-- tant que la notation n'est pas calibrée contre l'oracle Sudoku Explainer, elle est cohérente
-  mais **pas encore prouvée conforme** — et l'interface ne doit pas laisser croire l'inverse.
+- la notation est calibrée contre l'oracle (91,4 % d'accord exact sous 4,0), mais **pas parfaite** :
+  au-dessus de 4,0 il nous manque des techniques, et certaines grilles sont refusées alors que
+  l'oracle sait les résoudre. L'interface ne doit pas laisser croire à une exactitude totale.
 
 ## Vérification avant de conclure
 
