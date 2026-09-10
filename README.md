@@ -94,6 +94,64 @@ lève), et une sauvegarde corrompue fait repartir sur une partie neuve plutôt q
 L'écriture est **différée** de 400 ms, avec un enregistrement immédiat quand l'onglet passe en
 arrière-plan : sauvegarder à chaque frappe sérialiserait la partie des dizaines de fois par minute.
 
+## La progression, et le défi quotidien
+
+Six grilles par jour, **une par niveau**. L'argument du « tout le monde résout la même grille »
+vaut chez les concurrents parce qu'ils ont un classement en ligne ; nous n'en avons pas et n'en
+voulons pas. Sans classement, une grille unique exclurait simplement le débutant le vendredi et
+ennuierait l'expert le lundi.
+
+**Le défi du jour fonctionne hors ligne** — ce que presque aucun concurrent ne sait faire, parce
+que chez eux il vient d'un serveur.
+
+### Pourquoi le quotidien est un fichier, et non un calcul
+
+Le réflexe est de dériver la grille du jour d'une graine-date. La signature l'accepte déjà. C'est
+un piège, et il se referme deux fois :
+
+- **la génération dépend de la notation.** `climb()` appelle `rate()` à chaque échange et branche
+  sur le score. `RATING_VERSION` est passé de 2 à 4 en deux incréments — le calendrier d'un joueur
+  aurait continué d'afficher ses jours résolus, mais pour d'autres grilles ;
+- **la génération dépend du temps réel.** Elle s'arrête sur un budget en millisecondes, donc sur
+  la vitesse de la machine. Un vieux téléphone n'aurait jamais eu le même défi qu'un portable
+  récent.
+
+Le corpus est donc produit une fois par `pnpm dailies`, vérifié grille par grille, et versionné.
+Le même raisonnement que pour le code imprimé : ce qui doit être identique pour tout le monde et
+pour toujours porte **la grille**, jamais la graine.
+
+274 jours, 1 644 grilles, **43 Ko compressés** — soit le poids de l'application elle-même, la
+borne qu'on s'était fixée avant de mesurer. Un test échoue quand il reste moins de soixante jours
+de corpus : l'échéance se signale avant la panne, pas après.
+
+### La série a un filet
+
+Les défis passés restent jouables indéfiniment, et la série compte les **jours résolus**, peu
+importe quand ils l'ont été — rattraper dimanche les cinq jours de la semaine reconstitue la
+série. Une série qui punit un jour manqué est exactement le levier de pression que ce projet
+reproche au marché, au même titre que la limite de trois erreurs.
+
+Un jour compte dès qu'**une** de ses six grilles est résolue : rien ne justifie qu'un débutant
+régulier soit moins bien traité qu'un expert intermittent.
+
+### Des statistiques qui ne mentent pas
+
+La règle « ne jamais afficher une difficulté qui n'est pas mesurée » a un pendant chiffré :
+**un indicateur que l'échantillon ne porte pas ne reçoit aucune valeur.**
+
+| | |
+|---|---|
+| Un record | dit dès la première partie — un record sur un échantillon de un reste un record |
+| Une médiane | cinq parties du même niveau minimum, et l'effectif est affiché à côté. En deçà : « encore 3 parties », plutôt qu'un chiffre présenté comme un fait |
+| Médiane, pas moyenne | la distribution des durées a une longue queue ; une partie interrompue déplacerait une moyenne de plusieurs minutes |
+| Jamais tous niveaux confondus | une durée agrégée ne mesure pas l'habileté du joueur, mais ce qu'il a choisi de jouer |
+| Aucun taux de réussite | il n'y a pas de bouton « abandonner » : le dénominateur n'est pas définissable |
+
+Le chronomètre se met en pause dès que l'onglet cesse d'être regardé — trois événements et non un
+seul, car sur iOS `visibilitychange` n'est fiable ni au verrouillage ni au balayage vers
+l'accueil. Et lorsqu'il ne peut pas savoir — l'onglet resté visible pendant un déjeuner — la
+partie est enregistrée **sans durée** plutôt qu'avec une durée fausse.
+
 ## Le thème
 
 Trois états — clair, sombre, **système** — et non deux. « Système » n'est pas un défaut qu'on
@@ -158,8 +216,13 @@ packages/
 │  ├─ solver/    Solveur brut : propagation de contraintes + backtracking MRV
 │  ├─ logic/     Solveur humain : 24 techniques, chemin de résolution, notation
 │  └─ generate/  Creusement à unicité garantie, puis recherche dirigée par niveau
+├─ cli/          Outillage hors production : oracle de calibration, corpus quotidien
 └─ app/          L'application Svelte 5
-   └─ src/lib/   Logique de partie, grille accessible, panneau d'analyse, Worker
+   ├─ src/lib/   Logique de partie, grille accessible, panneau d'analyse, Worker
+   │             day · dates civiles pures    stopwatch · chronomètre honnête
+   │             stats · historique persisté  progress · agrégats purs
+   │             daily · lecture du corpus des défis
+   └─ public/daily/corpus.json   274 jours de défis, figés et précachés
 ```
 
 Le moteur ne connaît ni le DOM, ni le navigateur, ni le framework, ni le stockage. Cette pureté
@@ -222,15 +285,22 @@ Le critère n'est pas une corrélation mais une **égalité exacte**. L'oracle p
 techniques que nous, mais il les essaie dans un ordre où les nôtres viennent en premier : pour
 une grille que notre registre résout, il devrait rendre le même nombre, pas un nombre proche.
 
-Résultat sur 329 grilles, après l'ajout des liens forts et des wings :
+Progression du taux d'accord exact sous 4,0, d'un incrément à l'autre :
 
-| Mesure | Valeur | Avant l'incrément 6 |
+| | Accord ≤ 4,0 | Ce qui l'a fait bouger |
 |---|---|---|
-| Accord exact, toutes grilles | 306/329 — **93,0 %** | 90,9 % |
-| Accord exact, score ≤ 4,0 | 291/312 — **93,3 %** | 91,4 % |
-| Grilles refusées à tort | **1**, notée 4,5 — un Unique Rectangle, hors registre | 4 |
-| Surévaluations | **1 sur 329**, de 0,2 point | — |
-| Même palier public annoncé que l'oracle | 319/329 — **97,0 %** | — |
+| Incrément 3 | 91,4 % | Calibration initiale, ordre des techniques corrigé |
+| Incrément 6 | 93,3 % | Liens forts et wings (4,0 à 4,4) |
+| **Incrément 7** | **94,6 %** | Variantes « Direct » restreintes au single caché |
+
+État courant, sur 329 grilles :
+
+| Mesure | Valeur |
+|---|---|
+| Accord exact, toutes grilles | 309/329 — **93,9 %** |
+| Accord exact, score ≤ 4,0 | 296/313 — **94,6 %** |
+| Grilles refusées à tort | **1**, notée 4,5 — un Unique Rectangle, hors registre |
+| Surévaluations | **1 sur 329**, de 0,2 point |
 
 Le corpus ciblé change avec la notation, si bien que deux campagnes ne portent pas exactement sur
 les mêmes grilles. Comparaison faite **grille par grille sur les 291 communes** aux deux, pour
@@ -241,6 +311,14 @@ Ce que la calibration a corrigé, et qu'aucun autre test ne pouvait révéler :
 - **L'ordre des techniques était faux.** Voir le tableau ci-dessus.
 - **Le garde-fou de pureté du moteur était cassé** depuis l'installation de `@types/node`, qui
   rendait `console` et `node:fs` utilisables dans `packages/engine`. Réparé par `types: []`.
+- **Les variantes « Direct » sur-détectaient**, et il aura fallu quatre hypothèses pour le voir.
+  L'incrément 3 en avait mesuré trois, toutes perdantes : les restreindre à leur propre unité
+  (92,9 %), les supprimer (84,3 %), énumérer tous les singles (92,6 %). La quatrième est la
+  bonne : **ne reconnaître que le single caché, jamais le single nu** — 93,3 % → 95,2 % à corpus
+  identique, 6 grilles corrigées, aucune régression. Elle colle au nom même des producteurs de
+  l'oracle, `DirectHiddenSet` et `DirectIntersection` : ce qu'il appelle « direct » est une
+  élimination qui rend un chiffre seul possible dans une **maison**, pas une case qui se retrouve
+  avec un seul candidat.
 - **Cinq techniques manquaient**, et l'oracle a dit lesquelles plutôt que de nous laisser
   deviner. Deux grilles refusées portaient un score de 4,0 — la valeur du triplet caché, que
   nous implémentions déjà : soit il nous manquait une technique de même valeur, soit notre
@@ -273,9 +351,21 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   technique sur un corpus de grilles réelles, pas seulement ceux que le registre retient.
 - **Aucune grille n'est résolue en devinant** : si le raisonnement ne suffit pas, le solveur
   s'arrête au lieu d'appeler le solveur brut.
-- **Toute grille est reproductible** depuis sa graine.
 - **Aucune limite d'erreurs**, annulation illimitée qui restaure aussi les notes.
 - **La couleur n'est jamais le seul porteur d'information.**
+- **Chaque grille du corpus quotidien est renotée à chaque exécution des tests** : 1 644 grilles
+  décodées, résolues et comparées au niveau annoncé. Un futur changement de barème fera échouer ce
+  test — on rafraîchit alors les étiquettes, jamais les grilles.
+- **Une partie terminée n'est enregistrée qu'une fois.** `isComplete` est un dérivé : annuler la
+  dernière case le fait osciller, et un enregistrement branché dessus écrirait trois parties là où
+  il y en a une. Un verrou fixe le moment de l'écriture, et un test l'exige.
+- **Une durée non mesurable vaut `null`**, jamais une approximation.
+
+> **Attention à la reproductibilité par graine.** Le PRNG est figé par des snapshots, mais cela ne
+> suffit pas : `generateAtLevel` dépend de `RATING_VERSION` *et* du temps réel écoulé sur la
+> machine. Deux joueurs, même graine, même version : deux grilles différentes. Tout ce qui doit
+> être identique pour tout le monde et pour toujours porte donc **la grille**, jamais la graine —
+> le code imprimé, et le corpus quotidien.
 
 ## Hors ligne : vérifié
 
@@ -288,11 +378,12 @@ serveur avant de recharger. Relevé depuis la page elle-même, serveur arrêté 
 | Requête réseau depuis la page | `TypeError: Failed to fetch` — le serveur est bien coupé |
 | Service worker | `activated`, portée `/`, script `/sw.js` |
 | Page servie par le service worker | oui (`navigator.serviceWorker.controller`) |
-| Entrées en cache | 10 |
+| Entrées en cache | 11, dont le corpus des défis quotidiens |
+| Défi du jour ouvert hors ligne | 274 jours lus depuis le cache, grille rendue, niveau mesuré |
 | Grille rendue | 81 cases |
 
 Le précache couvre l'intégralité de l'application : le HTML, la feuille de style, le bundle, le
-Worker du moteur, le manifeste et les quatre icônes. À ce format — une cinquantaine de kilo-octets
+Worker du moteur, le manifeste, les quatre icônes — **et les 274 jours de défis quotidiens**. À ce format — une cinquantaine de kilo-octets
 compressés, moteur compris — il n'y a rien à arbitrer entre ce qu'on met en cache et ce qu'on
 laisse au réseau : il n'y a aucun réseau à solliciter une fois la page chargée. La mise à jour
 passe par une bannière plutôt que par un rechargement forcé, car recharger la page sous les doigts
@@ -330,14 +421,21 @@ Ce qui reste ouvert, par ordre de valeur :
 
 - **Les chemins qui bifurquent.** Le registre ne manque plus de technique sous 4,5, mais notre
   chemin de résolution et celui de l'oracle divergent parfois dès les premières étapes, et le
-  score pic s'en ressent. Les divergences restantes se concentrent sur les variantes « Direct » :
-  17 des 23 écarts viennent de là, et toujours dans le même sens — nous notons trop bas.
+  score pic s'en ressent. C'est désormais la source dominante des écarts restants.
 - **Unique Rectangle** (4,5 et au-delà) : la seule grille encore refusée à tort en réclame une.
   Famille distincte, fondée sur l'unicité de la solution plutôt que sur l'élimination directe.
-- **Progression, défi quotidien, statistiques**, dont la sauvegarde est déjà le socle.
-- **Finition mobile** : saisie des candidats, réglage « gros caractères ».
+- **La campagne technique par technique** : générer des grilles dont la technique la plus dure est
+  *exactement* X, et en écrire la progression pédagogique. C'est le prolongement naturel des
+  indices en trois paliers, et le meilleur candidat pour l'incrément suivant.
+- **Finition mobile et accessibilité** : le pavé de saisie passe sous la ligne de flottaison sur
+  un téléphone, il n'existe aucun point de rupture, et le réglage « gros caractères » n'est
+  qu'à moitié en place — tout est en `rem`, mais trois `clamp(…vw…)` annuleraient son effet là où
+  il sert le plus. La coloration individuelle des candidats, réclamée depuis des années et absente
+  presque partout, appartient au même lot.
+- **Le rating Glicko2** : point de couture, pas fonctionnalité. Chaque partie enregistrée porte
+  déjà niveau, score, durée, indices et version du barème.
 
 Écarté sur preuve, pas par oubli : **W-Wing** n'apparaît nulle part dans l'oracle. L'implémenter
-nous ferait diverger sans aucune référence à laquelle nous comparer.
+nous ferait diverger sans aucune référence à laquelle comparer.
 
 Le plan complet est dans `docs/plan.md`.

@@ -56,6 +56,8 @@
 
   --accent: #1f4e8c;
   --accent-text: #ffffff;
+  /* Fond d'accent discret : jours résolus du calendrier, pastilles. */
+  --accent-soft: #e2ebf6;
   --focus: #b8531a;
   --success: #1c6b45;
 
@@ -103,6 +105,7 @@
 
     --accent: #4b82cf;
     --accent-text: #0e1013;
+    --accent-soft: #1e2a3a;
     --focus: #e0913f;
     --success: #62c295;
 
@@ -145,6 +148,7 @@
 
   --accent: #4b82cf;
   --accent-text: #0e1013;
+  --accent-soft: #1e2a3a;
   --focus: #e0913f;
   --success: #62c295;
 

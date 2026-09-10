@@ -198,3 +198,153 @@ describe('Game', () => {
     expect(other.toString()).toBe(game.toString());
   });
 });
+
+/** Remplit toute la grille avec la solution, sauf la dernière case laissée libre. */
+function fillAllButLast(game: Game): number {
+  let last = -1;
+  for (let cell = 0; cell < CELL_COUNT; cell++) {
+    if (game.puzzle[cell] !== EMPTY) continue;
+    last = cell;
+  }
+  for (let cell = 0; cell < CELL_COUNT; cell++) {
+    if (game.puzzle[cell] !== EMPTY || cell === last) continue;
+    game.select(cell);
+    game.enter(game.solution[cell]);
+  }
+  return last;
+}
+
+describe('instrumentation de la partie', () => {
+  let game: Game;
+  let solved: number;
+
+  beforeEach(() => {
+    game = new Game();
+    solved = 0;
+    game.onSolved = () => {
+      solved++;
+    };
+    game.loadPuzzle(makePuzzle('instrumentation'));
+  });
+
+  it('signale la fin de partie une seule fois', () => {
+    const last = fillAllButLast(game);
+    expect(solved).toBe(0);
+
+    game.select(last);
+    game.enter(game.solution[last]);
+    expect(game.isComplete).toBe(true);
+    expect(solved).toBe(1);
+  });
+
+  it('n’enregistre pas trois parties quand on annule puis rejoue la dernière case', () => {
+    /*
+      Le piège que ce verrou existe pour éviter : `isComplete` est un dérivé.
+      Annuler la dernière case le fait retomber à `false`, la reposer le fait
+      remonter à `true`. Branché naïvement, l'enregistrement écrirait trois
+      parties là où il y en a une.
+    */
+    const last = fillAllButLast(game);
+    game.select(last);
+    game.enter(game.solution[last]);
+    expect(solved).toBe(1);
+
+    game.undo();
+    expect(game.isComplete).toBe(false);
+    game.select(last);
+    game.enter(game.solution[last]);
+    expect(game.isComplete).toBe(true);
+
+    expect(solved).toBe(1);
+  });
+
+  it('constate aussi la fin quand c’est une annulation qui referme la grille', () => {
+    const last = fillAllButLast(game);
+    game.select(last);
+    game.enter(game.solution[last]);
+    // Nouvelle grille : le verrou repart à zéro.
+    game.loadPuzzle(makePuzzle('instrumentation-2'));
+    solved = 0;
+
+    const other = fillAllButLast(game);
+    game.select(other);
+    game.enter(game.solution[other]);
+    expect(solved).toBe(1);
+    solved = 0;
+
+    // On efface la dernière case, puis on annule l'effacement : la grille est
+    // à nouveau complète, mais elle a déjà été enregistrée.
+    game.clear();
+    game.undo();
+    expect(game.isComplete).toBe(true);
+    expect(solved).toBe(0);
+  });
+
+  it('compte les valeurs fausses à la saisie, sans jamais les décompter', () => {
+    const cell = firstEmpty(game);
+    const wrong = game.solution[cell] === 9 ? 1 : 9;
+
+    game.select(cell);
+    game.enter(wrong);
+    expect(game.mistakes).toBe(1);
+
+    // Corriger ne réécrit pas le passé.
+    game.enter(game.solution[cell]);
+    expect(game.mistakes).toBe(1);
+  });
+
+  it('ne compte pas une note comme une erreur', () => {
+    const cell = firstEmpty(game);
+    const wrong = game.solution[cell] === 9 ? 1 : 9;
+    game.select(cell);
+    game.toggleNoteMode();
+    game.enter(wrong);
+    expect(game.mistakes).toBe(0);
+  });
+
+  it('compte un indice consulté une fois, pas une fois par palier', () => {
+    game.requestHint();
+    expect(game.hintsShown).toBe(1);
+    game.requestHint();
+    game.requestHint();
+    expect(game.hintTier).toBe(3);
+    expect(game.hintsShown).toBe(1);
+    expect(game.hintsApplied).toBe(0);
+  });
+
+  it('distingue l’indice consulté de l’indice appliqué', () => {
+    game.requestHint();
+    game.applyHint();
+    expect(game.hintsShown).toBe(1);
+    expect(game.hintsApplied).toBe(1);
+  });
+
+  it('remet les compteurs à zéro à la grille suivante', () => {
+    const cell = firstEmpty(game);
+    game.select(cell);
+    game.enter(game.solution[cell] === 9 ? 1 : 9);
+    game.requestHint();
+    expect(game.mistakes).toBe(1);
+
+    game.loadPuzzle(makePuzzle('grille-suivante'));
+    expect(game.mistakes).toBe(0);
+    expect(game.hintsShown).toBe(0);
+    expect(game.hintsApplied).toBe(0);
+    expect(game.clock.elapsedMs).toBe(0);
+  });
+
+  it('produit une partie enregistrable, estampillée de la version du barème', () => {
+    const record = game.toRecord();
+    expect(record.id).toHaveLength(record.id.length);
+    expect(record.id.length).toBeGreaterThan(20);
+    expect(record.ratingVersion).toBeGreaterThanOrEqual(4);
+    expect(record.daily).toBeNull();
+    expect(record.day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('retient la date du défi quand la grille en est un', () => {
+    game.loadPuzzle(makePuzzle('quotidien'), '2026-09-10');
+    expect(game.daily).toBe('2026-09-10');
+    expect(game.toRecord().daily).toBe('2026-09-10');
+  });
+});

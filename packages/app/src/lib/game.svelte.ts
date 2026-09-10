@@ -1,8 +1,10 @@
 import {
   CELL_COUNT,
   EMPTY,
+  RATING_VERSION,
   SIZE,
   digitsOf,
+  encodeGrid,
   findConflicts,
   findNextStep,
   findSolution,
@@ -17,8 +19,12 @@ import {
 } from '@sudoku/engine';
 import type { Level, LeveledPuzzle, Rating, Step, Symmetry } from '@sudoku/engine';
 import { engine } from './engineClient.js';
+import { localDayKey } from './day.js';
+import type { DayKey } from './day.js';
+import { Stopwatch } from './stopwatch.svelte.js';
 import { toSnapshot } from './storage.js';
 import type { GameSnapshot, RestoredGame } from './storage.js';
+import type { GameRecord } from './stats.js';
 
 /** Un coup annulé : on restaure la valeur ET les notes précédentes. */
 interface Move {
@@ -58,6 +64,38 @@ export class Game {
   generating = $state<boolean>(false);
 
   history = $state<Move[]>([]);
+
+  /** Chronomètre de la partie. Voir `stopwatch.svelte.ts` pour ses garde-fous. */
+  readonly clock = new Stopwatch();
+  /** Jour civil local du **début** de la partie, figé une fois pour toutes. */
+  startedOn = $state<DayKey>(localDayKey());
+  /** Date du défi quotidien joué, ou `null` pour une partie libre. */
+  daily = $state<DayKey | null>(null);
+  /** Indices consultés, tous paliers confondus. */
+  hintsShown = $state<number>(0);
+  /** Indices dont le coup a été appliqué. */
+  hintsApplied = $state<number>(0);
+  /**
+   * Valeurs fausses saisies, comptées **à la saisie**.
+   *
+   * Informatif, jamais punitif : il n'y a aucune limite d'erreurs dans ce jeu,
+   * et il n'y en aura pas. Le compteur ne se décrémente pas quand la case est
+   * corrigée — ce serait réécrire ce qui s'est passé.
+   */
+  mistakes = $state<number>(0);
+
+  /**
+   * Verrou d'enregistrement.
+   *
+   * `isComplete` est un dérivé : annuler le dernier coup le fait retomber à
+   * `false`, et le rejouer le fait remonter. Un enregistrement branché dessus
+   * écrirait trois parties là où il y en a une. Le verrou fixe **le moment de
+   * l'écriture**, une fois par grille chargée.
+   */
+  #recorded = false;
+
+  /** Appelé une seule fois, à l'instant précis où la grille devient juste. */
+  onSolved: ((record: GameRecord) => void) | null = null;
 
   hint = $state<Step | null>(null);
   hintTier = $state<HintTier>(0);
@@ -123,7 +161,7 @@ export class Game {
    * n'a aucune raison de dépendre d'un Web Worker — ce qui rend la logique de
    * partie testable sans en démarrer un.
    */
-  loadPuzzle(result: LeveledPuzzle): void {
+  loadPuzzle(result: LeveledPuzzle, daily: DayKey | null = null): void {
     this.puzzle = [...result.puzzle];
     this.solution = [...result.solution];
     this.values = [...result.puzzle];
@@ -138,6 +176,15 @@ export class Game {
 
     const firstEmpty = this.puzzle.findIndex((v) => v === EMPTY);
     this.selected = firstEmpty < 0 ? 0 : firstEmpty;
+
+    this.daily = daily;
+    this.startedOn = localDayKey();
+    this.hintsShown = 0;
+    this.hintsApplied = 0;
+    this.mistakes = 0;
+    this.#recorded = false;
+    this.clock.reset();
+    this.clock.start();
   }
 
   /**
@@ -152,7 +199,7 @@ export class Game {
    * Renvoie `false` si le code est invalide ou la grille insoluble, sans rien
    * modifier de la partie en cours.
    */
-  loadFromCode(code: string): boolean {
+  loadFromCode(code: string, daily: DayKey | null = null): boolean {
     const puzzle = tryDecodeGrid(code);
     if (puzzle === null) return false;
 
@@ -169,7 +216,7 @@ export class Game {
       level: rating.level ?? 'facile',
       rating,
       exact: rating.level !== null,
-    });
+    }, daily);
     return true;
   }
 
@@ -185,6 +232,13 @@ export class Game {
       rating: this.rating,
       seed: this.seed,
       clues: this.clues,
+      elapsedMs: this.clock.elapsedMs,
+      startedOn: this.startedOn,
+      daily: this.daily,
+      hintsShown: this.hintsShown,
+      hintsApplied: this.hintsApplied,
+      mistakes: this.mistakes,
+      noteMode: this.noteMode,
     });
   }
 
@@ -205,12 +259,61 @@ export class Game {
     this.selected = saved.selected;
     this.seed = saved.seed;
     this.clues = saved.clues;
+    this.noteMode = saved.noteMode;
     this.clearHint();
 
     const rating = rate(Uint8Array.from(saved.puzzle));
     this.rating = rating;
     this.level = rating.level ?? saved.level;
     this.levelIsExact = rating.level !== null;
+
+    this.daily = saved.daily;
+    this.startedOn = saved.startedOn ?? localDayKey();
+    this.hintsShown = saved.hintsShown;
+    this.hintsApplied = saved.hintsApplied;
+    this.mistakes = saved.mistakes;
+    /*
+      Le chronomètre repart du total accumulé, jamais d'un instant de départ :
+      c'est ce qui fait qu'une partie reprise le lendemain ne compte pas la nuit.
+    */
+    this.clock.reset(saved.elapsedMs);
+
+    /*
+      Une grille déjà terminée a été enregistrée quand elle s'est terminée. La
+      rouvrir ne doit pas l'enregistrer une seconde fois.
+    */
+    this.#recorded = this.isComplete;
+    if (!this.#recorded) this.clock.start();
+  }
+
+  /**
+   * Constate qu'une grille vient d'être terminée, et le fait savoir — une fois.
+   *
+   * Appelé après chaque geste susceptible de compléter la grille, y compris
+   * `undo` : annuler un effacement peut parfaitement la reformer.
+   */
+  #settle(): void {
+    if (this.#recorded || !this.isComplete) return;
+    this.#recorded = true;
+    this.clock.pause();
+    this.onSolved?.(this.toRecord());
+  }
+
+  /** La partie terminée, sous la forme que l'historique conserve. */
+  toRecord(): GameRecord {
+    return {
+      id: encodeGrid(Uint8Array.from(this.puzzle)),
+      finishedAt: Date.now(),
+      day: this.startedOn,
+      daily: this.daily,
+      level: this.level,
+      score: this.rating?.score ?? 0,
+      ratingVersion: this.rating?.ratingVersion ?? RATING_VERSION,
+      durationMs: this.clock.recordableMs(),
+      hintsShown: this.hintsShown,
+      hintsApplied: this.hintsApplied,
+      mistakes: this.mistakes,
+    };
   }
 
   select(cell: number): void {
@@ -251,7 +354,11 @@ export class Game {
     if (!alreadyThere) {
       this.notes[cell] = 0;
       this.#clearNotesOfPeers(cell, digit);
+      // Comptée à la saisie, une seule fois. Corriger la case ensuite n'efface
+      // pas le fait qu'elle a été posée.
+      if (digit !== this.solution[cell]) this.mistakes++;
     }
+    this.#settle();
   }
 
   /**
@@ -285,6 +392,12 @@ export class Game {
     this.notes[cell] = 0;
   }
 
+  /*
+    `undo` peut reformer une grille complète : annuler l'effacement de la
+    dernière case la termine. D'où l'appel à `#settle` ici aussi — le verrou
+    garantit qu'une partie déjà enregistrée ne l'est pas deux fois.
+  */
+
   undo(): void {
     const move = this.history.pop();
     if (move === undefined) return;
@@ -292,6 +405,7 @@ export class Game {
     this.values[move.cell] = move.previousValue;
     this.notes[move.cell] = move.previousNotes;
     this.selected = move.cell;
+    this.#settle();
   }
 
   toggleNoteMode(): void {
@@ -323,6 +437,10 @@ export class Game {
       if (this.hintTier < 3) this.hintTier = (this.hintTier + 1) as HintTier;
       return;
     }
+
+    // Un indice consulté est compté ici, pas au changement de palier : monter
+    // d'un palier, c'est approfondir le même indice, pas en demander un autre.
+    this.hintsShown++;
 
     this.hintNotice = null;
 
@@ -381,7 +499,9 @@ export class Game {
       this.#record(elimination.cell);
       this.notes[elimination.cell] = withoutDigit(this.notes[elimination.cell], elimination.digit);
     }
+    this.hintsApplied++;
     this.clearHint();
+    this.#settle();
   }
 
   toString(): string {

@@ -28,7 +28,19 @@ import type { Level, Rating } from '@sudoku/engine';
 
 const KEY = 'sudoku.game';
 
-/** Version du format sauvegardé. Tout changement incompatible l'incrémente. */
+/**
+ * Version du format sauvegardé. Tout changement **incompatible** l'incrémente.
+ *
+ * Encore faut-il dire lequel l'est, sans quoi on finit par bumper au moindre
+ * ajout — et un bump efface la partie en cours de chaque joueur à la mise à
+ * jour. La règle tenue ici :
+ *
+ *   - **ajouter un champ optionnel, lu avec un défaut, n'est pas incompatible.**
+ *     Une sauvegarde antérieure reste parfaitement exploitable, il lui manque
+ *     seulement une information qu'on sait remplacer ;
+ *   - changer le sens, le type ou l'encodage d'un champ existant l'est, et
+ *     impose le bump.
+ */
 export const SAVE_VERSION = 1;
 
 export interface SavedMove {
@@ -51,6 +63,21 @@ export interface GameSnapshot {
   readonly hardestLabel: string | null;
   readonly seed: string | number;
   readonly clues: number;
+  /*
+    Champs ajoutés à l'incrément 7. Tous optionnels : une sauvegarde écrite
+    avant eux se relit sans perte, avec les défauts ci-dessous.
+  */
+  /** Temps de jeu accumulé. Jamais un instant de départ — voir `stopwatch`. */
+  readonly elapsedMs?: number;
+  /** Jour civil local où la partie a commencé. */
+  readonly startedOn?: string;
+  /** Date du défi quotidien joué, ou `null` pour une partie libre. */
+  readonly daily?: string | null;
+  readonly hintsShown?: number;
+  readonly hintsApplied?: number;
+  readonly mistakes?: number;
+  /** Le mode notes fait partie de la position du joueur, pas de son réglage. */
+  readonly noteMode?: boolean;
 }
 
 interface StoredGame extends GameSnapshot {
@@ -69,6 +96,13 @@ export function toSnapshot(input: {
   rating: Rating | null;
   seed: string | number;
   clues: number;
+  elapsedMs: number;
+  startedOn: string;
+  daily: string | null;
+  hintsShown: number;
+  hintsApplied: number;
+  mistakes: number;
+  noteMode: boolean;
 }): GameSnapshot {
   return {
     puzzle: encodeGrid(Uint8Array.from(input.puzzle)),
@@ -82,6 +116,13 @@ export function toSnapshot(input: {
     hardestLabel: input.rating?.hardestLabel ?? null,
     seed: input.seed,
     clues: input.clues,
+    elapsedMs: input.elapsedMs,
+    startedOn: input.startedOn,
+    daily: input.daily,
+    hintsShown: input.hintsShown,
+    hintsApplied: input.hintsApplied,
+    mistakes: input.mistakes,
+    noteMode: input.noteMode,
   };
 }
 
@@ -95,6 +136,13 @@ export interface RestoredGame {
   readonly level: Level | null;
   readonly seed: string | number;
   readonly clues: number;
+  readonly elapsedMs: number;
+  readonly startedOn: string | null;
+  readonly daily: string | null;
+  readonly hintsShown: number;
+  readonly hintsApplied: number;
+  readonly mistakes: number;
+  readonly noteMode: boolean;
 }
 
 const isMove = (value: unknown): value is SavedMove => {
@@ -150,6 +198,13 @@ export function loadGame(): RestoredGame | null {
       level: parsed.level ?? null,
       seed: parsed.seed ?? 0,
       clues: typeof parsed.clues === 'number' ? parsed.clues : 0,
+      elapsedMs: typeof parsed.elapsedMs === 'number' ? parsed.elapsedMs : 0,
+      startedOn: typeof parsed.startedOn === 'string' ? parsed.startedOn : null,
+      daily: typeof parsed.daily === 'string' ? parsed.daily : null,
+      hintsShown: typeof parsed.hintsShown === 'number' ? parsed.hintsShown : 0,
+      hintsApplied: typeof parsed.hintsApplied === 'number' ? parsed.hintsApplied : 0,
+      mistakes: typeof parsed.mistakes === 'number' ? parsed.mistakes : 0,
+      noteMode: parsed.noteMode === true,
     };
   } catch {
     // JSON invalide, code de grille corrompu : on repart proprement.

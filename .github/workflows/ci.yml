@@ -1,8 +1,11 @@
 name: CI
 
 on:
+  # « master » et « main » : la branche du dépôt est master, et l'oubli a rendu
+  # le déclenchement sur push inopérant pendant six incréments. Les deux noms
+  # sont acceptés pour que la question ne se repose pas.
   push:
-    branches: [main]
+    branches: [master, main]
   pull_request:
 
 jobs:

@@ -40,9 +40,16 @@ La suite de tests est le garde-fou de qualité du projet, pas une formalité. En
 - Les invariants du moteur se testent **par propriété** (`fast-check`), pas par exemples.
 - **Aucun fixture inventé.** Toute grille de référence doit avoir été vérifiée par le solveur
   avant d'être figée dans un test — une grille écrite de mémoire est presque toujours fausse.
-- Les valeurs du PRNG sont verrouillées par des snapshots. **Elles ne doivent jamais changer** :
-  elles garantissent qu'une grille regénérée depuis un lien ou une date reste identique d'une
-  version à l'autre.
+- Les valeurs du PRNG sont verrouillées par des snapshots. **Elles ne doivent jamais changer.**
+
+> ⚠ **Un PRNG figé ne suffit pas à reproduire une grille.** `generateAtLevel` n'est reproductible
+> ni d'une version à l'autre — sa recherche locale appelle `rate()` et branche sur le score, donc
+> elle dépend de `RATING_VERSION` — ni même d'une machine à l'autre : elle s'arrête sur un budget
+> en millisecondes, donc sur la vitesse du processeur.
+>
+> Tout ce qui doit être **identique pour tout le monde et pour toujours** porte donc la grille
+> elle-même, jamais la graine qui l'a produite : le code imprimé sous chaque grille
+> (`io/encode.ts`) et le corpus des défis quotidiens (`packages/app/public/daily/corpus.json`).
 
 ## Ordre des techniques logiques
 
@@ -90,9 +97,24 @@ Le niveau affiché vient donc du solveur logique, et de lui seul. Trois conséqu
 - une grille que le registre ne sait pas résoudre ne reçoit **aucun** niveau ;
 - quand la génération n'atteint pas le palier demandé, l'application le **dit** et propose la
   grille la plus proche, au lieu de l'étiqueter au jugé ;
-- la notation est calibrée contre l'oracle (91,4 % d'accord exact sous 4,0), mais **pas parfaite** :
-  au-dessus de 4,0 il nous manque des techniques, et certaines grilles sont refusées alors que
-  l'oracle sait les résoudre. L'interface ne doit pas laisser croire à une exactitude totale.
+- la notation est calibrée contre l'oracle (**94,6 % d'accord exact sous 4,0**, incrément 7),
+  mais **pas parfaite** : il manque encore l'Unique Rectangle et les variantes groupées au-delà
+  de 4,3, et une poignée d'écarts viennent de chemins de résolution qui bifurquent. L'interface
+  ne doit pas laisser croire à une exactitude totale.
+
+## Honnêteté envers le joueur, volet statistique
+
+Même règle, appliquée aux chiffres de l'onglet Progression :
+
+- **un indicateur que l'échantillon ne porte pas ne reçoit aucune valeur.** Un record se dit dès
+  la première partie ; une médiane exige cinq parties du même niveau, et affiche sur combien elle
+  porte. En deçà, on dit ce qui manque plutôt que d'afficher un à-peu-près ;
+- **une durée non mesurable est `null`, jamais approximée** — exactement comme une grille que le
+  registre ne sait pas résoudre ne reçoit aucun niveau ;
+- **aucun taux de réussite** : il n'y a pas de bouton « abandonner », donc pas de dénominateur
+  définissable ;
+- **aucun compteur n'est persisté** (série, nombre de défis). Tout se recalcule depuis
+  l'historique : deux sources de vérité finissent toujours par se contredire.
 
 ## Vérification avant de conclure
 

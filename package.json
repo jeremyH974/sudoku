@@ -17,7 +17,8 @@
     "build": "pnpm --filter @sudoku/app build",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "calibrate": "tsx packages/cli/src/main.ts",
-    "diagnose": "tsx packages/cli/src/diagnose.ts"
+    "diagnose": "tsx packages/cli/src/diagnose.ts",
+    "dailies": "tsx packages/cli/src/dailies.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

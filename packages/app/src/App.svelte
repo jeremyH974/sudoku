@@ -8,6 +8,12 @@
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
   import { loadGame, requestPersistence, saveGame } from './lib/storage.js';
   import UpdateBanner from './lib/UpdateBanner.svelte';
+  import ProgressPanel from './lib/ProgressPanel.svelte';
+  import { appendRecord, loadRecords } from './lib/stats.js';
+  import type { GameRecord } from './lib/stats.js';
+  import { dailyCode, hasDaily, loadDailyCorpus, today as todayKey } from './lib/daily.js';
+  import type { DailyCorpus } from './lib/daily.js';
+  import type { DayKey } from './lib/day.js';
 
   const game = new Game();
 
@@ -19,8 +25,34 @@
 
   let level = $state<Level>('moyen');
   let symmetry = $state<Symmetry>('rotational180');
-  let tab = $state<'jeu' | 'analyse' | 'imprimer'>('jeu');
   let announcement = $state('');
+
+  /*
+    Les onglets comme données, et non comme quatre branches recopiées.
+
+    Le patron ARIA « tablist » a été retiré : il exigeait des identifiants, des
+    `aria-controls`, des panneaux `role="tabpanel"` et une navigation aux
+    flèches, dont rien n'était en place. Un rôle revendiqué mais non tenu dessert
+    davantage un lecteur d'écran qu'une navigation ordinaire — c'est la même
+    prudence que le projet s'impose déjà à propos de `role="grid"`.
+  */
+  const TABS = [
+    { id: 'jeu', label: 'Jouer' },
+    { id: 'progression', label: 'Progression' },
+    { id: 'analyse', label: 'Analyse' },
+    { id: 'imprimer', label: 'Imprimer' },
+  ] as const;
+  type TabId = (typeof TABS)[number]['id'];
+  let tab = $state<TabId>('jeu');
+
+  let records = $state<GameRecord[]>(loadRecords());
+  let corpus = $state<DailyCorpus | null>(null);
+  /*
+    « Aujourd'hui » se relit au retour au premier plan, jamais figé au
+    chargement : un onglet laissé ouvert toute la nuit proposerait sinon encore
+    le défi de la veille.
+  */
+  let today = $state<DayKey>(todayKey());
 
   const chosenLevel = $derived(LEVELS.find((l) => l.id === level) ?? LEVELS[1]!);
 
@@ -49,9 +81,100 @@
     else if (game.hint !== null) announcement = `Indice, palier ${String(game.hintTier)} sur 3.`;
   }
 
-  $effect(() => {
-    if (game.isComplete) announcement = 'Grille terminée, aucune erreur.';
+  /*
+    L'enregistrement passe par le rappel de `Game`, pas par un effet qui
+    observerait `isComplete`.
+
+    `isComplete` est un dérivé : annuler la dernière case le fait retomber à
+    `false`, la reposer le fait remonter. Un effet écrirait trois parties là où
+    il y en a une. `onSolved` est appelé une seule fois par grille chargée.
+  */
+  game.onSolved = (record) => {
+    if (!appendRecord(record)) {
+      announcement = 'Grille terminée. L’historique n’a pas pu être enregistré.';
+      return;
+    }
+    records = loadRecords();
+    announcement = record.daily === null
+      ? 'Grille terminée, aucune erreur.'
+      : `Défi du ${record.daily} résolu.`;
+  };
+
+  void loadDailyCorpus().then((loaded) => {
+    corpus = loaded;
   });
+
+  /** Ouvre le défi d'un jour au niveau demandé. */
+  function playDaily(day: DayKey, wanted: Level): void {
+    if (corpus === null) return;
+    const code = dailyCode(corpus, day, wanted);
+    if (code === null) {
+      announcement = 'Aucun défi pour ce jour à ce niveau.';
+      return;
+    }
+    if (game.loadFromCode(code, day)) {
+      tab = 'jeu';
+      announcement = `Défi du ${day}, niveau ${wanted}.`;
+    }
+  }
+
+  const dailyAvailable = $derived(corpus !== null && hasDaily(corpus, today));
+
+  /**
+   * Le chronomètre : mis en pause dès que l'onglet cesse d'être regardé.
+   *
+   * Trois événements, pas un seul. `visibilitychange` suffit sur ordinateur,
+   * mais sur iOS il n'est pas fiable au verrouillage de l'écran ni au balayage
+   * vers l'accueil ; `pagehide` et `freeze`, eux, le sont. Sans eux la pause
+   * fuirait précisément sur la plateforme où l'on joue le plus.
+   */
+  $effect(() => {
+    /*
+      Le battement se contente d'appeler `sample()` : `elapsedMs` est un `$state`
+      du chronomètre, donc l'affichage suit tout seul. Une variable locale
+      recopiée ici resterait en retard d'une seconde après un changement de
+      grille — le compteur repartirait de zéro visuellement une seconde trop
+      tard.
+    */
+    const tick = setInterval(() => {
+      game.clock.sample();
+    }, 1000);
+
+    const suspend = (): void => {
+      game.clock.pause();
+    };
+    const resume = (): void => {
+      // Le jour civil se relit ici : c'est le seul moment où il peut avoir
+      // changé sans que personne ne regarde.
+      today = todayKey();
+      if (!game.isComplete && !game.generating) game.clock.start();
+    };
+    const onVisibility = (): void => {
+      if (document.visibilityState === 'hidden') suspend();
+      else resume();
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', suspend);
+    window.addEventListener('freeze', suspend);
+
+    return () => {
+      clearInterval(tick);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', suspend);
+      window.removeEventListener('freeze', suspend);
+    };
+  });
+
+  /** « 8:12 », « 1:04:37 ». Compact, à chiffres de largeur fixe. */
+  function formatClock(ms: number): string {
+    const total = Math.floor(ms / 1000);
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = total % 60;
+    const mm = String(minutes).padStart(hours > 0 ? 2 : 1, '0');
+    return `${hours > 0 ? `${String(hours)}:` : ''}${mm}:${String(seconds).padStart(2, '0')}`;
+  }
 
   /**
    * Grille venue du papier ?
@@ -174,34 +297,17 @@
 
   <div class="no-print"><UpdateBanner /></div>
 
-  <nav class="tabs no-print" role="tablist" aria-label="Sections">
-    <button
-      type="button"
-      role="tab"
-      aria-selected={tab === 'jeu'}
-      class:active={tab === 'jeu'}
-      onclick={() => (tab = 'jeu')}
-    >
-      Jouer
-    </button>
-    <button
-      type="button"
-      role="tab"
-      aria-selected={tab === 'analyse'}
-      class:active={tab === 'analyse'}
-      onclick={() => (tab = 'analyse')}
-    >
-      Analyse
-    </button>
-    <button
-      type="button"
-      role="tab"
-      aria-selected={tab === 'imprimer'}
-      class:active={tab === 'imprimer'}
-      onclick={() => (tab = 'imprimer')}
-    >
-      Imprimer
-    </button>
+  <nav class="tabs no-print" aria-label="Sections">
+    {#each TABS as entry (entry.id)}
+      <button
+        type="button"
+        class:active={tab === entry.id}
+        aria-current={tab === entry.id ? 'page' : undefined}
+        onclick={() => (tab = entry.id)}
+      >
+        {entry.label}
+      </button>
+    {/each}
   </nav>
 
   {#if tab === 'jeu'}
@@ -210,12 +316,18 @@
         <SudokuBoard {game} />
 
         <p class="status" class:done={game.isComplete}>
+          <span class="clock" aria-label={`Temps de jeu : ${formatClock(game.clock.elapsedMs)}`}>
+            {formatClock(game.clock.elapsedMs)}
+          </span>
           {#if game.isComplete}
             Grille terminée, aucune erreur.
           {:else}
             {game.filledCount} / 81 cases remplies{game.conflicts.size > 0
               ? ` — ${String(game.conflicts.size)} en conflit`
               : ''}
+          {/if}
+          {#if game.daily !== null}
+            <span class="badge">Défi du {game.daily}</span>
           {/if}
         </p>
 
@@ -308,6 +420,14 @@
           <button type="button" class="primary" onclick={newPuzzle} disabled={game.generating}>
             {game.generating ? 'Génération…' : 'Générer'}
           </button>
+          <button
+            type="button"
+            class="secondary"
+            disabled={!dailyAvailable || game.generating}
+            onclick={() => playDaily(today, level)}
+          >
+            Défi du jour
+          </button>
           {#if game.generating}
             <p class="muted small">
               Les niveaux élevés demandent une recherche dirigée : quelques secondes sont
@@ -337,6 +457,8 @@
         {/if}
       </div>
     </div>
+  {:else if tab === 'progression'}
+    <ProgressPanel {records} {corpus} {today} onPlayDaily={playDaily} />
   {:else if tab === 'analyse'}
     <AnalysisPanel {game} />
   {:else}
@@ -464,10 +586,34 @@
   }
 
   .status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
     margin: 0;
     color: var(--text-muted);
     font-size: 0.95rem;
     font-variant-numeric: tabular-nums;
+  }
+
+  .clock {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-sunken);
+    color: var(--text);
+    font-weight: 600;
+    /* Largeur fixe : sans cela le compteur tressaute à chaque seconde. */
+    font-variant-numeric: tabular-nums;
+  }
+
+  .badge {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 0.8rem;
   }
 
   .status.done {
@@ -670,6 +816,21 @@
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+  }
+
+  .secondary {
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .secondary:disabled {
+    opacity: 0.5;
+    cursor: default;
   }
 
   .primary:disabled {

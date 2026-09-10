@@ -48,7 +48,13 @@ export default defineConfig({
           ce qu'on met en cache et ce qu'on laisse au réseau — d'autant qu'il
           n'y a aucun réseau à solliciter une fois la page chargée.
         */
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        /*
+          `json` fait partie de la liste pour une raison précise : le corpus des
+          défis quotidiens. Sans lui, le défi du jour serait la seule chose de
+          l'application à exiger le réseau — exactement la promesse qu'on tient
+          face aux concurrents, dont le quotidien vient d'un serveur.
+        */
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
         cleanupOutdatedCaches: true,
         /*
           Runtime Workbox intégré au service worker plutôt que chargé à part.

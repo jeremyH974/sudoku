@@ -58,6 +58,13 @@ function makeSnapshot(seed = 'sauvegarde'): GameSnapshot {
     rating: rate(puzzle),
     seed,
     clues: 34,
+    elapsedMs: 125_000,
+    startedOn: '2026-09-10',
+    daily: null,
+    hintsShown: 2,
+    hintsApplied: 1,
+    mistakes: 3,
+    noteMode: true,
   });
 }
 
