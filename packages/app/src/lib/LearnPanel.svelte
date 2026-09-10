@@ -22,12 +22,23 @@
 
   const progress = $derived(new Map(techniqueProgress(records).map((entry) => [entry.technique, entry])));
 
-  /** Une grille au hasard parmi celles de la technique, pour ne pas toujours ouvrir la même. */
+  /**
+   * La grille d'exercice d'une technique — **déterministe**, et qui tourne.
+   *
+   * Le tirage était aléatoire, et appelé depuis le `{#each}` : déplier une leçon
+   * relançait le rendu de sa ligne, donc le tirage, et les deux boutons
+   * pouvaient viser deux grilles différentes.
+   *
+   * La n-ième pratique ouvre la n-ième grille du corpus. Plus de hasard, et une
+   * deuxième tentative donne une grille différente — ce que le hasard ne
+   * garantissait même pas.
+   */
   function pick(technique: TechniqueId): string | null {
     if (corpus === null) return null;
     const codes = gridsFor(corpus, technique);
     if (codes.length === 0) return null;
-    return codes[Math.floor(Math.random() * codes.length)] ?? null;
+    const done = progress.get(technique)?.done ?? 0;
+    return codes[done % codes.length] ?? null;
   }
 
   function stateOf(technique: TechniqueId): string {

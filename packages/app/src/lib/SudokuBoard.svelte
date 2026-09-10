@@ -83,6 +83,17 @@
     return selectedValue !== EMPTY && values[cell] === selectedValue && cell !== game.selected;
   }
 
+  /**
+   * Conflits — de la partie en cours **seulement**.
+   *
+   * Le plateau passif affiche une position du solveur, qui n'a par construction
+   * aucun conflit. Lire `game.conflicts` y peignait en rouge les cases fausses
+   * d'une **autre** grille, celle que le joueur a sous les doigts, et le lecteur
+   * d'écran l'annonçait. `isPeer` et `isSameValue` s'arrêtaient déjà sur
+   * `!interactive` ; ceux-ci avaient été oubliés.
+   */
+  const conflicts = $derived(interactive ? game.conflicts : new Set<number>());
+
   /** Notes du joueur, ou candidats calculés en mode analyse. */
   function notesOf(cell: number): number[] {
     if (overrideCandidates !== null) return digitsOf(overrideCandidates[cell] ?? 0);
@@ -120,7 +131,7 @@
       parts.push(String(value));
       if (game.isGiven(cell)) parts.push('indice de départ');
     }
-    if (game.conflicts.has(cell)) parts.push('en conflit');
+    if (conflicts.has(cell)) parts.push('en conflit');
     if (marked.has(cell)) parts.push('mise en évidence');
     return parts.join(', ');
   }
@@ -203,12 +214,12 @@
           aria-label={describe(cell)}
           aria-selected={interactive && game.selected === cell}
           aria-readonly={!interactive || game.isGiven(cell)}
-          aria-invalid={game.conflicts.has(cell)}
+          aria-invalid={conflicts.has(cell)}
           tabindex={interactive && game.selected === cell ? 0 : -1}
           class="cell"
           class:given={game.isGiven(cell)}
           class:selected={interactive && game.selected === cell}
-          class:conflict={game.conflicts.has(cell)}
+          class:conflict={conflicts.has(cell)}
           class:peer={isPeer(cell)}
           class:same-value={isSameValue(cell)}
           class:zone={zoneCells.has(cell)}

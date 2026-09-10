@@ -295,26 +295,55 @@
    *
    * L'effet se réexécute à chaque changement de la partie et annule le report
    * précédent : écrire à chaque frappe sérialiserait l'état des dizaines de fois
-   * par minute, pour un résultat identique. Un report court suffit, et
-   * `visibilitychange` garantit une écriture au moment où l'onglet passe en
-   * arrière-plan — le seul instant où l'on est sûr de ne pas être interrompu.
+   * par minute, pour un résultat identique. Un report court suffit.
+   *
+   * ─── Ce qu'il ne doit surtout pas lire ──────────────────────────────────────
+   *
+   * L'instantané se construit **dans** le report, jamais dans le corps de
+   * l'effet. `snapshot()` lit le total du chronomètre, et celui-ci était un
+   * `$state` réassigné chaque seconde par le battement : l'effet se
+   * redéclenchait donc une fois par seconde, indéfiniment, et l'antirebond n'a
+   * jamais eu l'occasion de regrouper quoi que ce soit. `currentMs()` rend
+   * désormais le même total sans dépendance, et les lectures d'ici ne portent
+   * plus que sur de vrais gestes du joueur.
+   *
+   * Les trois mêmes événements que le chronomètre, et pour la même raison : sur
+   * iOS, `visibilitychange` n'est fiable ni au verrouillage de l'écran ni au
+   * balayage vers l'accueil.
    */
   $effect(() => {
-    const snapshot = game.snapshot();
     if (game.generating) return;
+    // Dépendances explicites : l'état du plateau, et rien qui batte.
+    void game.values;
+    void game.notes;
+    void game.noteColors;
+    void game.history.length;
+    void game.selected;
+    void game.noteMode;
+    void game.markMode;
+    void game.hintsShown;
+    void game.hintsApplied;
+    void game.mistakes;
+    void game.lesson;
+    void game.daily;
 
-    const timer = setTimeout(() => {
-      saveGame(snapshot);
-    }, 400);
-
-    const flush = (): void => {
-      if (document.visibilityState === 'hidden') saveGame(snapshot);
+    const write = (): void => {
+      saveGame(game.snapshot());
     };
+    const timer = setTimeout(write, 400);
+    const flush = (): void => {
+      if (document.visibilityState === 'hidden') write();
+    };
+
     document.addEventListener('visibilitychange', flush);
+    window.addEventListener('pagehide', write);
+    window.addEventListener('freeze', write);
 
     return () => {
       clearTimeout(timer);
       document.removeEventListener('visibilitychange', flush);
+      window.removeEventListener('pagehide', write);
+      window.removeEventListener('freeze', write);
     };
   });
 

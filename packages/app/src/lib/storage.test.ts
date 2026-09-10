@@ -80,6 +80,8 @@ function makeSnapshot(seed = 'sauvegarde'): GameSnapshot {
     hintsApplied: 1,
     mistakes: 3,
     noteMode: true,
+    lesson: null,
+    originCandidates: null,
   });
 }
 

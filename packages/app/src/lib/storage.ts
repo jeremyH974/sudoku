@@ -1,5 +1,5 @@
-import { decodeGrid, encodeGrid } from '@sudoku/engine';
-import type { Level, Rating } from '@sudoku/engine';
+import { TECHNIQUE_CATALOGUE, decodeGrid, encodeGrid } from '@sudoku/engine';
+import type { Level, Rating, TechniqueId } from '@sudoku/engine';
 
 /**
  * Persistance de la partie en cours.
@@ -130,6 +130,23 @@ export interface GameSnapshot {
     mise à jour.
   */
   readonly noteColors?: readonly number[];
+  /*
+    Champs ajoutés à l'incrément 9, sous la même règle. Ils vont **par paire** :
+    voir la validation dans `loadGame`.
+  */
+  /** Technique enseignée quand la partie est un exercice de la campagne. */
+  readonly lesson?: TechniqueId | null;
+  /**
+   * Candidats de la position d'origine d'un exercice : 81 masques.
+   *
+   * Les **valeurs** de cette position ne sont pas répétées — un exercice fige sa
+   * position de départ comme grille de départ, donc elles sont déjà `puzzle`.
+   * Seuls les candidats manquaient, et sans eux `requestHint` repartait de
+   * `findNextStep(values)`, retrouvait les éliminations déjà acquises et
+   * proposait une technique plus simple que celle enseignée. Mesuré : la
+   * mauvaise technique dans neuf cas sur treize.
+   */
+  readonly originCandidates?: readonly number[];
 }
 
 interface StoredGame extends GameSnapshot {
@@ -173,6 +190,8 @@ export function toSnapshot(input: {
   mistakes: number;
   noteMode: boolean;
   noteColors: readonly number[];
+  lesson: TechniqueId | null;
+  originCandidates: readonly number[] | null;
 }): GameSnapshot {
   return {
     puzzle: encodeGrid(Uint8Array.from(input.puzzle)),
@@ -194,6 +213,13 @@ export function toSnapshot(input: {
     mistakes: input.mistakes,
     noteMode: input.noteMode,
     noteColors: [...input.noteColors],
+    lesson: input.lesson,
+    /*
+      `exactOptionalPropertyTypes` interdit d'écrire `undefined` : on n'ajoute la
+      clé que lorsqu'elle a un sens, ce qui laisse la sauvegarde d'une partie
+      ordinaire exactement aussi légère qu'avant.
+    */
+    ...(input.originCandidates === null ? {} : { originCandidates: [...input.originCandidates] }),
   };
 }
 
@@ -215,7 +241,15 @@ export interface RestoredGame {
   readonly hintsApplied: number;
   readonly mistakes: number;
   readonly noteMode: boolean;
+  readonly lesson: TechniqueId | null;
+  /** `null` dès que la partie n'est pas un exercice restaurable. */
+  readonly originCandidates: number[] | null;
 }
+
+const KNOWN_TECHNIQUES = new Set<string>(TECHNIQUE_CATALOGUE.map((info) => info.id));
+
+const isTechniqueId = (value: unknown): value is TechniqueId =>
+  typeof value === 'string' && KNOWN_TECHNIQUES.has(value);
 
 const isCellState = (value: unknown): value is SavedCellState => {
   if (typeof value !== 'object' || value === null) return false;
@@ -279,6 +313,25 @@ export function loadGame(): RestoredGame | null {
       : [];
     const noteColors = storedColors.length === 81 ? storedColors : new Array<number>(81).fill(0);
 
+    /*
+      Les deux ensemble, ou aucun des deux.
+
+      Une leçon sans candidats d'origine, c'est exactement l'exercice à demi
+      restauré : l'écran annonce la technique et l'indice en enseigne une autre.
+      Des candidats sans leçon, c'est une partie ordinaire dont les indices
+      repartiraient mystérieusement d'une position figée.
+
+      La technique est vérifiée contre le catalogue, pas seulement typée : un
+      identifiant inventé ferait planter `techniqueInfo`, qui déréférence sans
+      garde.
+    */
+    const lesson = isTechniqueId(parsed.lesson) ? parsed.lesson : null;
+    const storedOrigin = Array.isArray(parsed.originCandidates)
+      ? parsed.originCandidates.filter((n): n is number => typeof n === 'number')
+      : [];
+    const originCandidates = storedOrigin.length === 81 ? storedOrigin : [];
+    const exercise = lesson !== null && originCandidates.length === 81;
+
     return {
       puzzle: decodeGrid(parsed.puzzle),
       solution: decodeGrid(parsed.solution),
@@ -301,6 +354,8 @@ export function loadGame(): RestoredGame | null {
       hintsApplied: typeof parsed.hintsApplied === 'number' ? parsed.hintsApplied : 0,
       mistakes: typeof parsed.mistakes === 'number' ? parsed.mistakes : 0,
       noteMode: parsed.noteMode === true,
+      lesson: exercise ? lesson : null,
+      originCandidates: exercise ? originCandidates : null,
     };
   } catch {
     // JSON invalide, code de grille corrompu : on repart proprement.

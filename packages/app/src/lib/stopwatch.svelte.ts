@@ -95,7 +95,24 @@ export class Stopwatch {
    * DOM, et qui fuit si personne ne l'arrête.
    */
   sample(): void {
-    this.elapsedMs = this.#closed + this.#openSegment();
+    this.elapsedMs = this.currentMs();
+  }
+
+  /**
+   * Total courant, **sans passer par l'état réactif**.
+   *
+   * `elapsedMs` est réassigné chaque seconde par le battement de l'interface. Le
+   * lire depuis l'effet de sauvegarde y installait une dépendance : la partie
+   * était réécrite dans `localStorage` une fois par seconde, indéfiniment, et
+   * l'antirebond de 400 ms n'avait jamais rien à regrouper.
+   *
+   * Cette lecture-ci rend la même valeur — plus fraîche, même, puisqu'elle
+   * n'attend pas le battement — sans la dépendance. Effet de bord conservé et
+   * voulu : un segment invraisemblable fait tomber `trustworthy`, exactement
+   * comme `sample()`.
+   */
+  currentMs(): number {
+    return this.#closed + this.#openSegment();
   }
 
   /** Repart de zéro, ou d'un total repris d'une sauvegarde. */

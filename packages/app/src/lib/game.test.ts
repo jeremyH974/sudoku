@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import fc from 'fast-check';
 import {
   CELL_COUNT,
   EMPTY,
   countSolutions,
+  encodeGrid,
   generatePuzzle,
   hasDigit,
   indexOf,
@@ -12,7 +13,9 @@ import {
 } from '@sudoku/engine';
 import type { LeveledPuzzle } from '@sudoku/engine';
 import { Game } from './game.svelte.js';
-import { MAX_HISTORY } from './storage.js';
+import { MAX_HISTORY, loadGame, saveGame } from './storage.js';
+import { buildExercise } from './learn.js';
+import type { Exercise } from './learn.js';
 
 /**
  * Fabrique une grille notée sans passer par le Web Worker : la logique de partie
@@ -599,5 +602,127 @@ describe('les compteurs disent ce qu’ils nomment', () => {
     expect(game.hintsApplied).toBe(0);
     // Et aucun geste vide poussé dans l'historique.
     expect(game.history).toHaveLength(depth);
+  });
+});
+
+describe('un exercice reste un exercice après un rechargement', () => {
+  /*
+    `localStorage` n'existe pas sous Node, et ces cas-ci passent par la
+    sauvegarde : c'est tout leur objet.
+  */
+  beforeEach(() => {
+    const data = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => data.get(k) ?? null,
+      setItem: (k: string, v: string) => void data.set(k, v),
+      removeItem: (k: string) => void data.delete(k),
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  /** Un exercice bâti sur une grille générée et notée ici même. */
+  function anExercise(): Exercise {
+    for (let i = 0; i < 60; i++) {
+      const generated = generatePuzzle({ seed: `exercice-${String(i)}`, minClues: 26 });
+      const rating = rate(generated.puzzle);
+      if (rating.outcome !== 'solved') continue;
+      const step = rating.steps.find((s) => s.eliminations.length >= 2);
+      if (step === undefined) continue;
+      const built = buildExercise(encodeGrid(generated.puzzle), step.technique);
+      if (built !== null) return built;
+    }
+    throw new Error('aucun exercice constructible : la recherche est en cause');
+  }
+
+  it('retrouve sa technique, son indice et son absence de niveau', () => {
+    /*
+      Le défaut introduit à l'incrément 8 : ni `lesson`, ni la position d'origine
+      n'étaient sauvegardés, et `restoreFrom` ne les remettait pas non plus. Un
+      exercice rechargé redevenait une partie ordinaire — indice sur la mauvaise
+      technique, durée versée dans les médianes par niveau, et un niveau affiché
+      pour une position qui n'en a pas.
+    */
+    const exercise = anExercise();
+    const game = new Game();
+    game.loadExercise(exercise);
+    saveGame(game.snapshot());
+
+    const restored = new Game();
+    const saved = loadGame();
+    expect(saved).not.toBeNull();
+    restored.restoreFrom(saved!);
+
+    expect(restored.lesson).toBe(exercise.technique);
+    expect(restored.level).toBeNull();
+    expect(restored.rating).toBeNull();
+    expect(restored.toRecord().lesson).toBe(exercise.technique);
+
+    restored.requestHint();
+    expect(restored.hint?.technique).toBe(exercise.technique);
+  });
+
+  it('ne laisse pas un exercice déteindre sur la partie suivante', () => {
+    /*
+      `#origin` est privé : on l'observe par ce qu'il change, l'indice rendu. Une
+      partie ordinaire restaurée après un exercice doit donner le même indice
+      qu'une partie ordinaire restaurée à froid.
+    */
+    const ordinaire = new Game();
+    ordinaire.loadPuzzle(makePuzzle('exercice-deteint'));
+    saveGame(ordinaire.snapshot());
+    const saved = loadGame()!;
+
+    const froid = new Game();
+    froid.restoreFrom(saved);
+    froid.requestHint();
+
+    const apres = new Game();
+    apres.loadExercise(anExercise());
+    apres.restoreFrom(saved);
+    apres.requestHint();
+
+    expect(apres.lesson).toBeNull();
+    expect(apres.level).not.toBeNull();
+    expect(apres.hint?.technique).toBe(froid.hint?.technique);
+  });
+
+  it('les trois chargeurs repartent de la même page blanche', () => {
+    const dirty = (game: Game): void => {
+      game.setMarkMode(2);
+      game.requestHint();
+    };
+    const clean = (game: Game): Record<string, unknown> => ({
+      markMode: game.markMode,
+      lesson: game.lesson,
+      daily: game.daily,
+      history: game.history.length,
+      hintsShown: game.hintsShown,
+      hintsApplied: game.hintsApplied,
+      mistakes: game.mistakes,
+      hint: game.hint,
+    });
+    const fresh = { markMode: 0, lesson: null, daily: null, history: 0, hintsShown: 0, hintsApplied: 0, mistakes: 0, hint: null };
+
+    const a = new Game();
+    a.loadPuzzle(makePuzzle('page-blanche-a'));
+    dirty(a);
+    a.loadPuzzle(makePuzzle('page-blanche-a2'));
+    expect(clean(a)).toEqual(fresh);
+
+    const b = new Game();
+    b.loadPuzzle(makePuzzle('page-blanche-b'));
+    dirty(b);
+    b.loadExercise(anExercise());
+    expect(clean(b)).toEqual({ ...fresh, lesson: b.lesson });
+
+    const c = new Game();
+    c.loadPuzzle(makePuzzle('page-blanche-c'));
+    saveGame(c.snapshot());
+    dirty(c);
+    c.restoreFrom(loadGame()!);
+    expect(clean(c)).toEqual(fresh);
   });
 });

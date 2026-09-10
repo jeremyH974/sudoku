@@ -192,6 +192,28 @@ export class Game {
   }
 
   /**
+   * Remet à zéro tout ce qui décrit **la partie**, et non la grille.
+   *
+   * Appelée en tête des trois chargeurs. C'est ce qui garantit qu'aucun champ
+   * n'est oublié par l'un d'eux — et l'exercice qui redevenait une partie
+   * ordinaire après un rechargement venait précisément de cet oubli, dans le
+   * seul des trois qui ne remettait ni `lesson`, ni `#origin`, ni `markMode`.
+   */
+  #resetSession(): void {
+    this.history = [];
+    this.clearHint();
+    this.daily = null;
+    this.lesson = null;
+    this.#origin = null;
+    this.markMode = 0;
+    this.startedOn = localDayKey();
+    this.hintsShown = 0;
+    this.hintsApplied = 0;
+    this.mistakes = 0;
+    this.#recorded = false;
+  }
+
+  /**
    * Demande une grille du niveau voulu au moteur.
    *
    * L'opération passe par un Web Worker et peut durer plusieurs secondes aux
@@ -217,13 +239,12 @@ export class Game {
    * partie testable sans en démarrer un.
    */
   loadPuzzle(result: LeveledPuzzle, daily: DayKey | null = null): void {
+    this.#resetSession();
     this.puzzle = [...result.puzzle];
     this.solution = [...result.solution];
     this.values = [...result.puzzle];
     this.notes = new Array<number>(CELL_COUNT).fill(0);
     this.noteColors = new Array<number>(CELL_COUNT).fill(0);
-    this.history = [];
-    this.clearHint();
     this.seed = result.seed;
     this.clues = result.clues;
     this.rating = result.rating;
@@ -234,13 +255,6 @@ export class Game {
     this.selected = firstEmpty < 0 ? 0 : firstEmpty;
 
     this.daily = daily;
-    this.lesson = null;
-    this.#origin = null;
-    this.startedOn = localDayKey();
-    this.hintsShown = 0;
-    this.hintsApplied = 0;
-    this.mistakes = 0;
-    this.#recorded = false;
     this.clock.reset();
     this.clock.start();
   }
@@ -266,14 +280,13 @@ export class Game {
    * l'annonce comme tel.
    */
   loadExercise(exercise: Exercise): void {
+    this.#resetSession();
     const values = [...exercise.position.values];
     this.puzzle = values;
     this.values = [...values];
     this.solution = [...exercise.solution];
     this.notes = [...exercise.position.candidates];
     this.noteColors = new Array<number>(CELL_COUNT).fill(0);
-    this.history = [];
-    this.clearHint();
 
     this.#origin = exercise.position;
     this.lesson = exercise.technique;
@@ -286,12 +299,6 @@ export class Game {
     const firstEmpty = values.findIndex((value) => value === EMPTY);
     this.selected = firstEmpty < 0 ? 0 : firstEmpty;
 
-    this.daily = null;
-    this.startedOn = localDayKey();
-    this.hintsShown = 0;
-    this.hintsApplied = 0;
-    this.mistakes = 0;
-    this.#recorded = false;
     this.clock.reset();
     this.clock.start();
   }
@@ -341,7 +348,7 @@ export class Game {
       rating: this.rating,
       seed: this.seed,
       clues: this.clues,
-      elapsedMs: this.clock.elapsedMs,
+      elapsedMs: this.clock.currentMs(),
       startedOn: this.startedOn,
       daily: this.daily,
       hintsShown: this.hintsShown,
@@ -349,6 +356,8 @@ export class Game {
       mistakes: this.mistakes,
       noteMode: this.noteMode,
       noteColors: this.noteColors,
+      lesson: this.lesson,
+      originCandidates: this.#origin === null ? null : [...this.#origin.candidates],
     });
   }
 
@@ -361,6 +370,7 @@ export class Game {
    * grille ouverte depuis un code imprimé.
    */
   restoreFrom(saved: RestoredGame): void {
+    this.#resetSession();
     this.puzzle = [...saved.puzzle];
     this.solution = [...saved.solution];
     this.values = [...saved.values];
@@ -389,12 +399,35 @@ export class Game {
     this.seed = saved.seed;
     this.clues = saved.clues;
     this.noteMode = saved.noteMode;
-    this.clearHint();
 
-    const rating = rate(Uint8Array.from(saved.puzzle));
-    this.rating = rating;
-    this.level = rating.level ?? saved.level;
-    this.levelIsExact = rating.level !== null;
+    this.lesson = saved.lesson;
+    /*
+      Un exercice fige sa position de départ comme grille de départ : ses valeurs
+      **sont** `puzzle`, et seuls ses candidats manquaient à la sauvegarde.
+    */
+    this.#origin =
+      saved.lesson === null || saved.originCandidates === null
+        ? null
+        : {
+            values: Uint8Array.from(saved.puzzle),
+            candidates: Uint16Array.from(saved.originCandidates),
+          };
+
+    if (this.lesson !== null) {
+      /*
+        Une position n'a pas de niveau, et la noter reviendrait à afficher une
+        difficulté mesurée sur un fragment — ce que `loadExercise` refuse par
+        principe, et que la restauration faisait pourtant.
+      */
+      this.rating = null;
+      this.level = null;
+      this.levelIsExact = true;
+    } else {
+      const rating = rate(Uint8Array.from(saved.puzzle));
+      this.rating = rating;
+      this.level = rating.level ?? saved.level;
+      this.levelIsExact = rating.level !== null;
+    }
 
     this.daily = saved.daily;
     this.startedOn = saved.startedOn ?? localDayKey();

@@ -98,6 +98,36 @@ describe('accessibilité de la grille', () => {
     expect(label).toContain('6 marqué C');
   });
 
+  it('n’annonce pas en conflit les cases d’une autre grille', () => {
+    /*
+      La vue passive montre une position du solveur, qui n'a par construction
+      aucun conflit. Elle lisait pourtant les conflits de la partie en cours :
+      des cases rouges sur un chemin qui n'en a pas, et un lecteur d'écran à qui
+      on l'annonçait.
+    */
+    const game = makeGame('a11y-conflits');
+    const given = game.puzzle.findIndex((v) => v !== 0);
+    const value = game.values[given]!;
+    const row = Math.floor(given / 9);
+    const target = game.values.findIndex((v, i) => v === 0 && Math.floor(i / 9) === row);
+    game.select(target);
+    game.enter(value);
+    expect(game.conflicts.size).toBeGreaterThan(0);
+
+    view = render(SudokuBoard, {
+      game,
+      interactive: false,
+      overrideValues: [...game.puzzle],
+    });
+
+    expect(view.container.querySelectorAll('[aria-invalid="true"]')).toHaveLength(0);
+    expect(view.container.querySelectorAll('.conflict')).toHaveLength(0);
+    const labels = [...view.container.querySelectorAll('[role="gridcell"]')].map((c) =>
+      c.getAttribute('aria-label'),
+    );
+    expect(labels.some((l) => l?.includes('en conflit'))).toBe(false);
+  });
+
   it('n’expose aucune case à la tabulation en vue passive', () => {
     view = render(SudokuBoard, { game: makeGame('a11y-passive'), interactive: false });
     expect(view.container.querySelectorAll('[tabindex="0"]')).toHaveLength(0);
