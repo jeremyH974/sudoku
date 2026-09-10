@@ -3,9 +3,9 @@
 Générateur et jeu de Sudoku **sans rien à installer** : tout tourne dans le navigateur.
 Aucune publicité, aucun compte, aucun suivi, aucune requête réseau après le chargement.
 
-> **État : incrément 3 terminé.** La notation est désormais **calibrée contre Sudoku
-> Explainer**, la référence du domaine : 91,4 % d'accord exact sur le domaine où il est
-> exigible, et un test de non-régression qui tient ce résultat sans dépendre de Java.
+> **État : incrément 4 terminé.** Le studio d'impression produit des cahiers avec corrigés
+> détachables, et chaque grille imprimée porte un QR code qui la rouvre à l'écran — la même
+> grille, avec la même difficulté calibrée.
 
 ## Démarrer
 
@@ -24,6 +24,9 @@ pnpm dev
 | `pnpm build` | Build de production de l'application |
 | `pnpm calibrate` | Compare notre notation à celle de l'oracle (nécessite Java, hors CI) |
 | `pnpm diagnose <grille>` | Chemin de résolution détaillé d'une grille |
+
+Le studio d'impression est dans l'onglet « Imprimer » ; une grille scannée s'ouvre via une adresse
+en `#g=…`.
 
 ## Le parti pris
 
@@ -82,6 +85,44 @@ laisse `prefers-color-scheme` reprendre la main et suivre un basculement sans re
 
 La préférence est appliquée par un script inline **avant le premier rendu** : sans cela, la page
 s'afficherait une fraction de seconde en clair avant de basculer — un flash blanc en pleine nuit.
+
+## Le studio d'impression
+
+Cahiers au format standard ou relié, corrigés groupés **à la fin** sur des pages séparées :
+l'enseignant imprime d'un bloc et détache les dernières pages avant de distribuer. Intercaler
+les corrigés les rendrait visibles par transparence et impossibles à retirer.
+
+Composé en HTML et CSS, imprimé par `@page` et `window.print()`. **Les bibliothèques PDF en
+JavaScript ne rendent pas le CSS** : jsPDF et pdfmake demandent de reconstruire la mise en page
+dans leur propre API. Pour un cahier dont l'unique critère est le rendu papier, seul le moteur du
+navigateur convient. Contrepartie assumée : « Enregistrer en PDF » depuis la boîte de dialogue,
+un clic de plus contre un rendu juste.
+
+Détails qui comptent sur du papier : filets de bloc trois fois plus épais que les filets de case
+(sans ce contraste l'œil ne découpe plus les blocs), marge de reliure **alternée** selon la parité
+des pages (sinon une page sur deux disparaît dans la pliure), et `print-color-adjust: exact` pour
+que le QR survive au mode économie d'encre.
+
+## Le pont papier ↔ écran
+
+C'est le moat n°2, et il est **testé comme tel** : la grille encodée dans le QR, décodée, doit
+être identique à celle imprimée et recevoir le même niveau.
+
+Chaque grille imprimée porte trois choses :
+
+| | Contenu | Rôle |
+|---|---|---|
+| **QR code** | L'URL complète, grille encodée dedans (35 caractères) | Le chemin normal : on scanne, la grille s'ouvre |
+| **Le code en clair** | La même chaîne, en groupes de cinq | Le recours sans téléphone — long à saisir, mais ça marche vraiment |
+| **Étiquette** (`CADZH`) | Empreinte de la grille | Repérer une grille dans le sommaire et sur son corrigé |
+
+Pourquoi pas un « code court » de huit caractères qui contiendrait la grille : **c'est
+impossible**. 81 cases à dix valeurs représentent environ 269 bits, huit caractères en portent une
+cinquantaine. Un tel code supposerait un serveur — que nous n'avons pas et ne voulons pas.
+
+L'encodage porte **la grille**, pas la graine qui l'a produite : reproduire depuis une graine
+dépendrait de `RATING_VERSION`, donc de la moindre évolution du moteur. Un cahier imprimé
+aujourd'hui doit s'ouvrir dans dix ans.
 
 ## L'onglet Analyse
 
@@ -192,8 +233,10 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
 
 ## Suite
 
-Les 4 grilles refusées à tort désignent la prochaine étape : ajouter XY-Wing (4,2), XYZ-Wing
-(4,4), Skyscraper et Turbot Fish. Elles sont purement additives — le registre est fait pour
+Deux chantiers ouverts. **La PWA hors-ligne** : le service worker manque, si bien que recharger la
+page sans réseau échoue — la promesse « rien à installer » n'est pas encore tenue au sens fort.
+**Les techniques manquantes** : les 4 grilles refusées à tort de la calibration réclament XY-Wing
+(4,2), XYZ-Wing (4,4), Skyscraper et Turbot Fish. Elles sont purement additives — le registre est fait pour
 ça — et devraient à la fois combler ces refus et resserrer l'accord au-dessus de 4,0.
 
 Le plan complet est dans `docs/plan.md`.

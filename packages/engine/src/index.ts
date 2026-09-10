@@ -10,3 +10,4 @@ export * from './grid/index.js';
 export * from './solver/index.js';
 export * from './generate/index.js';
 export * from './logic/index.js';
+export * from './io/index.js';

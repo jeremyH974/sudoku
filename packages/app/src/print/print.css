@@ -1,0 +1,57 @@
+/*
+  Règles d'impression.
+
+  Le principe : à l'écran, les feuilles sont un aperçu posé sur un fond gris ;
+  à l'impression, elles sont la seule chose qui existe.
+
+  On masque le reste avec `visibility` et non `display: none`. La nuance compte :
+  `display: none` retire les éléments du flux, ce qui recalcule toute la mise en
+  page et fait dériver les sauts de page. `visibility: hidden` conserve la
+  structure et se contente de ne rien peindre.
+*/
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .sheets,
+  .sheets * {
+    visibility: visible;
+  }
+
+  .sheets {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    background: none;
+  }
+
+  .sheet {
+    /*
+      Une feuille par page. `break-after` est la propriété normalisée ;
+      `page-break-after` reste nécessaire pour les moteurs plus anciens.
+    */
+    break-after: page;
+    page-break-after: always;
+    box-shadow: none !important;
+    /* Une grille coupée en deux entre deux pages ruinerait le cahier. */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* Les aplats et les filets doivent survivre au mode « économie d'encre ». */
+  .sheet,
+  .sheet * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

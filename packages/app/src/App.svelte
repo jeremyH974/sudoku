@@ -4,6 +4,7 @@
   import { Game } from './lib/game.svelte.js';
   import SudokuBoard from './lib/SudokuBoard.svelte';
   import AnalysisPanel from './lib/AnalysisPanel.svelte';
+  import PrintStudio from './print/PrintStudio.svelte';
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
 
   const game = new Game();
@@ -16,7 +17,7 @@
 
   let level = $state<Level>('moyen');
   let symmetry = $state<Symmetry>('rotational180');
-  let tab = $state<'jeu' | 'analyse'>('jeu');
+  let tab = $state<'jeu' | 'analyse' | 'imprimer'>('jeu');
   let announcement = $state('');
 
   const chosenLevel = $derived(LEVELS.find((l) => l.id === level) ?? LEVELS[1]!);
@@ -50,11 +51,53 @@
     if (game.isComplete) announcement = 'Grille terminée, aucune erreur.';
   });
 
-  void newPuzzle();
+  /**
+   * Grille venue du papier ?
+   *
+   * Une adresse en `#g=…` provient d'un QR code ou d'un lien imprimé. Elle prime
+   * sur la génération d'une nouvelle grille : quelqu'un qui scanne veut jouer
+   * *cette* grille-là, pas une autre. C'est le retour du papier vers l'écran, et
+   * la moitié qui manquait au pont.
+   */
+  function openFromUrl(): boolean {
+    if (typeof window === 'undefined') return false;
+    const match = /^#g=(.+)$/.exec(window.location.hash);
+    if (match === null) return false;
+
+    if (game.loadFromCode(decodeURIComponent(match[1]))) {
+      // Basculer sur le jeu : quelqu'un qui scanne veut jouer, pas rester sur
+      // l'onglet où il se trouvait.
+      tab = 'jeu';
+      announcement = 'Grille ouverte depuis un code imprimé.';
+      return true;
+    }
+    announcement = 'Ce code de grille est illisible ou incomplet.';
+    return false;
+  }
+
+  /**
+   * Suivre aussi les changements d'adresse en cours de route.
+   *
+   * Sans cela, seul un chargement complet ouvrirait une grille : scanner un QR
+   * alors que l'application est déjà ouverte ne ferait rien du tout, puisque
+   * modifier le fragment ne remonte aucun composant. C'est précisément le cas le
+   * plus fréquent — l'onglet reste ouvert d'une grille à l'autre.
+   */
+  $effect(() => {
+    const onHashChange = (): void => {
+      openFromUrl();
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => {
+      window.removeEventListener('hashchange', onHashChange);
+    };
+  });
+
+  if (!openFromUrl()) void newPuzzle();
 </script>
 
 <main>
-  <header>
+  <header class="no-print">
     <div class="title">
       <h1>Sudoku</h1>
       <p class="tagline">Rien à installer. Aucune publicité, aucun compte, aucun suivi.</p>
@@ -77,7 +120,7 @@
     </div>
   </header>
 
-  <nav class="tabs" role="tablist" aria-label="Sections">
+  <nav class="tabs no-print" role="tablist" aria-label="Sections">
     <button
       type="button"
       role="tab"
@@ -95,6 +138,15 @@
       onclick={() => (tab = 'analyse')}
     >
       Analyse
+    </button>
+    <button
+      type="button"
+      role="tab"
+      aria-selected={tab === 'imprimer'}
+      class:active={tab === 'imprimer'}
+      onclick={() => (tab = 'imprimer')}
+    >
+      Imprimer
     </button>
   </nav>
 
@@ -231,8 +283,10 @@
         {/if}
       </div>
     </div>
-  {:else}
+  {:else if tab === 'analyse'}
     <AnalysisPanel {game} />
+  {:else}
+    <PrintStudio />
   {/if}
 
   <p class="sr-only" role="status" aria-live="polite">{announcement}</p>

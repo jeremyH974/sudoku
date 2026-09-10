@@ -5,9 +5,13 @@ import {
   digitsOf,
   findConflicts,
   findNextStep,
+  findSolution,
   formatGrid,
+  gridLabel,
   hasDigit,
   indexOf,
+  rate,
+  tryDecodeGrid,
   withDigit,
   withoutDigit,
 } from '@sudoku/engine';
@@ -132,6 +136,39 @@ export class Game {
 
     const firstEmpty = this.puzzle.findIndex((v) => v === EMPTY);
     this.selected = firstEmpty < 0 ? 0 : firstEmpty;
+  }
+
+  /**
+   * Charge une grille depuis un code imprimé : celui d'un QR ou celui saisi à la
+   * main sous la grille.
+   *
+   * C'est le retour du papier vers l'écran. La solution et la notation sont
+   * recalculées localement — quelques millisecondes — plutôt que transportées
+   * dans le code : un cahier imprimé n'a ainsi qu'une chose à porter, la grille
+   * elle-même, et reste lisible même si le moteur évolue.
+   *
+   * Renvoie `false` si le code est invalide ou la grille insoluble, sans rien
+   * modifier de la partie en cours.
+   */
+  loadFromCode(code: string): boolean {
+    const puzzle = tryDecodeGrid(code);
+    if (puzzle === null) return false;
+
+    const solution = findSolution(puzzle);
+    if (solution === null) return false;
+
+    const rating = rate(puzzle);
+    this.loadPuzzle({
+      puzzle,
+      solution,
+      clues: puzzle.reduce((total, value) => total + (value === EMPTY ? 0 : 1), 0),
+      seed: gridLabel(puzzle),
+      symmetry: 'none',
+      level: rating.level ?? 'facile',
+      rating,
+      exact: rating.level !== null,
+    });
+    return true;
   }
 
   select(cell: number): void {

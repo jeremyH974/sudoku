@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@sudoku/engine": "workspace:*"
+    "@sudoku/engine": "workspace:*",
+    "qrcode-generator": "^2.0.4"
   }
 }
