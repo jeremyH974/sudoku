@@ -1,22 +1,57 @@
 <script lang="ts">
-  import { EMPTY, SIZE } from '@sudoku/engine';
+  import { EMPTY, SIZE, UNITS, digitsOf } from '@sudoku/engine';
   import type { Game } from './game.svelte.js';
 
-  const { game }: { game: Game } = $props();
+  interface Props {
+    game: Game;
+    /**
+     * Mode analyse : valeurs, candidats et zones fournis de l'extérieur.
+     *
+     * Le plateau devient alors une vue passive du chemin de résolution. Sans
+     * cette bascule, il faudrait un second composant qui dupliquerait toute la
+     * géométrie et, plus grave, tout le travail d'accessibilité.
+     */
+    interactive?: boolean;
+    overrideValues?: readonly number[] | null;
+    overrideCandidates?: readonly number[] | null;
+    highlightUnits?: readonly number[];
+    highlightCells?: ReadonlySet<number>;
+    targetCells?: ReadonlySet<number>;
+  }
+
+  const {
+    game,
+    interactive = true,
+    overrideValues = null,
+    overrideCandidates = null,
+    highlightUnits = [],
+    highlightCells,
+    targetCells,
+  }: Props = $props();
 
   let cellElements: (HTMLElement | null)[] = $state([]);
   let gridElement: HTMLElement | null = $state(null);
 
+  const values = $derived(overrideValues ?? game.values);
+  const marked = $derived(highlightCells ?? game.hintCells);
+  const targets = $derived(targetCells ?? game.hintTargets);
+
+  /** Cases des unités mises en avant par l'étape ou l'indice affiché. */
+  const zoneCells = $derived(
+    new Set(highlightUnits.flatMap((unitIndex) => [...UNITS[unitIndex]!.cells])),
+  );
+
   /**
-   * Un seul element de la grille est atteignable au clavier a la fois
+   * Un seul élément de la grille est atteignable au clavier à la fois
    * (« roving tabindex ») : la tabulation entre puis sort de la grille, et la
-   * navigation interne se fait aux fleches. C'est le comportement attendu d'une
-   * grille, et cela evite d'imposer 81 tabulations pour la traverser.
+   * navigation interne se fait aux flèches. C'est le comportement attendu d'une
+   * grille, et cela évite d'imposer 81 tabulations pour la traverser.
    *
-   * On ne redonne le focus que s'il est deja dans la grille, pour ne pas le
-   * voler a quelqu'un qui serait ailleurs dans la page.
+   * On ne redonne le focus que s'il est déjà dans la grille, pour ne pas le
+   * voler à quelqu'un qui serait ailleurs dans la page.
    */
   $effect(() => {
+    if (!interactive) return;
     const element = cellElements[game.selected];
     if (!element || !gridElement) return;
     if (gridElement.contains(document.activeElement) && document.activeElement !== element) {
@@ -27,8 +62,9 @@
   const rowOf = (cell: number): number => Math.floor(cell / SIZE);
   const colOf = (cell: number): number => cell % SIZE;
 
-  /** Cellule partageant une unite avec la selection : surlignage d'aide. */
+  /** Case partageant une unité avec la sélection : surlignage d'aide. */
   function isPeer(cell: number): boolean {
+    if (!interactive) return false;
     const s = game.selected;
     if (cell === s) return false;
     return (
@@ -39,24 +75,32 @@
     );
   }
 
-  /** Meme chiffre que la selection : reperage visuel reclame par les joueurs. */
+  /** Même chiffre que la sélection : repérage visuel réclamé par les joueurs. */
   function isSameValue(cell: number): boolean {
-    const selectedValue = game.values[game.selected];
-    return selectedValue !== EMPTY && game.values[cell] === selectedValue && cell !== game.selected;
+    if (!interactive) return false;
+    const selectedValue = values[game.selected];
+    return selectedValue !== EMPTY && values[cell] === selectedValue && cell !== game.selected;
   }
 
-  /** Libelle lu par les lecteurs d'ecran. */
+  /** Notes du joueur, ou candidats calculés en mode analyse. */
+  function notesOf(cell: number): number[] {
+    if (overrideCandidates !== null) return digitsOf(overrideCandidates[cell] ?? 0);
+    return game.notesOf(cell);
+  }
+
+  /** Libellé lu par les lecteurs d'écran. */
   function describe(cell: number): string {
-    const value = game.values[cell];
+    const value = values[cell];
     const parts = [`ligne ${String(rowOf(cell) + 1)}, colonne ${String(colOf(cell) + 1)}`];
     if (value === EMPTY) {
-      const notes = game.notesOf(cell);
+      const notes = notesOf(cell);
       parts.push(notes.length > 0 ? `notes ${notes.join(' ')}` : 'vide');
     } else {
       parts.push(String(value));
-      if (game.isGiven(cell)) parts.push('indice de depart');
+      if (game.isGiven(cell)) parts.push('indice de départ');
     }
     if (game.conflicts.has(cell)) parts.push('en conflit');
+    if (marked.has(cell)) parts.push('mise en évidence');
     return parts.join(', ');
   }
 
@@ -68,6 +112,7 @@
   };
 
   function onKeyDown(event: KeyboardEvent): void {
+    if (!interactive) return;
     const key = event.key;
 
     if ((event.ctrlKey || event.metaKey) && key.toLowerCase() === 'z') {
@@ -106,42 +151,51 @@
 <div
   bind:this={gridElement}
   role="grid"
-  aria-label="Grille de sudoku, 9 lignes sur 9 colonnes"
+  aria-label={interactive
+    ? 'Grille de sudoku, 9 lignes sur 9 colonnes'
+    : 'Grille analysée, en lecture seule'}
   aria-rowcount={SIZE}
   aria-colcount={SIZE}
+  aria-readonly={!interactive}
   class="board"
-  class:note-mode={game.noteMode}
+  class:note-mode={interactive && game.noteMode}
+  class:passive={!interactive}
   tabindex={-1}
 >
   {#each { length: SIZE } as _, row (row)}
     <div role="row" aria-rowindex={row + 1} class="row">
       {#each { length: SIZE } as _, col (col)}
         {@const cell = row * SIZE + col}
-        {@const value = game.values[cell]}
+        {@const value = values[cell]}
         <div
           bind:this={cellElements[cell]}
           role="gridcell"
           aria-colindex={col + 1}
           aria-label={describe(cell)}
-          aria-selected={game.selected === cell}
-          aria-readonly={game.isGiven(cell)}
+          aria-selected={interactive && game.selected === cell}
+          aria-readonly={!interactive || game.isGiven(cell)}
           aria-invalid={game.conflicts.has(cell)}
-          tabindex={game.selected === cell ? 0 : -1}
+          tabindex={interactive && game.selected === cell ? 0 : -1}
           class="cell"
           class:given={game.isGiven(cell)}
-          class:selected={game.selected === cell}
+          class:selected={interactive && game.selected === cell}
           class:conflict={game.conflicts.has(cell)}
           class:peer={isPeer(cell)}
           class:same-value={isSameValue(cell)}
-          onclick={() => game.select(cell)}
+          class:zone={zoneCells.has(cell)}
+          class:marked={marked.has(cell)}
+          class:target={targets.has(cell)}
+          onclick={() => {
+            if (interactive) game.select(cell);
+          }}
           onkeydown={onKeyDown}
         >
           {#if value !== EMPTY}
             <span class="value">{value}</span>
-          {:else if game.notes[cell] !== 0}
+          {:else if notesOf(cell).length > 0}
             <span class="notes" aria-hidden="true">
               {#each { length: SIZE } as _, i (i)}
-                <span class="note">{game.notesOf(cell).includes(i + 1) ? i + 1 : ''}</span>
+                <span class="note">{notesOf(cell).includes(i + 1) ? i + 1 : ''}</span>
               {/each}
             </span>
           {/if}
@@ -165,12 +219,16 @@
     touch-action: manipulation;
   }
 
+  .board.passive {
+    width: min(88vw, 27rem);
+  }
+
   /*
-    Traits epais delimitant les blocs de 3x3. Portes par une bordure sur la
-    derniere ligne et la derniere colonne de chaque bloc : avec
+    Traits épais délimitant les blocs de 3×3. Portés par une bordure sur la
+    dernière ligne et la dernière colonne de chaque bloc : avec
     `box-sizing: border-box`, la bordure est prise DANS la piste de grille, donc
-    toutes les cases gardent exactement la meme taille. Un overlay peint en
-    surimpression paraissait plus elegant, mais se revele fragile — les traits
+    toutes les cases gardent exactement la même taille. Un overlay peint en
+    surimpression paraissait plus élégant, mais s'est révélé fragile — les traits
     horizontaux tombaient dans les interstices et devenaient invisibles.
   */
   .row {
@@ -202,6 +260,11 @@
     transition: background-color 90ms ease;
   }
 
+  .board.passive .cell {
+    cursor: default;
+    font-size: clamp(0.85rem, 3.6vw, 1.3rem);
+  }
+
   .cell.given {
     color: var(--value-given);
     font-weight: 650;
@@ -219,9 +282,28 @@
     background: var(--cell-selected);
   }
 
+  /* Zone désignée au premier palier d'indice : « regarde par ici ». */
+  .cell.zone {
+    background: var(--zone-bg);
+  }
+
+  /* Le motif qui porte le raisonnement, révélé au deuxième palier. */
+  .cell.marked {
+    background: var(--hint-bg);
+    box-shadow: inset 0 0 0 2px var(--hint-border);
+    z-index: 1;
+  }
+
+  /* La conclusion, révélée au dernier palier seulement. */
+  .cell.target {
+    background: var(--hint-target-bg);
+    box-shadow: inset 0 0 0 3px var(--hint-target-border);
+    z-index: 1;
+  }
+
   /*
-    Le conflit n'est jamais signale par la seule couleur : un trait epais double
-    l'information, pour rester lisible en cas de daltonisme comme a l'impression
+    Le conflit n'est jamais signalé par la seule couleur : un trait épais double
+    l'information, pour rester lisible en cas de daltonisme comme à l'impression
     en noir et blanc.
   */
   .cell.conflict {
@@ -262,9 +344,9 @@
   }
 
   /*
-    Le mode notes se voit sur la grille elle-meme, pas seulement sur un bouton
-    a l'ecart : la confusion entre note et valeur definitive est l'un des
-    reproches les plus frequents faits aux applications existantes.
+    Le mode notes se voit sur la grille elle-même, pas seulement sur un bouton à
+    l'écart : la confusion entre note et valeur définitive est l'un des reproches
+    les plus fréquents faits aux applications existantes.
   */
   .board.note-mode {
     border-color: var(--note-accent);

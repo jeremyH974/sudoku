@@ -1,12 +1,32 @@
 /*
-  Palette et reglages globaux.
+  Palette et réglages globaux.
 
-  Trois contraintes ont guide les choix de couleur :
+  ─── Les trois états du thème ────────────────────────────────────────────────
+
+  Le thème a trois états, pas deux : clair, sombre, et « celui du système ».
+  Ce dernier n'est pas un simple défaut mais un choix à part entière, et il se
+  traduit par l'ABSENCE d'attribut `data-theme` — ce qui laisse
+  `prefers-color-scheme` reprendre la main et suivre un basculement du système
+  sans rechargement ni écouteur JavaScript.
+
+  D'où les trois blocs ci-dessous :
+    1. `:root` porte la palette claire ;
+    2. la requête média applique la palette sombre quand le système la demande,
+       sauf si l'utilisateur a explicitement forcé le clair ;
+    3. `[data-theme='dark']` la force inconditionnellement.
+
+  La palette sombre est donc écrite deux fois. C'est délibéré : la factoriser
+  demanderait `light-dark()`, dont l'absence sur un navigateur ancien laisserait
+  la page sans aucune couleur. Vingt lignes redondantes valent mieux qu'une
+  application illisible.
+
+  ─── Contraintes de couleur ──────────────────────────────────────────────────
+
     - contraste d'au moins 4,5:1 entre texte et fond, partout (WCAG AA) ;
     - jamais la couleur seule comme porteuse d'information — le conflit est
-      double d'un trait, le mode notes d'un changement de bordure ;
-    - un accent bleu et un signal orange plutot qu'un couple rouge/vert, qui
-      est le pire choix possible pour les formes courantes de daltonisme.
+      doublé d'un trait, le mode notes d'un changement de bordure ;
+    - un accent bleu et un signal orange plutôt qu'un couple rouge/vert, qui est
+      le pire choix possible pour les formes courantes de daltonisme.
 */
 
 :root {
@@ -42,11 +62,23 @@
   --note-accent: #1f7a6d;
   --note-accent-soft: #dcefec;
 
+  /*
+    Trois intensités pour les trois paliers d'indice : la zone où chercher, le
+    motif qui porte le raisonnement, puis la conclusion. Chacune est doublée
+    d'un liseré, jamais portée par la seule couleur.
+  */
+  --zone-bg: #f1ece0;
+  --hint-bg: #f6e6c8;
+  --hint-border: #b8862a;
+  --hint-target-bg: #d9ecdc;
+  --hint-target-border: #1c6b45;
+
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
+/* Le système demande le sombre, et l'utilisateur n'a pas forcé le clair. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #16171a;
     --surface: #212327;
     --surface-hover: #2b2e33;
@@ -76,7 +108,60 @@
 
     --note-accent: #3fa695;
     --note-accent-soft: #23383a;
+
+    --zone-bg: #2a2721;
+    --hint-bg: #3d3421;
+    --hint-border: #d4a548;
+    --hint-target-bg: #1e3a2a;
+    --hint-target-border: #62c295;
   }
+}
+
+/* L'utilisateur a explicitement choisi le sombre. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #16171a;
+  --surface: #212327;
+  --surface-hover: #2b2e33;
+  --surface-sunken: #1c1e21;
+  --border: #3a3d43;
+
+  --text: #ecedef;
+  --text-muted: #a8abb1;
+  --text-faint: #7e828a;
+
+  --grid-strong: #6a6f78;
+  --cell-bg: #212327;
+  --cell-peer: #272c34;
+  --cell-same: #2e3a4b;
+  --cell-selected: #3a4d68;
+  --cell-conflict: #43281d;
+
+  --value-given: #ecedef;
+  --value-player: #86b4ef;
+  --value-note: #969aa2;
+  --value-conflict: #f0946a;
+
+  --accent: #4b82cf;
+  --accent-text: #0e1013;
+  --focus: #e0913f;
+  --success: #62c295;
+
+  --note-accent: #3fa695;
+  --note-accent-soft: #23383a;
+
+  --zone-bg: #2a2721;
+  --hint-bg: #3d3421;
+  --hint-border: #d4a548;
+  --hint-target-bg: #1e3a2a;
+  --hint-target-border: #62c295;
+}
+
+/* L'utilisateur a explicitement choisi le clair : on l'impose au navigateur
+   aussi, pour que les contrôles natifs et les barres de défilement suivent. */
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 * {
@@ -85,10 +170,10 @@
 
 html {
   /*
-    Point d'ancrage du reglage « gros caracteres » a venir : toute l'interface
-    est dimensionnee en rem, donc changer cette seule valeur agrandira
-    l'ensemble sans casser une seule mise en page. Le public senior, tres large
-    et tres mal servi par le marche, en depend directement.
+    Point d'ancrage du réglage « gros caractères » à venir : toute l'interface
+    est dimensionnée en rem, donc changer cette seule valeur agrandira
+    l'ensemble sans casser une seule mise en page. Le public senior, très large
+    et très mal servi par le marché, en dépend directement.
   */
   font-size: 100%;
 }

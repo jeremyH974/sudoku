@@ -70,7 +70,7 @@ export function generateSolvedGrid(rng: Rng): Grid {
  * Cellules a vider ensemble pour respecter la symetrie demandee.
  * Les groupes sont deduplique : sur l'axe de symetrie, une cellule est seule.
  */
-function symmetryGroups(symmetry: Symmetry): number[][] {
+export function symmetryGroups(symmetry: Symmetry): number[][] {
   const partnerOf = (cell: number): number => {
     switch (symmetry) {
       case 'none':

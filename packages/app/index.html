@@ -6,9 +6,30 @@
     <meta name="color-scheme" content="light dark" />
     <meta
       name="description"
-      content="Generateur et jeu de Sudoku. Aucune installation, aucune publicite, aucun compte."
+      content="Générateur et jeu de Sudoku. Aucune installation, aucune publicité, aucun compte."
     />
     <title>Sudoku</title>
+    <script>
+      /*
+        Applique le thème choisi AVANT le premier rendu.
+
+        Si l'on attendait le démarrage de l'application, la page s'afficherait
+        une fraction de seconde dans le thème du système avant de basculer —
+        un flash blanc en pleine nuit, particulièrement désagréable. D'où ce
+        script, volontairement inline et synchrone : il doit s'exécuter avant
+        que quoi que ce soit ne soit peint.
+      */
+      (function () {
+        try {
+          var stored = localStorage.getItem('sudoku.theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {
+          /* stockage indisponible : on suivra le système */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

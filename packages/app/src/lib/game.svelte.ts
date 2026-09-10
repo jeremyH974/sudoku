@@ -4,46 +4,38 @@ import {
   SIZE,
   digitsOf,
   findConflicts,
+  findNextStep,
   formatGrid,
-  generatePuzzle,
   hasDigit,
   indexOf,
   withDigit,
   withoutDigit,
 } from '@sudoku/engine';
-import type { Symmetry } from '@sudoku/engine';
+import type { Level, LeveledPuzzle, Rating, Step, Symmetry } from '@sudoku/engine';
+import { engine } from './engineClient.js';
 
-/** Un coup annule : on restaure la valeur ET les notes precedentes. */
+/** Un coup annulé : on restaure la valeur ET les notes précédentes. */
 interface Move {
   readonly cell: number;
   readonly previousValue: number;
   readonly previousNotes: number;
 }
 
-export interface NewPuzzleOptions {
-  readonly seed?: string | number;
-  readonly symmetry?: Symmetry;
-  readonly minClues?: number;
-}
-
 /**
- * Etat d'une partie.
+ * Paliers de révélation d'un indice.
  *
- * Deux principes de conception, qui repondent directement a des reproches
- * recurrents faits aux applications existantes :
- *   - aucune limite d'erreurs. Les conflits sont signales, jamais sanctionnes.
- *     Une partie ne se "perd" pas ;
- *   - l'annulation est illimitee et restaure aussi les notes, pas seulement la
- *     valeur — sinon annuler une saisie detruit silencieusement le raisonnement
- *     qui la precedait.
+ * Le reproche le plus constant fait aux applications existantes est que leur
+ * indice donne la réponse sans rien enseigner. Ici, la révélation est graduée :
+ * on montre d'abord *où* regarder, puis *quel raisonnement* s'applique et
+ * pourquoi, et seulement en dernier recours *le coup*. Un joueur qui progresse
+ * s'arrête au premier ou au deuxième palier.
  */
+export type HintTier = 0 | 1 | 2 | 3;
+
 export class Game {
-  /** Indices de depart. Ces cases ne sont pas modifiables. */
   puzzle = $state<number[]>(new Array<number>(CELL_COUNT).fill(EMPTY));
   solution = $state<number[]>(new Array<number>(CELL_COUNT).fill(EMPTY));
-  /** Ce qu'affiche la grille : indices de depart + saisies du joueur. */
   values = $state<number[]>(new Array<number>(CELL_COUNT).fill(EMPTY));
-  /** Notes du joueur, en masque de 9 bits par cellule. */
   notes = $state<number[]>(new Array<number>(CELL_COUNT).fill(0));
 
   selected = $state<number>(indexOf(4, 4));
@@ -51,27 +43,43 @@ export class Game {
   seed = $state<string | number>(0);
   clues = $state<number>(0);
 
+  /** Niveau annoncé, mesuré sur la grille initiale. */
+  level = $state<Level | null>(null);
+  /** Notation complète de la grille initiale : chemin, techniques, score. */
+  rating = $state<Rating | null>(null);
+  /** `false` quand le niveau demandé n'a pas pu être atteint — dit tel quel. */
+  levelIsExact = $state<boolean>(true);
+  generating = $state<boolean>(false);
+
   history = $state<Move[]>([]);
 
-  /** Cellules en conflit — les deux cotes, pas seulement la derniere saisie. */
+  hint = $state<Step | null>(null);
+  hintTier = $state<HintTier>(0);
+  /** Message affiché quand aucun indice n'est possible, et pourquoi. */
+  hintNotice = $state<string | null>(null);
+
   conflicts = $derived(new Set(findConflicts(Uint8Array.from(this.values))));
-
   filledCount = $derived(this.values.filter((v) => v !== EMPTY).length);
-
   isComplete = $derived(this.filledCount === CELL_COUNT && this.conflicts.size === 0);
-
   canUndo = $derived(this.history.length > 0);
 
-  /** `true` si la case fait partie des indices de depart. */
-  isGiven(cell: number): boolean {
-    return this.puzzle[cell] !== EMPTY;
-  }
+  /** Cases mises en évidence par l'indice courant, selon le palier atteint. */
+  hintCells = $derived.by(() => {
+    const step = this.hint;
+    if (step === null || this.hintTier < 2) return new Set<number>();
+    return new Set(step.highlights.map((h) => h.cell));
+  });
 
-  /**
-   * Chiffres deja places dans une unite de la cellule selectionnee.
-   * Sert a griser les touches devenues impossibles — un confort de saisie que
-   * beaucoup d'applications n'offrent pas.
-   */
+  /** Cases visées par la conclusion de l'indice, révélées au dernier palier. */
+  hintTargets = $derived.by(() => {
+    const step = this.hint;
+    if (step === null || this.hintTier < 3) return new Set<number>();
+    return new Set([
+      ...step.placements.map((p) => p.cell),
+      ...step.eliminations.map((e) => e.cell),
+    ]);
+  });
+
   usedDigits = $derived.by(() => {
     const counts = new Map<number, number>();
     for (const value of this.values) {
@@ -80,54 +88,81 @@ export class Game {
     return counts;
   });
 
-  newPuzzle(options: NewPuzzleOptions = {}): void {
-    const generated = generatePuzzle(options);
-    this.puzzle = [...generated.puzzle];
-    this.solution = [...generated.solution];
-    this.values = [...generated.puzzle];
+  isGiven(cell: number): boolean {
+    return this.puzzle[cell] !== EMPTY;
+  }
+
+  /**
+   * Demande une grille du niveau voulu au moteur.
+   *
+   * L'opération passe par un Web Worker et peut durer plusieurs secondes aux
+   * niveaux élevés : atteindre un palier difficile demande une recherche
+   * dirigée, pas un simple tirage.
+   */
+  async newPuzzle(level: Level, symmetry: Symmetry = 'rotational180'): Promise<void> {
+    this.generating = true;
+    this.clearHint();
+    try {
+      const result = await engine.generateAtLevel({ level, symmetry });
+      if (result !== null) this.loadPuzzle(result);
+    } finally {
+      this.generating = false;
+    }
+  }
+
+  /**
+   * Installe une grille déjà produite.
+   *
+   * Séparé de `newPuzzle` à dessein : le chargement est purement synchrone et
+   * n'a aucune raison de dépendre d'un Web Worker — ce qui rend la logique de
+   * partie testable sans en démarrer un.
+   */
+  loadPuzzle(result: LeveledPuzzle): void {
+    this.puzzle = [...result.puzzle];
+    this.solution = [...result.solution];
+    this.values = [...result.puzzle];
     this.notes = new Array<number>(CELL_COUNT).fill(0);
     this.history = [];
-    this.seed = generated.seed;
-    this.clues = generated.clues;
-    this.selected = this.puzzle.findIndex((v) => v === EMPTY);
-    if (this.selected < 0) this.selected = 0;
+    this.clearHint();
+    this.seed = result.seed;
+    this.clues = result.clues;
+    this.rating = result.rating;
+    this.level = result.rating.level ?? result.level;
+    this.levelIsExact = result.exact;
+
+    const firstEmpty = this.puzzle.findIndex((v) => v === EMPTY);
+    this.selected = firstEmpty < 0 ? 0 : firstEmpty;
   }
 
   select(cell: number): void {
     if (cell >= 0 && cell < CELL_COUNT) this.selected = cell;
   }
 
-  /** Deplacement au clavier, avec bouclage sur les bords. */
   moveSelection(deltaRow: number, deltaCol: number): void {
     const row = Math.floor(this.selected / SIZE);
     const col = this.selected % SIZE;
-    const nextRow = (row + deltaRow + SIZE) % SIZE;
-    const nextCol = (col + deltaCol + SIZE) % SIZE;
-    this.selected = indexOf(nextRow, nextCol);
+    this.selected = indexOf((row + deltaRow + SIZE) % SIZE, (col + deltaCol + SIZE) % SIZE);
   }
 
   #record(cell: number): void {
     this.history.push({
       cell,
-      previousValue: this.values[cell]!,
-      previousNotes: this.notes[cell]!,
+      previousValue: this.values[cell],
+      previousNotes: this.notes[cell],
     });
   }
 
-  /**
-   * Saisit un chiffre dans la cellule selectionnee, ou l'ajoute/retire des
-   * notes si le mode notes est actif. Rejouer le meme chiffre l'efface.
-   */
   enter(digit: number): void {
     const cell = this.selected;
     if (this.isGiven(cell)) return;
+    this.clearHint();
 
     if (this.noteMode) {
       if (this.values[cell] !== EMPTY) return;
       this.#record(cell);
-      this.notes[cell] = hasDigit(this.notes[cell]!, digit)
-        ? withoutDigit(this.notes[cell]!, digit)
-        : withDigit(this.notes[cell]!, digit);
+      this.notes[cell] = hasDigit(this.notes[cell], digit)
+        ? withoutDigit(this.notes[cell], digit)
+        : withDigit(this.notes[cell], digit);
       return;
     }
 
@@ -141,9 +176,8 @@ export class Game {
   }
 
   /**
-   * Retire le chiffre pose des notes des cellules voisines. C'est ce que ferait
-   * un joueur a la main sur papier ; l'omettre laisse des notes fausses a
-   * l'ecran et fausse le raisonnement.
+   * Retire le chiffre posé des notes voisines. C'est ce que ferait un joueur à
+   * la main ; l'omettre laisserait des notes fausses à l'écran.
    */
   #clearNotesOfPeers(cell: number, digit: number): void {
     const row = Math.floor(cell / SIZE);
@@ -158,7 +192,7 @@ export class Game {
         otherRow === row ||
         otherCol === col ||
         (Math.floor(otherRow / 3) * 3 === boxRow && Math.floor(otherCol / 3) * 3 === boxCol);
-      if (sameUnit) this.notes[other] = withoutDigit(this.notes[other]!, digit);
+      if (sameUnit) this.notes[other] = withoutDigit(this.notes[other], digit);
     }
   }
 
@@ -166,6 +200,7 @@ export class Game {
     const cell = this.selected;
     if (this.isGiven(cell)) return;
     if (this.values[cell] === EMPTY && this.notes[cell] === 0) return;
+    this.clearHint();
     this.#record(cell);
     this.values[cell] = EMPTY;
     this.notes[cell] = 0;
@@ -174,6 +209,7 @@ export class Game {
   undo(): void {
     const move = this.history.pop();
     if (move === undefined) return;
+    this.clearHint();
     this.values[move.cell] = move.previousValue;
     this.notes[move.cell] = move.previousNotes;
     this.selected = move.cell;
@@ -184,10 +220,91 @@ export class Game {
   }
 
   notesOf(cell: number): number[] {
-    return digitsOf(this.notes[cell]!);
+    return digitsOf(this.notes[cell]);
   }
 
-  /** Forme canonique de la grille en cours, pour le partage et le debug. */
+  /** Valeurs posées par le joueur qui contredisent la solution. */
+  wrongCells(): number[] {
+    const wrong: number[] = [];
+    for (let cell = 0; cell < CELL_COUNT; cell++) {
+      if (this.values[cell] !== EMPTY && this.values[cell] !== this.solution[cell]) wrong.push(cell);
+    }
+    return wrong;
+  }
+
+  /**
+   * Demande un indice, ou passe au palier suivant si un indice est déjà affiché.
+   *
+   * L'indice part de **l'état réel de la partie**, pas de la grille de départ :
+   * un conseil qui ignorerait ce que le joueur a déjà posé serait au mieux
+   * inutile, au pire trompeur.
+   */
+  requestHint(): void {
+    if (this.hint !== null) {
+      if (this.hintTier < 3) this.hintTier = (this.hintTier + 1) as HintTier;
+      return;
+    }
+
+    this.hintNotice = null;
+
+    if (this.conflicts.size > 0) {
+      this.hintNotice =
+        'Deux cases se contredisent dans une même ligne, colonne ou boîte. ' +
+        'Corrige-les avant de chercher la suite.';
+      return;
+    }
+
+    const wrong = this.wrongCells();
+    if (wrong.length > 0) {
+      this.hintNotice =
+        wrong.length === 1
+          ? 'Une valeur posée est incorrecte, même si elle ne crée aucun conflit visible. ' +
+            'Le raisonnement ne peut pas se poursuivre à partir de là.'
+          : `${String(wrong.length)} valeurs posées sont incorrectes, même sans conflit visible. ` +
+            'Le raisonnement ne peut pas se poursuivre à partir de là.';
+      return;
+    }
+
+    const step = findNextStep(Uint8Array.from(this.values));
+    if (step === null) {
+      this.hintNotice = this.isComplete
+        ? 'La grille est terminée.'
+        : 'Aucune des techniques connues ne s’applique ici. Cette grille exige un ' +
+          'raisonnement par chaînes, qui n’est pas encore implémenté.';
+      return;
+    }
+
+    this.hint = step;
+    this.hintTier = 1;
+  }
+
+  clearHint(): void {
+    this.hint = null;
+    this.hintTier = 0;
+    this.hintNotice = null;
+  }
+
+  /** Applique la conclusion de l'indice affiché. */
+  applyHint(): void {
+    const step = this.hint;
+    if (step === null) return;
+
+    for (const placement of step.placements) {
+      if (this.values[placement.cell] !== EMPTY) continue;
+      this.#record(placement.cell);
+      this.values[placement.cell] = placement.digit;
+      this.notes[placement.cell] = 0;
+      this.#clearNotesOfPeers(placement.cell, placement.digit);
+      this.selected = placement.cell;
+    }
+    for (const elimination of step.eliminations) {
+      if (this.notes[elimination.cell] === 0) continue;
+      this.#record(elimination.cell);
+      this.notes[elimination.cell] = withoutDigit(this.notes[elimination.cell], elimination.digit);
+    }
+    this.clearHint();
+  }
+
   toString(): string {
     return formatGrid(Uint8Array.from(this.values));
   }

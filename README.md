@@ -3,9 +3,9 @@
 Générateur et jeu de Sudoku **sans rien à installer** : tout tourne dans le navigateur.
 Aucune publicité, aucun compte, aucun suivi, aucune requête réseau après le chargement.
 
-> **État : incrément 1 terminé.** Le moteur génère des grilles à solution unique garantie et
-> l'interface est jouable. La **notation de difficulté n'est pas encore implémentée** — et
-> l'application le dit explicitement plutôt que d'afficher un niveau qui serait faux.
+> **État : incrément 2 terminé.** Le moteur génère des grilles à niveau ciblé, mesure la
+> difficulté par les techniques réellement nécessaires, explique chaque déduction, et propose
+> des indices qui enseignent au lieu de donner la réponse.
 
 ## Démarrer
 
@@ -32,12 +32,60 @@ là où une métrique simulant un raisonnement humain atteint **0,95**
 ([Pelánek, arXiv:1403.7373](https://arxiv.org/abs/1403.7373), 1 700+ grilles).
 
 C'est la source directe de la plainte la plus répandue chez les joueurs — des niveaux
-incohérents entre eux et entre applications. Ce projet part de là : **la difficulté sera
-calculée à partir des techniques de raisonnement réellement nécessaires**, calibrée contre la
-référence du domaine, et affichée en clair au lieu d'être cachée derrière un label marketing.
+incohérents entre eux et entre applications.
 
-En attendant que ce solveur logique existe, l'application n'annonce aucun niveau. Le réglage
-disponible dit exactement ce qu'il fait : combien de cases sont laissées vides.
+Ici, la difficulté est **mesurée** : un solveur logique résout la grille comme le ferait un
+humain, en n'appliquant que des techniques nommées, et le niveau annoncé est celui de la
+technique la plus difficile réellement nécessaire. Rien n'est déduit du nombre de cases vides.
+
+## Les niveaux
+
+Six paliers, définis par ce qu'ils exigent — jamais par le nombre d'indices. Le barème est celui
+de **Sudoku Explainer**, la référence du domaine.
+
+| Niveau | Exige au plus | Score |
+|---|---|---|
+| **Facile** | Singles cachés | ≤ 1,5 |
+| **Moyen** | Single nu, variantes directes | ≤ 2,3 |
+| **Difficile** | Paires pointantes et revendiquées | ≤ 2,8 |
+| **Expert** | Paire nue, X-Wing, paire cachée | ≤ 3,4 |
+| **Maître** | Triplet nu, Swordfish, triplet caché | ≤ 4,0 |
+| **Diabolique** | Quadruplets, Jellyfish | ≤ 5,4 |
+
+Repère : **les sudokus de presse plafonnent presque tous à 3,0.** Notre palier « Difficile »
+atteint déjà ce plafond.
+
+Au-delà de 5,4 il faut des chaînes, absentes de ce registre. Les grilles qui les exigent sont
+**rejetées à la génération**, jamais étiquetées au jugé.
+
+## Les indices, en trois paliers
+
+Le reproche le plus constant fait aux applications existantes est que leur indice donne la
+réponse sans rien enseigner — y compris chez les concurrents payants, qui ne nomment même pas
+la technique employée. Ici la révélation est graduée :
+
+1. **la zone** — « un raisonnement s'applique par ici » ;
+2. **la technique**, nommée et expliquée, avec le motif encadré sur la grille ;
+3. **le coup**, en dernier recours seulement.
+
+L'indice part de **l'état réel de la partie**, pas de la grille de départ. Si une valeur posée
+est fausse — même sans conflit visible — il le dit plutôt que de conseiller dans le vide.
+
+## Le thème
+
+Trois états — clair, sombre, **système** — et non deux. « Système » n'est pas un défaut qu'on
+remplacerait au premier clic : c'est le choix de suivre le rythme de la machine, qui bascule
+souvent au coucher du soleil. Il se traduit par l'absence d'attribut sur le document, ce qui
+laisse `prefers-color-scheme` reprendre la main et suivre un basculement sans rechargement.
+
+La préférence est appliquée par un script inline **avant le premier rendu** : sans cela, la page
+s'afficherait une fraction de seconde en clair avant de basculer — un flash blanc en pleine nuit.
+
+## L'onglet Analyse
+
+Le chemin de résolution complet, étape par étape : candidats affichés, zone concernée, motif du
+raisonnement, conclusion, et le décompte des techniques employées. C'est l'instrument qui valide
+le solveur, et un outil d'apprentissage à part entière.
 
 ## Architecture
 
@@ -47,60 +95,67 @@ packages/
 │  ├─ rng/       PRNG seedable — tout est reproductible depuis une graine
 │  ├─ grid/      Géométrie 9×9, masques de candidats, lecture/écriture
 │  ├─ solver/    Solveur brut : propagation de contraintes + backtracking MRV
-│  └─ generate/  Solution complète aléatoire, puis creusement à unicité garantie
+│  ├─ logic/     Solveur humain : 19 techniques, chemin de résolution, notation
+│  └─ generate/  Creusement à unicité garantie, puis recherche dirigée par niveau
 └─ app/          L'application Svelte 5
-   └─ src/lib/   Logique de partie (classe à runes) et grille accessible
+   └─ src/lib/   Logique de partie, grille accessible, panneau d'analyse, Worker
 ```
 
-Le moteur ne connaît ni le DOM, ni le navigateur, ni le framework, ni le stockage. C'est ce qui
-garde ouvertes, sans dette, les options « outil en ligne de commande », « intégration dans un
-site », « génération côté serveur » et « application native ».
-
-Cette pureté est **vérifiée mécaniquement** : le moteur compile avec `lib: ["ES2023"]` seul, donc
-un simple `console.log` oublié dans `packages/engine/src` casse le typecheck.
+Le moteur ne connaît ni le DOM, ni le navigateur, ni le framework, ni le stockage. Cette pureté
+est **vérifiée mécaniquement** : il compile avec `lib: ["ES2023"]` seul, donc un simple
+`console.log` oublié dans `packages/engine/src` casse le typecheck.
 
 ### Décisions structurantes
 
 | Sujet | Décision | Pourquoi |
 |---|---|---|
-| Diversité des grilles | Solution complète tirée par backtracking randomisé à chaque fois | Transformer une grille germe unique (permutations, transposition, réétiquetage) ne produit que des grilles **isomorphes** — une seule classe d'équivalence sur les 5 472 730 538 existantes. La diversité vient du creusement. |
-| Unicité | Arrêt dès la 2ᵉ solution trouvée | Compter toutes les solutions est du calcul jeté |
-| Symétrie | Option purement esthétique | Elle n'a **aucun** effet sur la difficulté logique et ne doit jamais être présentée comme un réglage de difficulté |
-| Dépendances | **Zéro copyleft** | HoDoKu est en GPLv3, le portage Rust de jczsolve en AGPL. Tout est réimplémenté depuis les algorithmes publiés, ce qui garde ouvertes les options commerciale et open source permissive. |
-| Web Components | **Non**, composants Svelte standards | Le Shadow DOM empêche `aria-labelledby`, `aria-describedby` et `<label for>` de traverser sa frontière — en conflit frontal avec l'accessibilité de la grille. L'encapsulation pour embarquer le jeu se fera par **un seul** élément racine, le jour où le besoin existera. |
+| Ordre des techniques | Figé, **non trié par difficulté** | Sudoku Explainer teste par familles et retient le premier résultat, pas le moins cher. La paire cachée (3,4) passe donc avant la paire nue (3,0). Trier « logiquement » ferait diverger la note dès qu'une position admet plusieurs coups. |
+| Propagation | Le solveur logique **ne propage rien** au-delà de la règle du jeu | Le solveur brut pose les singles en cascade pour aller vite. Réutiliser cela ici résoudrait des cases sans créditer la technique qui les justifie : note faussée, indices absurdes. |
+| Génération ciblée | Recherche locale dirigée, pas rejet simple | Mesuré : le rejet trouve une grille facile en 1,4 tirage, une difficile en 63, et **jamais** d'expert en 400. La difficulté vient de la structure, pas du nombre d'indices. |
+| Diversité des grilles | Solution complète tirée à chaque fois | Transformer une grille germe ne produit que des grilles **isomorphes** — une classe d'équivalence sur 5 472 730 538. |
+| Web Worker | Oui, depuis l'incrément 2 | La génération d'un niveau élevé prend de 1,5 à 8 secondes. |
+| Dépendances | **Zéro copyleft** | HoDoKu est en GPLv3, le portage Rust de jczsolve en AGPL, Sudoku Explainer en LGPL. Tout est réimplémenté depuis les algorithmes publiés. |
+| Web Components | **Non**, composants Svelte standards | Le Shadow DOM empêche `aria-labelledby` et `<label for>` de traverser sa frontière — en conflit frontal avec l'accessibilité de la grille. |
 
 ### Performance mesurée
 
-Sur la machine de développement (`pnpm measure`) :
-
-| Étape | p50 | p95 |
+| Opération | p50 | p95 |
 |---|---|---|
 | Solution complète aléatoire | 0,5 ms | 0,6 ms |
-| **Creusement avec vérification d'unicité** | **16,3 ms** | **17,8 ms** |
-| Grille jouable de bout en bout | 16,6 ms | 19,4 ms |
+| Creusement avec vérification d'unicité | 16,3 ms | 17,8 ms |
+| Notation logique d'une grille | 0,4 à 1,6 ms | — |
 | Unicité sur « Platinum Blonde » (843 hypothèses) | 13,2 ms | 14,0 ms |
 
-Le creusement représente ~97 % du coût. Aucun Web Worker n'est nécessaire à ce stade ; il le
-deviendra quand le solveur logique entrera dans la boucle de génération.
+Génération à niveau ciblé, taux de réussite sur 5 tentatives :
+
+| Niveau | Réussite | Temps moyen |
+|---|---|---|
+| Facile | 5/5 | 0,02 s |
+| Moyen | 5/5 | 0,09 s |
+| Difficile | 5/5 | 0,70 s |
+| Expert | 5/5 | 1,47 s |
+| Maître | 4/5 | 4,78 s |
+| Diabolique | 2/5 | 8,05 s |
+
+Diabolique reste aux limites du registre : quand le niveau n'est pas atteint, l'application le
+**dit** et propose la grille la plus proche, plutôt que de mal l'étiqueter.
 
 ## Ce qui est garanti, et testé
 
-- **Toute grille générée admet exactement une solution.** Vérifié par property test à chaque
-  exécution de la suite, sur toutes les symétries.
-- **Toute grille est reproductible** depuis sa graine — condition du partage par lien court et
-  du défi quotidien sans serveur.
-- **Aucune limite d'erreurs.** Les conflits sont signalés, jamais sanctionnés : une partie ne se
-  perd pas.
-- **L'annulation est illimitée et restaure aussi les notes**, pas seulement la valeur — sinon
-  annuler détruit silencieusement le raisonnement qui précédait.
-- **La couleur n'est jamais le seul porteur d'information** : un conflit est doublé d'un trait,
-  le mode notes d'un changement de bordure.
+- **Toute grille générée admet exactement une solution.**
+- **Toute déduction produite est logiquement valide** — aucune technique n'écarte jamais un
+  candidat appartenant à la solution. Vérifié en énumérant *tous* les motifs de *chaque*
+  technique sur un corpus de grilles réelles, pas seulement ceux que le registre retient.
+- **Aucune grille n'est résolue en devinant** : si le raisonnement ne suffit pas, le solveur
+  s'arrête au lieu d'appeler le solveur brut.
+- **Toute grille est reproductible** depuis sa graine.
+- **Aucune limite d'erreurs**, annulation illimitée qui restaure aussi les notes.
+- **La couleur n'est jamais le seul porteur d'information.**
 
 ## Suite
 
-Incrément 2 : solveur logique humain (10 techniques, de Full House à X-Wing) et banc de débogage
-montrant le chemin de résolution pas à pas. C'est la fondation des indices pédagogiques et de la
-notation de difficulté.
+Incrément 3 : calibration contre l'oracle Sudoku Explainer. Notre notation reproduit un barème
+documenté, mais n'a pas encore été **prouvée conforme** — c'est la différence entre une échelle
+cohérente et une échelle vérifiée.
 
-Le plan complet — recherche concurrentielle, douleurs du marché, moats visés, feuille de route —
-est dans `docs/plan.md`.
+Le plan complet est dans `docs/plan.md`.

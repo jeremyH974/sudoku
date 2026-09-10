@@ -1,6 +1,27 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CELL_COUNT, EMPTY, countSolutions, hasDigit, indexOf, parseGrid } from '@sudoku/engine';
+import {
+  CELL_COUNT,
+  EMPTY,
+  countSolutions,
+  generatePuzzle,
+  hasDigit,
+  indexOf,
+  parseGrid,
+  rate,
+} from '@sudoku/engine';
+import type { LeveledPuzzle } from '@sudoku/engine';
 import { Game } from './game.svelte.js';
+
+/**
+ * Fabrique une grille notée sans passer par le Web Worker : la logique de partie
+ * doit rester testable seule, sans dépendre de l'infrastructure qui l'alimente
+ * en production.
+ */
+function makePuzzle(seed: string): LeveledPuzzle {
+  const generated = generatePuzzle({ seed, minClues: 34 });
+  const rating = rate(generated.puzzle);
+  return { ...generated, level: rating.level ?? 'facile', rating, exact: true };
+}
 
 const firstEmpty = (game: Game): number => game.puzzle.findIndex((v) => v === EMPTY);
 const firstGiven = (game: Game): number => game.puzzle.findIndex((v) => v !== EMPTY);
@@ -10,7 +31,7 @@ describe('Game', () => {
 
   beforeEach(() => {
     game = new Game();
-    game.newPuzzle({ seed: 'partie-de-test' });
+    game.loadPuzzle(makePuzzle('partie-de-test'));
   });
 
   it('demarre sur une grille a solution unique', () => {
@@ -173,7 +194,7 @@ describe('Game', () => {
 
   it('est reproductible a seed egal', () => {
     const other = new Game();
-    other.newPuzzle({ seed: 'partie-de-test' });
+    other.loadPuzzle(makePuzzle('partie-de-test'));
     expect(other.toString()).toBe(game.toString());
   });
 });

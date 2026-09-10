@@ -55,12 +55,22 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   d'ancrage du futur réglage « gros caractères », attendu par un public senior très large.
 - `role="grid"` est signalé comme anti-pattern potentiel hors données tabulaires : à valider par
   un test réel avec un lecteur d'écran avant de le considérer comme acquis.
+- Le thème a **trois** états (clair, sombre, système) ; « système » retire l'attribut au lieu
+  d'écrire une valeur. Tout accès à `localStorage` est enveloppé dans un `try` : en navigation
+  privée, il lève.
 
 ## Honnêteté envers le joueur
 
 Ne jamais afficher une difficulté qui n'est pas mesurée. Le nombre d'indices ne prédit pas la
-difficulté (corrélation ≈ 0,27) ; l'annoncer comme un niveau serait mentir. Tant que le solveur
-logique n'existe pas, l'application dit ce qu'elle fait réellement — et explique pourquoi.
+difficulté (corrélation ≈ 0,27) ; l'annoncer comme un niveau serait mentir.
+
+Le niveau affiché vient donc du solveur logique, et de lui seul. Trois conséquences à tenir :
+
+- une grille que le registre ne sait pas résoudre ne reçoit **aucun** niveau ;
+- quand la génération n'atteint pas le palier demandé, l'application le **dit** et propose la
+  grille la plus proche, au lieu de l'étiqueter au jugé ;
+- tant que la notation n'est pas calibrée contre l'oracle Sudoku Explainer, elle est cohérente
+  mais **pas encore prouvée conforme** — et l'interface ne doit pas laisser croire l'inverse.
 
 ## Vérification avant de conclure
 

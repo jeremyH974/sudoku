@@ -9,3 +9,4 @@ export * from './rng/index.js';
 export * from './grid/index.js';
 export * from './solver/index.js';
 export * from './generate/index.js';
+export * from './logic/index.js';
