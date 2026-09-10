@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    // Le moteur travaille sur des TypedArrays de taille fixe (81 cellules,
+    // 27 unites) dont les bornes sont garanties par construction et couvertes
+    // par les property tests. Le `| undefined` sur chaque acces indexe nuirait
+    // a la lisibilite du code chaud sans gain de surete reel ici.
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["src/**/*.ts"]
+}

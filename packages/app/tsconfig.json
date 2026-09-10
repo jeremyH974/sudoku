@@ -1,0 +1,23 @@
+{
+  // Projet non "composite" a dessein : l'application n'est jamais compilee par
+  // `tsc` (c'est Vite qui la construit). Ce fichier existe pour donner un
+  // contexte de types a ESLint et a svelte-check, qui est l'outil de reference
+  // pour verifier des composants Svelte.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "allowJs": true,
+    // Impose par la consommation directe des SOURCES du moteur : celui-ci
+    // travaille sur des TypedArrays de taille fixe et desactive ce controle,
+    // or type-checker ses fichiers depuis ce projet leur applique la config
+    // d'ici. Le jour ou le moteur sera consomme via ses declarations compilees
+    // plutot que ses sources, ce reglage pourra remonter a `true`.
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["src/**/*.ts", "src/**/*.svelte", "*.config.ts", "svelte.config.js"]
+}

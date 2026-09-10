@@ -1,0 +1,7 @@
+# Fins de ligne normalisees en LF dans le depot : le projet est developpe sous
+# Windows mais la CI tourne sous Linux, et un melange CRLF/LF rendrait chaque
+# diff illisible.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary

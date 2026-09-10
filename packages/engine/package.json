@@ -1,0 +1,14 @@
+{
+  "name": "@sudoku/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Moteur Sudoku : generation, resolution, notation de difficulte. Zero dependance, zero DOM.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./rng": "./src/rng/index.ts",
+    "./grid": "./src/grid/index.ts",
+    "./solver": "./src/solver/index.ts"
+  },
+  "sideEffects": false
+}

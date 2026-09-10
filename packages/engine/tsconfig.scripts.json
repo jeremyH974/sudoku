@@ -1,0 +1,15 @@
+{
+  // Projet distinct des sources du moteur : les scripts d'outillage ont besoin
+  // de `console` et `performance`, que le moteur n'a le droit d'utiliser nulle
+  // part. C'est cette separation qui garantit mecaniquement que `src/` reste
+  // executable aussi bien dans un navigateur que dans un Worker ou Node.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "noEmit": true,
+    "composite": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["scripts/**/*.ts", "src/**/*.ts"]
+}

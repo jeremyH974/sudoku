@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.env
+.env.local
+# Oracle Sudoku Explainer : binaire tiers LGPL, jamais versionne
+tools/sudoku-explainer/
+# Corpus generes (volumineux, reproductibles depuis une seed)
+corpus/generated/

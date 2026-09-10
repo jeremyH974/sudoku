@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sudoku-app",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@sudoku/app", "dev"],
+      "port": 5173
+    }
+  ]
+}
