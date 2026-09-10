@@ -66,6 +66,34 @@ export class LogicState implements LogicStateView {
   }
 
   /**
+   * Reprend une position figée : valeurs **et** candidats, sans les redériver.
+   *
+   * ─── Pourquoi les valeurs seules ne suffisent pas ───────────────────────────
+   *
+   * Une position en cours de résolution porte des candidats déjà écartés par les
+   * techniques précédentes. Les recalculer depuis les seules valeurs les fait
+   * réapparaître — et ce sont précisément ces éliminations qui rendaient la
+   * technique suivante nécessaire. Mesuré sur treize techniques : figer une
+   * position par ses valeurs ne préserve l'étape attendue que dans quatre cas ;
+   * l'amorce d'un X-Wing s'ouvre alors sur une paire pointante.
+   *
+   * Renvoie `null` si la position est incohérente — une valeur absente de ses
+   * propres candidats, ou une case vide sans candidat.
+   */
+  static fromSnapshot(values: Grid, candidates: Uint16Array): LogicState | null {
+    if (values.length !== CELL_COUNT || candidates.length !== CELL_COUNT) return null;
+
+    const state = new LogicState(new Uint8Array(values), new Uint16Array(candidates));
+    for (let cell = 0; cell < CELL_COUNT; cell++) {
+      const filled = values[cell] !== EMPTY;
+      // L'invariant de la classe : une case résolue n'a plus de candidats.
+      if (filled && candidates[cell] !== 0) return null;
+      if (!filled && candidates[cell] === 0) return null;
+    }
+    return state;
+  }
+
+  /**
    * Pose une valeur et la retire des candidats des pairs.
    * Aucune autre déduction n'est faite — voir la note en tête de classe.
    */

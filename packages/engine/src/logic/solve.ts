@@ -1,4 +1,4 @@
-import { CELL_COUNT } from '../grid/index.js';
+import { CELL_COUNT, hasDigit } from '../grid/index.js';
 import type { Grid } from '../grid/index.js';
 import { REGISTRY, RATING_VERSION } from './registry.js';
 import { LogicState } from './state.js';
@@ -124,6 +124,49 @@ export function solveLogically(grid: Grid, options: SolveLogicallyOptions = {}):
 export function findNextStep(grid: Grid, options: SolveLogicallyOptions = {}): Step | null {
   const state = LogicState.fromGrid(grid);
   if (state === null) return null;
+  return findStep(state, options.registry ?? REGISTRY);
+}
+
+/** Une position de départ figée : les valeurs, et les candidats qui vont avec. */
+export interface Position {
+  readonly values: Grid;
+  readonly candidates: Uint16Array;
+}
+
+/**
+ * Prochaine étape depuis une position reprise en cours de route.
+ *
+ * ─── Pourquoi elle ne peut pas être `findNextStep` ──────────────────────────
+ *
+ * Un exercice commence à l'instant précis où une technique devient nécessaire —
+ * ce qui suppose que les éliminations acquises jusque-là soient conservées.
+ * Repartir des seules valeurs les perdrait, et une technique plus simple
+ * redeviendrait applicable : l'indice contredirait alors la leçon, sur l'écran
+ * même qui prétend l'enseigner.
+ *
+ * `current` porte les valeurs telles qu'elles sont **maintenant**, coups du
+ * joueur compris. Les notes du joueur ne sont jamais consultées : elles lui
+ * appartiennent, et peuvent être fausses.
+ *
+ * Renvoie `null` si la position est incohérente, ou si le joueur a posé une
+ * valeur qui n'était pas candidate — auquel cas il n'y a pas d'indice à donner
+ * mais une erreur à signaler, ce dont l'appelant se charge déjà.
+ */
+export function findNextStepFrom(
+  origin: Position,
+  current: Grid,
+  options: SolveLogicallyOptions = {},
+): Step | null {
+  const state = LogicState.fromSnapshot(origin.values, origin.candidates);
+  if (state === null) return null;
+
+  for (let cell = 0; cell < current.length; cell++) {
+    const digit = current[cell];
+    if (digit === 0 || origin.values[cell] !== 0) continue;
+    if (!hasDigit(state.candidatesAt(cell), digit)) return null;
+    state.place(cell, digit);
+  }
+
   return findStep(state, options.registry ?? REGISTRY);
 }
 

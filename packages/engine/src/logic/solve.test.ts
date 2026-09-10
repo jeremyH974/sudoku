@@ -8,11 +8,14 @@ import {
   isSolved,
   parseGrid,
 } from '../grid/index.js';
+import type { Grid } from '../grid/index.js';
 import { createRng } from '../rng/index.js';
 import { findSolution } from '../solver/index.js';
 import { generatePuzzle } from '../generate/index.js';
 import { LogicState } from './state.js';
-import { findNextStep, solveLogically } from './solve.js';
+import { findNextStep, findNextStepFrom, replayPath, solveLogically } from './solve.js';
+import type { PathFrame } from './solve.js';
+import { rate } from './rate.js';
 import { checkPathSoundness } from './testing.js';
 import { hiddenSingle } from './techniques/hiddenSingle.js';
 import { nakedSingle } from './techniques/nakedSingle.js';
@@ -218,5 +221,85 @@ describe('findNextStep', () => {
 
   it('ne rend rien sur une grille déjà résolue', () => {
     expect(findNextStep(parseGrid(SOLVED))).toBeNull();
+  });
+});
+
+describe('reprise d’une position figée', () => {
+  /**
+   * Une grille dont le chemin emploie une technique donnée, produite ici plutôt
+   * que recopiée : le projet interdit les fixtures inventées, et une grille
+   * écrite de mémoire est presque toujours fausse.
+   */
+  function pathWith(technique: string): { grid: Grid; frames: PathFrame[]; index: number } | null {
+    for (let i = 0; i < 400; i++) {
+      const { puzzle } = generatePuzzle({ seed: `position-${String(i)}`, minClues: 26 });
+      const rating = rate(puzzle);
+      if (rating.outcome !== 'solved') continue;
+      const index = rating.steps.findIndex((step) => step.technique === technique);
+      if (index <= 0) continue;
+      return { grid: puzzle, frames: replayPath(puzzle, rating.steps), index };
+    }
+    return null;
+  }
+
+  it('rend exactement l’étape que le chemin annonce', () => {
+    const found = pathWith('pointing');
+    expect(found).not.toBeNull();
+    const { frames, index } = found!;
+    const frame = frames[index]!;
+
+    const step = findNextStepFrom({ values: frame.values, candidates: frame.candidates }, frame.values);
+    expect(step?.technique).toBe('pointing');
+  });
+
+  it('se confond avec `findNextStep` quand les candidats sont ceux de la grille nue', () => {
+    // Sur la première image, aucune élimination n'a encore eu lieu : les deux
+    // chemins doivent coïncider. C'est ce qui garantit qu'on n'a pas introduit
+    // une seconde logique de résolution à côté de la première.
+    const { puzzle } = generatePuzzle({ seed: 'position-depart', minClues: 30 });
+    const rating = rate(puzzle);
+    const first = replayPath(puzzle, rating.steps)[0]!;
+
+    const fromPosition = findNextStepFrom(
+      { values: first.values, candidates: first.candidates },
+      first.values,
+    );
+    expect(fromPosition?.technique).toBe(findNextStep(puzzle)?.technique);
+  });
+
+  it('conserve les éliminations que redériver ferait disparaître', () => {
+    /*
+      Le cœur du mécanisme, et la mesure qui a décidé de sa forme : sur treize
+      techniques, figer une position par ses seules valeurs ne préserve l'étape
+      attendue que dans quatre cas. Ce test le constate sur une grille réelle —
+      au moins une position du chemin où les deux réponses diffèrent.
+    */
+    let diverged = 0;
+    for (let i = 0; i < 60 && diverged === 0; i++) {
+      const { puzzle } = generatePuzzle({ seed: `divergence-${String(i)}`, minClues: 26 });
+      const rating = rate(puzzle);
+      if (rating.outcome !== 'solved') continue;
+      const frames = replayPath(puzzle, rating.steps);
+
+      for (const frame of frames) {
+        if (frame.step === null) continue;
+        const fromPosition = findNextStepFrom(
+          { values: frame.values, candidates: frame.candidates },
+          frame.values,
+        );
+        const naive = findNextStep(frame.values);
+        if (fromPosition?.technique !== naive?.technique) diverged++;
+      }
+    }
+    expect(diverged).toBeGreaterThan(0);
+  });
+
+  it('refuse une position incohérente plutôt que d’inventer une réponse', () => {
+    const { puzzle } = generatePuzzle({ seed: 'position-invalide', minClues: 30 });
+    const frame = replayPath(puzzle, rate(puzzle).steps)[0]!;
+    // Une case vide sans aucun candidat : la position ne peut pas exister.
+    const broken = new Uint16Array(frame.candidates);
+    broken[frame.values.indexOf(0)] = 0;
+    expect(findNextStepFrom({ values: frame.values, candidates: broken }, frame.values)).toBeNull();
   });
 });

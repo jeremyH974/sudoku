@@ -8,6 +8,12 @@
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
   import { TEXT_SIZE_OPTIONS, textSize } from './lib/textSize.svelte.js';
   import { MARKS } from './lib/marks.js';
+  import LearnPanel from './lib/LearnPanel.svelte';
+  import { buildExercise, loadLessonCorpus } from './lib/learn.js';
+  import type { LessonCorpus } from './lib/learn.js';
+  import { LESSONS } from './lib/lessons.js';
+  import type { TechniqueId } from '@sudoku/engine';
+  import { techniqueInfo } from '@sudoku/engine';
   import { loadGame, requestPersistence, saveGame } from './lib/storage.js';
   import UpdateBanner from './lib/UpdateBanner.svelte';
   import ProgressPanel from './lib/ProgressPanel.svelte';
@@ -40,6 +46,7 @@
   */
   const TABS = [
     { id: 'jeu', label: 'Jouer' },
+    { id: 'apprendre', label: 'Apprendre' },
     { id: 'progression', label: 'Progression' },
     { id: 'analyse', label: 'Analyse' },
     { id: 'imprimer', label: 'Imprimer' },
@@ -49,6 +56,7 @@
 
   let records = $state<GameRecord[]>(loadRecords());
   let corpus = $state<DailyCorpus | null>(null);
+  let lessonCorpus = $state<LessonCorpus | null>(null);
   /*
     « Aujourd'hui » se relit au retour au premier plan, jamais figé au
     chargement : un onglet laissé ouvert toute la nuit proposerait sinon encore
@@ -106,6 +114,40 @@
   void loadDailyCorpus().then((loaded) => {
     corpus = loaded;
   });
+
+  void loadLessonCorpus().then((loaded) => {
+    lessonCorpus = loaded;
+  });
+
+  /**
+   * Ouvre l'exercice amorcé d'une technique.
+   *
+   * L'amorce est fabriquée localement à partir de la seule grille : on rejoue le
+   * chemin et on s'arrête à la première étape qui emploie la technique. Si le
+   * barème a changé au point qu'elle n'y figure plus, on le **dit** plutôt que
+   * d'ouvrir un exercice qui ne porterait pas sur la leçon.
+   */
+  function practise(technique: TechniqueId, code: string): void {
+    const exercise = buildExercise(code, technique);
+    if (exercise === null) {
+      announcement =
+        `Cette grille n’exige plus de ${techniqueInfo(technique).label} sous le barème ` +
+        `en vigueur. L’exercice n’est pas proposé.`;
+      return;
+    }
+    game.loadExercise(exercise);
+    tab = 'jeu';
+    announcement = `Exercice : ${techniqueInfo(technique).label}. ${LESSONS[technique].summary}`;
+  }
+
+  /** Ouvre la grille entière dont l'exercice est extrait. */
+  function playFull(technique: TechniqueId, code: string): void {
+    void technique;
+    if (game.loadFromCode(code)) {
+      tab = 'jeu';
+      announcement = `Grille complète, niveau ${game.level ?? 'non mesuré'}.`;
+    }
+  }
 
   /** Ouvre le défi d'un jour au niveau demandé. */
   function playDaily(day: DayKey, wanted: Level): void {
@@ -380,6 +422,9 @@
           {#if game.daily !== null}
             <span class="badge">Défi du {game.daily}</span>
           {/if}
+          {#if game.lesson !== null}
+            <span class="badge">Exercice — {techniqueInfo(game.lesson).label}</span>
+          {/if}
           {#if game.noteMode}
             <!--
               Le mode se lit **en toutes lettres**, pas seulement à la couleur de
@@ -554,7 +599,25 @@
           {/if}
         </fieldset>
 
-        {#if game.rating !== null}
+        {#if game.lesson !== null}
+          <!--
+            Un exercice ne reçoit **aucun niveau**, et ce n'est pas un oubli : une
+            position en cours de résolution n'en a pas. Lui attribuer celui de la
+            grille dont elle est extraite serait afficher une difficulté qui n'a
+            pas été mesurée sur ce qu'on montre — précisément ce que ce projet
+            refuse. On dit donc ce qu'on sait : la technique qui s'y applique.
+          -->
+          <div class="verdict">
+            <p>
+              <strong>{techniqueInfo(game.lesson).label}</strong>
+              — l’exercice commence à l’instant où cette technique devient nécessaire.
+            </p>
+            <p class="muted small">
+              {game.clues} cases déjà posées, candidats à jour. Une position n’a pas de niveau :
+              celui de la grille d’origine ne la décrirait pas.
+            </p>
+          </div>
+        {:else if game.rating !== null}
           <div class="verdict">
             <p>
               <strong>{game.level ? (LEVELS.find((l) => l.id === game.level)?.label ?? '—') : '—'}</strong>
@@ -575,6 +638,13 @@
         {/if}
       </div>
     </div>
+  {:else if tab === 'apprendre'}
+    <LearnPanel
+      {records}
+      corpus={lessonCorpus}
+      onPractise={practise}
+      onPlayFull={playFull}
+    />
   {:else if tab === 'progression'}
     <ProgressPanel {records} {corpus} {today} onPlayDaily={playDaily} />
   {:else if tab === 'analyse'}

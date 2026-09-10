@@ -18,7 +18,8 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "calibrate": "tsx packages/cli/src/main.ts",
     "diagnose": "tsx packages/cli/src/diagnose.ts",
-    "dailies": "tsx packages/cli/src/dailies.ts"
+    "dailies": "tsx packages/cli/src/dailies.ts",
+    "lessons": "tsx packages/cli/src/lessons.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

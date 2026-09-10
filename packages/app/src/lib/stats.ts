@@ -1,6 +1,6 @@
 import { isDayKey } from './day.js';
 import type { DayKey } from './day.js';
-import type { Level } from '@sudoku/engine';
+import type { Level, TechniqueId } from '@sudoku/engine';
 
 /**
  * L'historique des parties terminées.
@@ -81,6 +81,13 @@ export interface GameRecord {
   readonly hintsApplied: number;
   /** Valeurs fausses saisies, comptées à la saisie. Informatif, jamais punitif. */
   readonly mistakes: number;
+  /**
+   * Technique enseignée si cette partie était un exercice de la campagne.
+   *
+   * Champ ajouté à l'incrément 8, sous la règle 1 ci-dessus : optionnel à la
+   * lecture, avec un défaut explicite, donc sans montée de `STATS_VERSION`.
+   */
+  readonly lesson: TechniqueId | null;
 }
 
 interface StatsFile {
@@ -110,6 +117,7 @@ const normalise = (value: GameRecord): GameRecord => ({
   hintsShown: typeof value.hintsShown === 'number' ? value.hintsShown : 0,
   hintsApplied: typeof value.hintsApplied === 'number' ? value.hintsApplied : 0,
   mistakes: typeof value.mistakes === 'number' ? value.mistakes : 0,
+  lesson: value.lesson ?? null,
 });
 
 function quarantine(raw: string): void {

@@ -7,7 +7,7 @@ import { nakedPair, nakedQuad, nakedTriple } from './techniques/nakedSet.js';
 import { nakedSingle } from './techniques/nakedSingle.js';
 import { skyscraper, turbotFish, twoStringKite } from './techniques/strongLinks.js';
 import { xyWing, xyzWing } from './techniques/wings.js';
-import type { TechniqueEntry } from './types.js';
+import type { TechniqueEntry, TechniqueId } from './types.js';
 
 /**
  * Version du barème et de l'ordre d'essai.
@@ -84,3 +84,65 @@ export const REGISTRY: readonly TechniqueEntry[] = [
 
 /** Difficulté la plus élevée que ce registre sait attribuer. */
 export const MAX_KNOWN_DIFFICULTY = 5.4;
+
+/** Une technique, telle qu'on peut la nommer et la viser de l'extérieur. */
+export interface TechniqueInfo {
+  readonly id: TechniqueId;
+  /** Nom affichable, identique à celui que porte l'étape produite. */
+  readonly label: string;
+  readonly difficulty: number;
+}
+
+/**
+ * Catalogue des vingt-quatre techniques, par difficulté croissante.
+ *
+ * ─── Pourquoi il existe ─────────────────────────────────────────────────────
+ *
+ * Jusqu'ici, la difficulté d'une technique n'était connue qu'en la voyant
+ * s'appliquer : elle vit dans des tables locales aux neuf modules, et n'apparaît
+ * dans une `Step` qu'une fois le motif trouvé. Cela suffit pour noter une grille,
+ * pas pour en **demander** une : viser un X-Wing suppose de savoir, avant de
+ * chercher, que le X-Wing vaut 3,2.
+ *
+ * ─── La duplication, et comment elle est tenue ──────────────────────────────
+ *
+ * Ces valeurs sont écrites ici **et** dans les modules de techniques. Le doublon
+ * est réel, et il est verrouillé plutôt que toléré : `registry.test.ts` fait
+ * tourner le solveur sur un large échantillon et vérifie que toute étape
+ * observée porte exactement le libellé et la difficulté annoncés ci-dessous. Un
+ * écart casse la suite.
+ *
+ * L'ordre d'essai reste celui de `REGISTRY` ; ce catalogue le décrit, il ne le
+ * commande pas.
+ */
+export const TECHNIQUE_CATALOGUE: readonly TechniqueInfo[] = [
+  { id: 'full-house', label: 'Dernière case', difficulty: 1.0 },
+  { id: 'hidden-single-box', label: 'Single caché en boîte', difficulty: 1.2 },
+  { id: 'hidden-single-line', label: 'Single caché en ligne', difficulty: 1.5 },
+  { id: 'direct-pointing', label: 'Paire pointante directe', difficulty: 1.7 },
+  { id: 'direct-claiming', label: 'Paire revendiquée directe', difficulty: 1.9 },
+  { id: 'direct-hidden-pair', label: 'Paire cachée directe', difficulty: 2.0 },
+  { id: 'naked-single', label: 'Single nu', difficulty: 2.3 },
+  { id: 'direct-hidden-triple', label: 'Triplet caché direct', difficulty: 2.5 },
+  { id: 'pointing', label: 'Paire pointante', difficulty: 2.6 },
+  { id: 'claiming', label: 'Paire revendiquée', difficulty: 2.8 },
+  { id: 'naked-pair', label: 'Paire nue', difficulty: 3.0 },
+  { id: 'x-wing', label: 'X-Wing', difficulty: 3.2 },
+  { id: 'hidden-pair', label: 'Paire cachée', difficulty: 3.4 },
+  { id: 'naked-triple', label: 'Triplet nu', difficulty: 3.6 },
+  { id: 'swordfish', label: 'Swordfish', difficulty: 3.8 },
+  { id: 'hidden-triple', label: 'Triplet caché', difficulty: 4.0 },
+  { id: 'skyscraper', label: 'Skyscraper', difficulty: 4.0 },
+  { id: 'two-string-kite', label: 'Cerf-volant', difficulty: 4.1 },
+  { id: 'turbot-fish', label: 'Turbot Fish', difficulty: 4.2 },
+  { id: 'xy-wing', label: 'XY-Wing', difficulty: 4.2 },
+  { id: 'xyz-wing', label: 'XYZ-Wing', difficulty: 4.4 },
+  { id: 'naked-quad', label: 'Quadruplet nu', difficulty: 5.0 },
+  { id: 'jellyfish', label: 'Jellyfish', difficulty: 5.2 },
+  { id: 'hidden-quad', label: 'Quadruplet caché', difficulty: 5.4 },
+];
+
+const CATALOGUE_BY_ID = new Map(TECHNIQUE_CATALOGUE.map((info) => [info.id, info]));
+
+/** Décrit une technique par son identifiant. */
+export const techniqueInfo = (id: TechniqueId): TechniqueInfo => CATALOGUE_BY_ID.get(id)!;

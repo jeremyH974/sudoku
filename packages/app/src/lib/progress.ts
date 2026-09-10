@@ -2,7 +2,7 @@ import { nextDay, previousDay } from './day.js';
 import type { DayKey } from './day.js';
 import type { GameRecord } from './stats.js';
 import { LEVELS } from '@sudoku/engine';
-import type { Level } from '@sudoku/engine';
+import type { Level, TechniqueId } from '@sudoku/engine';
 
 /**
  * Ce que l'historique permet de dire — et surtout ce qu'il ne permet pas.
@@ -41,6 +41,20 @@ import type { Level } from '@sudoku/engine';
 
 /** Nombre de parties en deçà duquel une médiane n'en est pas une. */
 export const MIN_SAMPLE_FOR_MEDIAN = 5;
+
+/**
+ * Les parties de jeu, exercices de la campagne exclus.
+ *
+ * ─── Pourquoi cette exclusion n'est pas un détail ───────────────────────────
+ *
+ * Un exercice amorcé démarre à cinquante cases posées et se termine en quarante
+ * secondes ; une grille Diabolique en prend quarante minutes. Les mêler dans une
+ * même médiane produirait un chiffre qui a l'air mesuré et ne l'est pas — le
+ * défaut exact que tout ce projet refuse. Un exercice n'a d'ailleurs **aucun
+ * niveau** : une position n'en a pas.
+ */
+const playedGames = (records: readonly GameRecord[]): GameRecord[] =>
+  records.filter((record) => record.lesson === null);
 
 /** Les jours dont le défi quotidien a été résolu, quel que soit le niveau. */
 export function completedDays(records: readonly GameRecord[]): Set<DayKey> {
@@ -130,8 +144,9 @@ export interface LevelSummary {
  * là où une liste tronquée ne dit rien.
  */
 export function summarise(records: readonly GameRecord[]): LevelSummary[] {
+  const games = playedGames(records);
   return LEVELS.map((info) => {
-    const played = records.filter((record) => record.level === info.id);
+    const played = games.filter((record) => record.level === info.id);
     const durations = played
       .map((record) => record.durationMs)
       .filter((value): value is number => value !== null);
@@ -157,9 +172,10 @@ export interface Totals {
 }
 
 export function totals(records: readonly GameRecord[]): Totals {
+  const games = playedGames(records);
   let highest: Level | null = null;
   let highestRank = -1;
-  for (const record of records) {
+  for (const record of games) {
     if (record.level === null) continue;
     const rank = LEVELS.findIndex((info) => info.id === record.level);
     if (rank > highestRank) {
@@ -169,9 +185,57 @@ export function totals(records: readonly GameRecord[]): Totals {
   }
 
   return {
-    played: records.length,
+    played: games.length,
     dailies: completedDays(records).size,
-    unaided: records.filter((record) => record.hintsApplied === 0).length,
+    unaided: games.filter((record) => record.hintsApplied === 0).length,
     highestLevel: highest,
   };
+}
+
+/** Ce qu'on sait d'une technique, et rien de plus. */
+export interface TechniqueProgress {
+  readonly technique: TechniqueId;
+  /** Exercices terminés. Un fait, dès le premier. */
+  readonly done: number;
+  /** Terminés sans appliquer un seul indice. */
+  readonly unaided: number;
+  /** Instant du premier exercice terminé, ou `null`. */
+  readonly firstAt: number | null;
+}
+
+/**
+ * Avancement par technique.
+ *
+ * ─── Ce que cette fonction refuse délibérément de calculer ──────────────────
+ *
+ * **Aucun pourcentage de maîtrise.** Il faudrait un dénominateur — le nombre
+ * d'exercices tentés — que rien n'observe : il n'y a pas de bouton « j'abandonne ».
+ * C'est la même raison qui a fait écarter le taux de réussite à l'incrément 7.
+ *
+ * **Aucune médiane de temps par technique.** Deux raisons, et la seconde ne
+ * saute pas aux yeux : cinq échantillons d'une tâche de trente secondes ne
+ * portent rien ; surtout, les exercices d'une même technique **partent de
+ * positions différentes**, avec un nombre de cases restantes différent. Leurs
+ * durées ne sont donc pas comparables entre elles, même en principe. Le seuil de
+ * cinq parties ne sauverait rien ici — il produirait un nombre qui aurait l'air
+ * mesuré.
+ *
+ * **Aucune barre « 21 sur 24 ».** Elle compterait comme des échecs les
+ * techniques dont le corpus n'a pas de grille, que le joueur ne peut pas faire.
+ */
+export function techniqueProgress(records: readonly GameRecord[]): TechniqueProgress[] {
+  const byTechnique = new Map<TechniqueId, GameRecord[]>();
+  for (const record of records) {
+    if (record.lesson === null) continue;
+    const bucket = byTechnique.get(record.lesson);
+    if (bucket === undefined) byTechnique.set(record.lesson, [record]);
+    else bucket.push(record);
+  }
+
+  return [...byTechnique.entries()].map(([technique, done]) => ({
+    technique,
+    done: done.length,
+    unaided: done.filter((record) => record.hintsApplied === 0).length,
+    firstAt: Math.min(...done.map((record) => record.finishedAt)),
+  }));
 }

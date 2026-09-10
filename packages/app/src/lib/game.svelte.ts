@@ -7,6 +7,7 @@ import {
   encodeGrid,
   findConflicts,
   findNextStep,
+  findNextStepFrom,
   findSolution,
   formatGrid,
   gridLabel,
@@ -17,7 +18,15 @@ import {
   withDigit,
   withoutDigit,
 } from '@sudoku/engine';
-import type { Level, LeveledPuzzle, Rating, Step, Symmetry } from '@sudoku/engine';
+import type {
+  Level,
+  LeveledPuzzle,
+  Position,
+  Rating,
+  Step,
+  Symmetry,
+  TechniqueId,
+} from '@sudoku/engine';
 import { engine } from './engineClient.js';
 import { localDayKey } from './day.js';
 import type { DayKey } from './day.js';
@@ -25,6 +34,7 @@ import { Stopwatch } from './stopwatch.svelte.js';
 import { toSnapshot } from './storage.js';
 import type { GameSnapshot, RestoredGame } from './storage.js';
 import type { GameRecord } from './stats.js';
+import type { Exercise } from './learn.js';
 import { restrictToNotes, toggleMark } from './marks.js';
 import type { Mark } from './marks.js';
 
@@ -88,6 +98,17 @@ export class Game {
   startedOn = $state<DayKey>(localDayKey());
   /** Date du défi quotidien joué, ou `null` pour une partie libre. */
   daily = $state<DayKey | null>(null);
+  /** Technique enseignée quand la partie est un exercice, `null` sinon. */
+  lesson = $state<TechniqueId | null>(null);
+  /**
+   * Position de départ d'un exercice : valeurs **et** candidats.
+   *
+   * Les candidats sont indispensables — voir `findNextStepFrom`. Sans eux,
+   * l'indice repartirait des valeurs seules, retrouverait les éliminations déjà
+   * acquises et proposerait une technique plus simple que celle enseignée : la
+   * leçon serait contredite sur l'écran même qui prétend l'enseigner.
+   */
+  #origin: Position | null = null;
   /** Indices consultés, tous paliers confondus. */
   hintsShown = $state<number>(0);
   /** Indices dont le coup a été appliqué. */
@@ -196,6 +217,59 @@ export class Game {
     this.selected = firstEmpty < 0 ? 0 : firstEmpty;
 
     this.daily = daily;
+    this.lesson = null;
+    this.#origin = null;
+    this.startedOn = localDayKey();
+    this.hintsShown = 0;
+    this.hintsApplied = 0;
+    this.mistakes = 0;
+    this.#recorded = false;
+    this.clock.reset();
+    this.clock.start();
+  }
+
+  /**
+   * Installe un exercice amorcé : la grille est reprise à l'instant précis où la
+   * technique enseignée devient nécessaire.
+   *
+   * ─── Trois décisions qui se justifient ──────────────────────────────────────
+   *
+   * **Les cases déjà posées deviennent des indices de départ.** Elles sont le
+   * travail du solveur, pas celui du joueur ; le laisser les défaire ferait
+   * dériver l'exercice loin de sa leçon.
+   *
+   * **Les candidats sont écrits comme notes.** Ce n'est pas un confort : une
+   * technique d'élimination ne produit rien sur une grille sans notes —
+   * `applyHint` passe son chemin quand la case n'en porte aucune. Sans cette
+   * ligne, les deux tiers de la campagne seraient silencieusement inertes.
+   *
+   * **Aucune notation n'est affichée.** Une position n'a pas de niveau : celui
+   * de la grille d'origine ne la décrit pas, et lui en attribuer un violerait la
+   * règle qui fonde ce projet. `rating` reste donc `null`, et l'onglet Analyse
+   * l'annonce comme tel.
+   */
+  loadExercise(exercise: Exercise): void {
+    const values = [...exercise.position.values];
+    this.puzzle = values;
+    this.values = [...values];
+    this.solution = [...exercise.solution];
+    this.notes = [...exercise.position.candidates];
+    this.noteColors = new Array<number>(CELL_COUNT).fill(0);
+    this.history = [];
+    this.clearHint();
+
+    this.#origin = exercise.position;
+    this.lesson = exercise.technique;
+    this.seed = 0;
+    this.clues = values.filter((value) => value !== EMPTY).length;
+    this.rating = null;
+    this.level = null;
+    this.levelIsExact = true;
+
+    const firstEmpty = values.findIndex((value) => value === EMPTY);
+    this.selected = firstEmpty < 0 ? 0 : firstEmpty;
+
+    this.daily = null;
     this.startedOn = localDayKey();
     this.hintsShown = 0;
     this.hintsApplied = 0;
@@ -349,6 +423,7 @@ export class Game {
       hintsShown: this.hintsShown,
       hintsApplied: this.hintsApplied,
       mistakes: this.mistakes,
+      lesson: this.lesson,
     };
   }
 
@@ -538,7 +613,17 @@ export class Game {
       return;
     }
 
-    const step = findNextStep(Uint8Array.from(this.values));
+    /*
+      Un exercice repart de sa position d'origine, candidats compris. Redériver
+      les candidats depuis les seules valeurs ferait réapparaître les
+      éliminations déjà acquises, et l'indice proposerait une technique plus
+      simple que celle enseignée — sur l'écran même qui prétend l'enseigner.
+    */
+    const origin = this.#origin;
+    const step =
+      origin === null
+        ? findNextStep(Uint8Array.from(this.values))
+        : findNextStepFrom(origin, Uint8Array.from(this.values));
     if (step === null) {
       this.hintNotice = this.isComplete
         ? 'La grille est terminée.'

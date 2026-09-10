@@ -3,8 +3,8 @@ import type { Grid } from '../grid/index.js';
 import { createRng } from '../rng/index.js';
 import type { Rng } from '../rng/index.js';
 import { hasUniqueSolution } from '../solver/index.js';
-import { LEVELS, rate } from '../logic/index.js';
-import type { Level, Rating } from '../logic/index.js';
+import { LEVELS, rate, techniqueInfo } from '../logic/index.js';
+import type { Level, Rating, TechniqueId } from '../logic/index.js';
 import { digHoles, generateSolvedGrid, symmetryGroups } from './generate.js';
 import type { Symmetry } from './generate.js';
 
@@ -146,15 +146,44 @@ function climb(
   targetCeiling: number,
   maxSwaps: number,
   deadline: number,
+  /**
+   * Appelé sur chaque candidat noté et résolu. Renvoyer `true` arrête la marche
+   * sur ce candidat, qui devient le résultat.
+   *
+   * Sans ce crochet, une grille qui satisfait déjà ce que l'appelant cherche
+   * serait traversée puis jetée : la marche ne juge que sur le score, et deux
+   * techniques peuvent partager le même. C'est ce qui séparait, à la mesure, une
+   * recherche qui aboutit en quelques secondes d'une qui échoue en quarante-cinq.
+   */
+  onRated?: (grid: Grid, rating: Rating) => boolean,
 ): { grid: Grid; rating: Rating } {
   let current = start;
   let currentRating = rate(current);
-  let best = current;
-  let bestRating = currentRating;
+  /*
+    ─── Le point de départ ne devient « le meilleur » que s'il est utilisable ──
+
+    `rate()` calcule le score comme le maximum des étapes parcourues, **quel que
+    soit le verdict**. Une grille creusée qui se bloque porte donc quand même un
+    score — celui de l'étape la plus dure atteinte avant le blocage, souvent
+    élevé. Mesuré : 13 % des grilles creusées ressortent `stuck`.
+
+    En faire le point de référence condamnait la marche. La promotion exige un
+    score **strictement** supérieur : une grille résolue à 3,2 ne pouvait alors
+    jamais déloger un départ bloqué à 4,0, `current` n'avançait pas davantage,
+    et tous les trente échecs la marche revenait s'asseoir sur ce point mort.
+    Elle brûlait ses quatre cents échanges **et** le budget de temps partagé,
+    donc aussi les tentatives suivantes. `generateAtLevel` jetait ensuite la
+    grille bloquée sans même la retenir comme approximation.
+
+    D'où un meilleur qui commence à « rien » plutôt qu'à « inutilisable ».
+  */
+  const usable = currentRating.outcome === 'solved' && currentRating.score <= targetCeiling;
+  let best: Grid | null = usable ? current : null;
+  let bestRating: Rating | null = usable ? currentRating : null;
   let sinceImprovement = 0;
 
   for (let i = 0; i < maxSwaps; i++) {
-    if (bestRating.outcome === 'solved' && bestRating.score > targetFloor) break;
+    if (bestRating !== null && bestRating.score > targetFloor) break;
     if (Date.now() > deadline) break;
 
     const candidate = trySwap(current, solution, groups, rng);
@@ -168,27 +197,41 @@ function climb(
     // sans pouvoir redescendre, et l'échange serait perdu.
     if (candidateRating.score > targetCeiling) continue;
 
+    if (onRated?.(candidate, candidateRating) === true) {
+      return { grid: candidate, rating: candidateRating };
+    }
+
+    /*
+      Un départ bloqué porte un score élevé mais ne vaut rien : on ne le prend
+      pas pour référence de comparaison non plus, sans quoi la marche resterait
+      figée exactement comme avant.
+    */
+    const currentScore = currentRating.outcome === 'solved' ? currentRating.score : -1;
     const wandering = sinceImprovement >= WANDER_AFTER;
-    if (candidateRating.score >= currentRating.score || wandering) {
+    if (candidateRating.score >= currentScore || wandering) {
       current = candidate;
       currentRating = candidateRating;
     }
 
-    if (candidateRating.score > bestRating.score) {
+    if (bestRating === null || candidateRating.score > bestRating.score) {
       best = candidate;
       bestRating = candidateRating;
       sinceImprovement = 0;
     } else {
       sinceImprovement++;
       if (sinceImprovement > WANDER_AFTER + WANDER_LENGTH) {
-        current = best;
+        current = best!;
         currentRating = bestRating;
         sinceImprovement = 0;
       }
     }
   }
 
-  return { grid: best, rating: bestRating };
+  // Aucun candidat utilisable : on rend le départ tel quel, et l'appelant le
+  // rejettera comme il rejetait déjà toute grille non résolue.
+  return best === null || bestRating === null
+    ? { grid: start, rating: rate(start) }
+    : { grid: best, rating: bestRating };
 }
 
 /**
@@ -269,4 +312,133 @@ export function generateAtLevel(options: GenerateAtLevelOptions): LeveledPuzzle 
     rating: best.rating,
     exact: false,
   };
+}
+
+/* ─── Génération visant une technique précise ─────────────────────────────── */
+
+export interface GenerateForTechniqueOptions {
+  /** Technique que la grille doit exiger, et qui doit y être la plus difficile. */
+  readonly technique: TechniqueId;
+  readonly seed?: string | number;
+  readonly symmetry?: Symmetry;
+  /**
+   * Plancher d'indices.
+   *
+   * Indispensable au bas de l'échelle, et seulement là : une grille dont la
+   * technique la plus dure est « Dernière case » est presque pleine. Mesuré —
+   * à 70 indices, 52 grilles sur 60 ; à 26, aucune.
+   */
+  readonly minClues?: number;
+  readonly maxAttempts?: number;
+  readonly maxSwaps?: number;
+  readonly timeBudgetMs?: number;
+}
+
+export interface TechniquePuzzle {
+  readonly puzzle: Grid;
+  readonly solution: Grid;
+  readonly clues: number;
+  readonly seed: string | number;
+  readonly symmetry: Symmetry;
+  readonly technique: TechniqueId;
+  readonly rating: Rating;
+}
+
+/**
+ * Produit une grille dont la technique **la plus difficile** est celle demandée.
+ *
+ * ─── Pourquoi le palier ne suffit pas ───────────────────────────────────────
+ *
+ * Un palier est une bande de scores, et les bandes contiennent plusieurs
+ * techniques : « Expert » couvre la paire nue, le X-Wing et la paire cachée.
+ * Mesuré sur vingt-quatre tirages ciblés par palier : le X-Wing sort dix fois
+ * sur vingt-quatre en Expert, et le Swordfish, le triplet caché, le XYZ-Wing et
+ * le Jellyfish **jamais**. Enseigner une technique suppose de la demander, pas
+ * de l'espérer.
+ *
+ * ─── Pourquoi un plafond serré, alors qu'il paraît handicaper la marche ─────
+ *
+ * L'intuition dit d'ouvrir le plafond pour laisser la marche circuler, et de ne
+ * trancher qu'à l'arrivée sur le nom de la technique. C'est le contraire qui est
+ * vrai, et cela a été mesuré : à plafond ouvert (5,4), le triplet nu, le
+ * Swordfish et le Jellyfish échouent tous les trois en quarante-cinq secondes ;
+ * à plafond serré ils sortent en 3,7 s, 6,9 s et 39 s. Le plafond n'est pas
+ * qu'un filtre de sortie — il **retient** la marche dans la région utile au lieu
+ * de la laisser fuir vers 4,2, où les wings abondent.
+ *
+ * ─── Ce que cette fonction ne promet pas ────────────────────────────────────
+ *
+ * Elle renvoie `null` plutôt qu'une approximation. Une grille « presque » de la
+ * bonne technique n'a aucun sens pédagogique : l'exercice porterait sur autre
+ * chose que la leçon. Mesuré : le quadruplet nu (5,0) n'apparaît dans aucun
+ * chemin sur ~22 000 échanges — sa géométrie l'interdit presque toujours, le
+ * complément d'un quadruplet nu étant un motif moins cher, donc trouvé avant.
+ * Une leçon sans grille se dit ; elle ne se fabrique pas.
+ */
+export function generateForTechnique(
+  options: GenerateForTechniqueOptions,
+): TechniquePuzzle | null {
+  const seed = options.seed ?? Math.floor(Math.random() * 0xffff_ffff);
+  const symmetry = options.symmetry ?? 'rotational180';
+  const maxAttempts = options.maxAttempts ?? 60;
+  const maxSwaps = options.maxSwaps ?? 400;
+  const deadline = Date.now() + (options.timeBudgetMs ?? 30_000);
+
+  const rng = createRng(seed);
+  const groups = symmetryGroups(symmetry);
+  const ceiling = techniqueInfo(options.technique).difficulty;
+  /*
+    Le plancher est juste sous le plafond : `climb` s'arrête dès qu'elle le
+    dépasse, donc exactement quand le score atteint la difficulté visée. Le nom
+    de la technique reste à vérifier — deux paires d'ex æquo subsistent à 4,0 et
+    à 4,2.
+  */
+  const floor = ceiling - 0.001;
+
+  const accept = (grid: Grid, solution: Grid, rating: Rating): TechniquePuzzle => ({
+    puzzle: grid,
+    solution,
+    clues: countClues(grid),
+    seed,
+    symmetry,
+    technique: options.technique,
+    rating,
+  });
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const solution = generateSolvedGrid(rng);
+    const dug = digHoles(solution, rng, {
+      symmetry,
+      ...(options.minClues === undefined ? {} : { minClues: options.minClues }),
+    });
+
+    let grid = dug;
+    let rating = rate(grid);
+    if (rating.outcome === 'solved' && rating.hardestTechnique === options.technique) {
+      return accept(grid, solution, rating);
+    }
+
+    if (rating.outcome !== 'solved' || rating.score <= floor) {
+      const climbed = climb(
+        grid,
+        solution,
+        groups,
+        rng,
+        floor,
+        ceiling,
+        maxSwaps,
+        deadline,
+        (_, candidate) => candidate.hardestTechnique === options.technique,
+      );
+      grid = climbed.grid;
+      rating = climbed.rating;
+      if (rating.outcome === 'solved' && rating.hardestTechnique === options.technique) {
+        return accept(grid, solution, rating);
+      }
+    }
+
+    if (Date.now() > deadline) break;
+  }
+
+  return null;
 }

@@ -62,6 +62,7 @@ function makeRecord(overrides: Partial<GameRecord> = {}): GameRecord {
     hintsShown: 0,
     hintsApplied: 0,
     mistakes: 0,
+    lesson: null,
     ...overrides,
   };
 }

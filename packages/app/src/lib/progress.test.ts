@@ -8,6 +8,7 @@ import {
   longestStreak,
   median,
   summarise,
+  techniqueProgress,
   totals,
 } from './progress.js';
 import type { GameRecord } from './stats.js';
@@ -26,6 +27,7 @@ function record(overrides: Partial<GameRecord> = {}): GameRecord {
     hintsShown: 0,
     hintsApplied: 0,
     mistakes: 0,
+    lesson: null,
     ...overrides,
   };
 }
@@ -234,5 +236,42 @@ describe('totaux', () => {
 
   it('ne prétend rien sur un historique vide', () => {
     expect(totals([])).toEqual({ played: 0, dailies: 0, unaided: 0, highestLevel: null });
+  });
+});
+
+describe('avancement par technique', () => {
+  it('ne compte que les exercices, et dit ce qu’il sait', () => {
+    const history = [
+      record({ id: 'a', lesson: 'x-wing', hintsApplied: 0, finishedAt: 1000 }),
+      record({ id: 'b', lesson: 'x-wing', hintsApplied: 2, finishedAt: 2000 }),
+      record({ id: 'c', lesson: 'skyscraper', hintsApplied: 0, finishedAt: 3000 }),
+      record({ id: 'd', lesson: null }),
+    ];
+    const progress = techniqueProgress(history);
+    const xWing = progress.find((entry) => entry.technique === 'x-wing')!;
+    expect(xWing.done).toBe(2);
+    expect(xWing.unaided).toBe(1);
+    expect(xWing.firstAt).toBe(1000);
+    // Une technique jamais pratiquée n'apparaît pas : « jamais rencontrée » se
+    // dit à l'affichage, à partir du catalogue, pas par une entrée vide ici.
+    expect(progress.find((entry) => entry.technique === 'jellyfish')).toBeUndefined();
+  });
+
+  it('tient les exercices hors des statistiques de niveau', () => {
+    /*
+      Un exercice de quarante secondes dans la même médiane qu'une Diabolique de
+      quarante minutes produirait un chiffre qui a l'air mesuré et ne l'est pas.
+      C'est la seule ligne de ce module dont l'oubli serait invisible.
+    */
+    const history = [
+      record({ id: 'jeu', level: 'expert', durationMs: 900_000 }),
+      ...Array.from({ length: 6 }, (_, i) =>
+        record({ id: `ex-${String(i)}`, level: 'expert', lesson: 'x-wing', durationMs: 30_000 }),
+      ),
+    ];
+    const expert = summarise(history).find((entry) => entry.level === 'expert')!;
+    expect(expert.played).toBe(1);
+    expect(expert.medianMs).toBeNull();
+    expect(totals(history).played).toBe(1);
   });
 });

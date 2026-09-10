@@ -136,7 +136,13 @@ describe('gridLabel', () => {
     // Empreinte sur 25 bits : quelques collisions sont possibles sur 200 tirages,
     // mais elles doivent rester marginales pour rester utilisables en sommaire.
     expect(labels.size).toBeGreaterThan(195);
-  });
+    /*
+      Deux cents creusements avec vérification d'unicité coûtent environ quatre
+      secondes, et davantage quand la suite occupe tous les cœurs. Le budget est
+      donc énoncé plutôt que subi : réduire l'échantillon affaiblirait ce que le
+      test mesure — la résistance aux collisions — pour gagner deux secondes.
+    */
+  }, 30_000);
 
   it('est stable : la même grille donne toujours la même étiquette', () => {
     const grid = parseGrid(PUZZLE);
