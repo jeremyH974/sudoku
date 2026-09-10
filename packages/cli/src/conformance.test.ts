@@ -41,21 +41,25 @@ const reference = JSON.parse(readFileSync(referencePath, 'utf8')) as Reference;
 
 /**
  * Seuil au-delà duquel un écart s'explique par des techniques que nous n'avons
- * pas encore (XY-Wing, XYZ-Wing, Skyscraper, Unique Rectangle, toutes entre 4,0
- * et 5,4). En deçà, un écart est un défaut de notre côté.
+ * pas encore : Unique Rectangle et les variantes groupées, entre 4,3 et 5,4. En
+ * deçà, un écart est un défaut de notre côté.
+ *
+ * XY-Wing, XYZ-Wing, Skyscraper et Cerf-volant figuraient dans cette liste
+ * jusqu'à l'incrément 6, qui les a implémentés.
  */
 const EXACTNESS_THRESHOLD = 4.0;
 
 /**
- * Plancher d'accord mesuré à la calibration de référence : 288 grilles sur 315
- * sous le seuil, soit 91,4 %.
+ * Plancher d'accord mesuré à la calibration de référence : 291 grilles sur 312
+ * sous le seuil, soit 93,3 % — contre 91,4 % avant l'ajout des liens forts et
+ * des wings.
  *
  * Volontairement placé un point en dessous du résultat constaté. Trop serré, il
  * casserait au moindre remaniement légitime ; trop lâche, il laisserait passer
  * une régression. L'intention est d'attraper un changement d'ordre ou de
  * détection, pas de figer un centième.
  */
-const MINIMUM_AGREEMENT = 0.9;
+const MINIMUM_AGREEMENT = 0.92;
 
 describe('conformité à l’oracle', () => {
   it('dispose d’une référence cohérente avec la version du barème en vigueur', () => {
@@ -65,7 +69,7 @@ describe('conformité à l’oracle', () => {
     expect(reference.ratingVersion).toBe(RATING_VERSION);
   });
 
-  it('garde un accord exact d’au moins 90 % sur le domaine où il est exigible', () => {
+  it('garde un accord exact d’au moins 92 % sur le domaine où il est exigible', () => {
     let comparable = 0;
     let agreeing = 0;
 

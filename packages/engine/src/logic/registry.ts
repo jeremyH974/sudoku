@@ -5,6 +5,8 @@ import { hiddenSingle } from './techniques/hiddenSingle.js';
 import { locking } from './techniques/locking.js';
 import { nakedPair, nakedQuad, nakedTriple } from './techniques/nakedSet.js';
 import { nakedSingle } from './techniques/nakedSingle.js';
+import { skyscraper, turbotFish, twoStringKite } from './techniques/strongLinks.js';
+import { xyWing, xyzWing } from './techniques/wings.js';
 import type { TechniqueEntry } from './types.js';
 
 /**
@@ -16,8 +18,10 @@ import type { TechniqueEntry } from './types.js';
  * sans qu'on puisse le détecter.
  *
  * Version 2 : ordre corrigé après calibration contre l'oracle (voir ci-dessous).
+ * Version 3 : ajout des liens forts (4,0 à 4,2) et des wings (4,2 et 4,4), qui
+ * s'intercalent entre le triplet caché et le quadruplet nu.
  */
-export const RATING_VERSION = 2;
+export const RATING_VERSION = 3;
 
 /**
  * Ordre d'essai des techniques : **par difficulté croissante**.
@@ -45,6 +49,13 @@ export const RATING_VERSION = 2;
  * Les variantes « Direct » restent groupées en tête malgré leur valeur : elles
  * aboutissent immédiatement à un placement, et leurs scores (1,7 à 2,5)
  * s'intercalent naturellement dans l'ordre croissant.
+ *
+ * Deux **ex æquo** subsistent, à 4,0 et à 4,2. À valeur égale l'ordre ne change
+ * aucune note, seulement le nom affiché quand les deux techniques s'appliquent
+ * au même moment. Faute d'avoir pu déterminer l'ordre interne de l'oracle sans
+ * lire ses sources — ce que nous nous interdisons —, les techniques ajoutées
+ * passent après celles déjà calibrées : à égalité, on ne déplace pas ce qui est
+ * déjà mesuré conforme.
  */
 export const REGISTRY: readonly TechniqueEntry[] = [
   hiddenSingle, //             1,0 · 1,2 · 1,5
@@ -58,7 +69,12 @@ export const REGISTRY: readonly TechniqueEntry[] = [
   hiddenPair, //  3,4
   nakedTriple, // 3,6
   swordfish, //   3,8
-  hiddenTriple, // 4,0
+  hiddenTriple, //   4,0
+  skyscraper, //     4,0
+  twoStringKite, //  4,1
+  turbotFish, //     4,2
+  xyWing, //         4,2
+  xyzWing, //        4,4
   nakedQuad, //   5,0
   jellyfish, //   5,2
   hiddenQuad, //  5,4

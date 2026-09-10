@@ -26,7 +26,12 @@ export type TechniqueId =
   | 'hidden-quad'
   | 'x-wing'
   | 'swordfish'
-  | 'jellyfish';
+  | 'jellyfish'
+  | 'skyscraper'
+  | 'two-string-kite'
+  | 'turbot-fish'
+  | 'xy-wing'
+  | 'xyz-wing';
 
 /** Une valeur qu'on peut poser avec certitude. */
 export interface Placement {

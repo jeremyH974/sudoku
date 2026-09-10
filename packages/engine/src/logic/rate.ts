@@ -55,13 +55,14 @@ export const LEVELS: readonly LevelInfo[] = [
     id: 'maitre',
     label: 'Maître',
     maxScore: 4.0,
-    description: 'Triplets et Swordfish : il faut tenir plusieurs déductions de front.',
+    description: 'Triplets, Swordfish et Skyscraper : il faut tenir plusieurs déductions de front.',
   },
   {
     id: 'diabolique',
     label: 'Diabolique',
     maxScore: 5.4,
-    description: 'Quadruplets et Jellyfish, aux limites de ce qui se résout sans chaînes.',
+    description:
+      'Cerf-volants, wings et quadruplets : deux déductions à relier à distance, aux limites de ce qui se résout sans chaînes.',
   },
 ];
 

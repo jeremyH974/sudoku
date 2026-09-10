@@ -54,8 +54,8 @@ de **Sudoku Explainer**, la référence du domaine.
 | **Moyen** | Single nu, variantes directes | ≤ 2,3 |
 | **Difficile** | Paires pointantes et revendiquées | ≤ 2,8 |
 | **Expert** | Paire nue, X-Wing, paire cachée | ≤ 3,4 |
-| **Maître** | Triplet nu, Swordfish, triplet caché | ≤ 4,0 |
-| **Diabolique** | Quadruplets, Jellyfish | ≤ 5,4 |
+| **Maître** | Triplet nu, Swordfish, triplet caché, Skyscraper | ≤ 4,0 |
+| **Diabolique** | Cerf-volant, Turbot Fish, XY-Wing, XYZ-Wing, quadruplets, Jellyfish | ≤ 5,4 |
 
 Repère : **les sudokus de presse plafonnent presque tous à 3,0.** Notre palier « Difficile »
 atteint déjà ce plafond.
@@ -156,7 +156,7 @@ packages/
 │  ├─ rng/       PRNG seedable — tout est reproductible depuis une graine
 │  ├─ grid/      Géométrie 9×9, masques de candidats, lecture/écriture
 │  ├─ solver/    Solveur brut : propagation de contraintes + backtracking MRV
-│  ├─ logic/     Solveur humain : 19 techniques, chemin de résolution, notation
+│  ├─ logic/     Solveur humain : 24 techniques, chemin de résolution, notation
 │  └─ generate/  Creusement à unicité garantie, puis recherche dirigée par niveau
 └─ app/          L'application Svelte 5
    └─ src/lib/   Logique de partie, grille accessible, panneau d'analyse, Worker
@@ -187,19 +187,31 @@ est **vérifiée mécaniquement** : il compile avec `lib: ["ES2023"]` seul, donc
 | Notation logique d'une grille | 0,4 à 1,6 ms | — |
 | Unicité sur « Platinum Blonde » (843 hypothèses) | 13,2 ms | 14,0 ms |
 
-Génération à niveau ciblé, taux de réussite sur 5 tentatives :
+Génération à niveau ciblé, taux de réussite sur 12 tentatives, temps médian :
 
-| Niveau | Réussite | Temps moyen |
+| Niveau | Réussite | Temps médian |
 |---|---|---|
-| Facile | 5/5 | 0,02 s |
-| Moyen | 5/5 | 0,09 s |
-| Difficile | 5/5 | 0,70 s |
-| Expert | 5/5 | 1,47 s |
-| Maître | 4/5 | 4,78 s |
-| Diabolique | 2/5 | 8,05 s |
+| Facile | 12/12 | 0,03 s |
+| Moyen | 12/12 | 0,11 s |
+| Difficile | 12/12 | 0,99 s |
+| Expert | 11/12 | 2,49 s |
+| Maître | 12/12 | 0,39 s |
+| Diabolique | 12/12 | 0,48 s |
 
-Diabolique reste aux limites du registre : quand le niveau n'est pas atteint, l'application le
-**dit** et propose la grille la plus proche, plutôt que de mal l'étiqueter.
+**Maître et Diabolique sont devenus les paliers les plus rapides à produire** — ils l'étaient
+auparavant le moins (4/5 en 4,8 s et 2/5 en 8,1 s). La raison n'est pas une optimisation mais un
+comblement : la bande 4,0 à 4,4 était vide, et la recherche devait forcer des chemins tordus pour
+y atteindre un score élevé. Cinq techniques plus tard, elle y trouve des grilles franches.
+
+Le même ajout a révélé un défaut ancien, invisible tant que l'échelle était trouée : **la marche
+locale ne connaissait pas son plafond**. Elle montait jusqu'à dépasser le plancher demandé, sans
+regarder au-dessus — et un seul échange pouvait la faire passer de 2,3 à 4,4, ruinant la
+tentative. Mesuré : à « Difficile » et « Expert », les échecs ne manquaient jamais le palier par
+en dessous, ils le dépassaient. Une fois le plafond transmis à la marche, Difficile est passé de
+10/12 à 12/12 et Expert de 9/12 à 11/12.
+
+Quand le niveau n'est pas atteint, l'application le **dit** et propose la grille la plus proche,
+plutôt que de mal l'étiqueter.
 
 ## La calibration
 
@@ -210,28 +222,44 @@ Le critère n'est pas une corrélation mais une **égalité exacte**. L'oracle p
 techniques que nous, mais il les essaie dans un ordre où les nôtres viennent en premier : pour
 une grille que notre registre résout, il devrait rendre le même nombre, pas un nombre proche.
 
-Résultat sur 317 grilles :
+Résultat sur 329 grilles, après l'ajout des liens forts et des wings :
 
-| Mesure | Valeur |
-|---|---|
-| Accord exact, toutes grilles | 288/317 — **90,9 %** |
-| Accord exact, score ≤ 4,0 | 288/315 — **91,4 %** |
-| Grilles refusées à tort | 4 (notées 4,0 à 4,4 par l'oracle) |
+| Mesure | Valeur | Avant l'incrément 6 |
+|---|---|---|
+| Accord exact, toutes grilles | 306/329 — **93,0 %** | 90,9 % |
+| Accord exact, score ≤ 4,0 | 291/312 — **93,3 %** | 91,4 % |
+| Grilles refusées à tort | **1**, notée 4,5 — un Unique Rectangle, hors registre | 4 |
+| Surévaluations | **1 sur 329**, de 0,2 point | — |
+| Même palier public annoncé que l'oracle | 319/329 — **97,0 %** | — |
+
+Le corpus ciblé change avec la notation, si bien que deux campagnes ne portent pas exactement sur
+les mêmes grilles. Comparaison faite **grille par grille sur les 291 communes** aux deux, pour
+que le progrès ne soit pas un effet d'échantillon : 4 corrigées, **0 régression**.
 
 Ce que la calibration a corrigé, et qu'aucun autre test ne pouvait révéler :
 
 - **L'ordre des techniques était faux.** Voir le tableau ci-dessus.
 - **Le garde-fou de pureté du moteur était cassé** depuis l'installation de `@types/node`, qui
   rendait `console` et `node:fs` utilisables dans `packages/engine`. Réparé par `types: []`.
+- **Cinq techniques manquaient**, et l'oracle a dit lesquelles plutôt que de nous laisser
+  deviner. Deux grilles refusées portaient un score de 4,0 — la valeur du triplet caché, que
+  nous implémentions déjà : soit il nous manquait une technique de même valeur, soit notre
+  détection était en défaut, et les deux corrections sont opposées. Interroger l'oracle avec son
+  format `%R` a tranché en une exécution : `Skyscraper`. Aucun bug, une technique absente.
 
 Trois hypothèses ont été testées puis **rejetées par la mesure**, ce qui vaut d'être noté :
 restreindre les variantes « Direct » à leur propre unité (89,3 %), les supprimer (79,5 %), et
 énumérer tous les singles au lieu du premier (89,9 %). La dernière est pourtant plus rigoureuse
 en théorie — l'oracle s'arrête donc lui aussi au premier candidat.
 
-Les 4 grilles refusées à tort sont notées 4,0 à 4,4 : elles exigent XY-Wing, XYZ-Wing ou Turbot
-Fish, absentes de notre registre. C'est exactement la zone prédite, et la piste de l'incrément
-suivant.
+Les quatre grilles alors refusées sont devenues des **cas de test nommés** : chacune doit être
+résolue au score exact de l'oracle **et sous le même nom de technique**. Un score juste par un
+chemin faux serait une coïncidence, pas une preuve.
+
+Sept divergences de l'incrément 3 dépassaient 3,4. Elles n'ont **pas** été corrigées, et c'était
+prévisible : renotées à l'identique, 0 sur 7. Elles n'emploient que des techniques que nous
+avions déjà — elles viennent de chemins qui bifurquent, pas d'une lacune du registre. C'est un
+problème distinct, et le dire vaut mieux que de laisser croire que l'ajout l'a réglé.
 
 **La conformité est tenue par un test**, pas par ce rapport : `corpus/oracle-reference.json`
 fige les verdicts de l'oracle grille par grille, et la CI rejoue la comparaison **sans Java**.
@@ -249,40 +277,67 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
 - **Aucune limite d'erreurs**, annulation illimitée qui restaure aussi les notes.
 - **La couleur n'est jamais le seul porteur d'information.**
 
-## Hors ligne : en place, mais non vérifié
+## Hors ligne : vérifié
 
-Le service worker est configuré (précaching complet, 14 entrées, 174 Kio), le manifeste est
-valide, les icônes sont générées, et la mise à jour passe par une bannière plutôt que par un
-rechargement forcé — recharger la page sous les doigts de quelqu'un en train de résoudre une
-grille est brutal.
+L'application démarre et se joue **sans réseau**. Ce n'est plus une intention : la vérification a
+été faite dans un vrai Chrome, sur un build de production servi par `vite preview`, en coupant le
+serveur avant de recharger. Relevé depuis la page elle-même, serveur arrêté :
 
-**Mais l'enregistrement du service worker n'a pas pu être constaté.** Dans le navigateur
-automatisé utilisé pendant le développement, `navigator.serviceWorker.register('/sw.js')` échoue
-avec un laconique « unknown error when fetching the script », alors que le fichier est servi en
-`200` avec le bon type MIME, qu'il n'a aucune dépendance externe, et que le service worker de
-*développement* s'enregistrait, lui, sans difficulté. La cause n'a pas été identifiée depuis cet
-environnement.
+| Contrôle | Relevé |
+|---|---|
+| Requête réseau depuis la page | `TypeError: Failed to fetch` — le serveur est bien coupé |
+| Service worker | `activated`, portée `/`, script `/sw.js` |
+| Page servie par le service worker | oui (`navigator.serviceWorker.controller`) |
+| Entrées en cache | 10 |
+| Grille rendue | 81 cases |
 
-Autrement dit : le code suit les pratiques établies et le build produit ce qu'il faut, mais
-**personne n'a encore vu l'application démarrer sans réseau**. À vérifier dans un vrai navigateur :
+Le précache couvre l'intégralité de l'application : le HTML, la feuille de style, le bundle, le
+Worker du moteur, le manifeste et les quatre icônes. À ce format — une cinquantaine de kilo-octets
+compressés, moteur compris — il n'y a rien à arbitrer entre ce qu'on met en cache et ce qu'on
+laisse au réseau : il n'y a aucun réseau à solliciter une fois la page chargée. La mise à jour
+passe par une bannière plutôt que par un rechargement forcé, car recharger la page sous les doigts
+de quelqu'un en train de résoudre une grille est brutal.
 
-```bash
-pnpm build && pnpm --filter @sudoku/app exec vite preview
-```
+### Ce qui avait bloqué la vérification pendant deux incréments
 
-puis, dans l'onglet Application des outils de développement, contrôler que le service worker
-s'active — avant de couper le réseau et de recharger.
+`navigator.serviceWorker.register()` échouait dans le navigateur automatisé du poste de
+développement avec un laconique « unknown error when fetching the script » — alors que le fichier
+était servi en `200`, avec le bon type MIME, sans dépendance externe.
+
+Le diagnostic tenait en une expérience : enregistrer un service worker **de 44 octets**, sans
+logique ni import, servi par le même serveur. Il échoue exactement de la même manière, tandis que
+la page récupère ce même fichier par `fetch()` sans difficulté. L'enregistrement est donc bloqué
+par l'environnement, quel que soit le script — ce n'était ni notre code, ni notre build, ni notre
+serveur. Reproduire le test dans un navigateur ordinaire l'a confirmé du premier coup.
+
+À retenir : un contre-exemple minimal tranche là où l'acharnement sur le vrai fichier ne mène
+nulle part.
 
 Deux détails appris en chemin, consignés dans `vite.config.ts` : le service worker de
 développement est **désactivé**, car il survit à l'arrêt du serveur et sert ensuite un cache
 périmé sans rien indiquer ; et le runtime Workbox est **intégré** au service worker plutôt que
 chargé à part, pour réduire le nombre de pièces mobiles au démarrage.
 
+Pour refaire la vérification :
+
+```bash
+pnpm build && pnpm --filter @sudoku/app exec vite preview
+```
+
 ## Suite
 
-**Les techniques manquantes** : les 4 grilles refusées à tort de la calibration réclament XY-Wing
-(4,2), XYZ-Wing (4,4), Skyscraper et Turbot Fish. Et **la vérification hors ligne** ci-dessus,
-qui demande un vrai navigateur. Elles sont purement additives — le registre est fait pour
-ça — et devraient à la fois combler ces refus et resserrer l'accord au-dessus de 4,0.
+Ce qui reste ouvert, par ordre de valeur :
+
+- **Les chemins qui bifurquent.** Le registre ne manque plus de technique sous 4,5, mais notre
+  chemin de résolution et celui de l'oracle divergent parfois dès les premières étapes, et le
+  score pic s'en ressent. Les divergences restantes se concentrent sur les variantes « Direct » :
+  17 des 23 écarts viennent de là, et toujours dans le même sens — nous notons trop bas.
+- **Unique Rectangle** (4,5 et au-delà) : la seule grille encore refusée à tort en réclame une.
+  Famille distincte, fondée sur l'unicité de la solution plutôt que sur l'élimination directe.
+- **Progression, défi quotidien, statistiques**, dont la sauvegarde est déjà le socle.
+- **Finition mobile** : saisie des candidats, réglage « gros caractères ».
+
+Écarté sur preuve, pas par oubli : **W-Wing** n'apparaît nulle part dans l'oracle. L'implémenter
+nous ferait diverger sans aucune référence à laquelle nous comparer.
 
 Le plan complet est dans `docs/plan.md`.

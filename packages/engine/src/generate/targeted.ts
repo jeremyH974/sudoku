@@ -122,6 +122,19 @@ const WANDER_LENGTH = 12;
  * D'où le vagabondage décrit par Daniel Beer : après une série d'échecs, on
  * accepte quelques échanges dégradants, puis on repart du meilleur point connu.
  * Le meilleur est conservé à part, jamais perdu.
+ *
+ * ─── Pourquoi la marche connaît aussi son plafond ───────────────────────────
+ *
+ * Monter sans regarder au-dessus de soi paraît inoffensif : on s'arrête dès que
+ * le plancher est franchi. Ce n'est vrai que si les paliers sont espacés. Dès
+ * que l'échelle se resserre — l'ajout des liens forts et des wings a rempli la
+ * bande 4,0 à 4,4 — un seul échange peut faire passer de 2,3 à 4,4, très
+ * au-dessus du niveau demandé. La tentative entière est alors perdue.
+ *
+ * Mesuré : à « Difficile » et « Expert », les échecs ne manquaient jamais le
+ * palier par en dessous, ils le **dépassaient**, toujours en atterrissant à 4,4.
+ * Une grille au-dessus du plafond est donc traitée ici comme un cul-de-sac, au
+ * même titre qu'une grille que le registre ne sait pas résoudre.
  * ───────────────────────────────────────────────────────────────────────────
  */
 function climb(
@@ -130,6 +143,7 @@ function climb(
   groups: readonly (readonly number[])[],
   rng: Rng,
   targetFloor: number,
+  targetCeiling: number,
   maxSwaps: number,
   deadline: number,
 ): { grid: Grid; rating: Rating } {
@@ -150,6 +164,9 @@ function climb(
     // Une grille que le registre ne sait pas résoudre est un cul-de-sac : on ne
     // pourrait pas l'étiqueter honnêtement.
     if (candidateRating.outcome !== 'solved') continue;
+    // Au-dessus du palier demandé, c'en est un autre : la marche s'y engagerait
+    // sans pouvoir redescendre, et l'échange serait perdu.
+    if (candidateRating.score > targetCeiling) continue;
 
     const wandering = sinceImprovement >= WANDER_AFTER;
     if (candidateRating.score >= currentRating.score || wandering) {
@@ -211,7 +228,7 @@ export function generateAtLevel(options: GenerateAtLevelOptions): LeveledPuzzle 
     // Trop facile : on tente de faire monter le score par échanges plutôt que
     // de repartir de zéro, beaucoup plus coûteux à niveau élevé.
     if (rating.outcome !== 'solved' || rating.score <= floor) {
-      const climbed = climb(grid, solution, groups, rng, floor, maxSwaps, deadline);
+      const climbed = climb(grid, solution, groups, rng, floor, ceiling, maxSwaps, deadline);
       grid = climbed.grid;
       rating = climbed.rating;
     }
@@ -229,8 +246,11 @@ export function generateAtLevel(options: GenerateAtLevelOptions): LeveledPuzzle 
           exact: true,
         };
       }
-      // On garde la tentative la plus proche du palier visé, par en dessous.
-      if (best === null || rating.score > best.rating.score) {
+      // On garde la tentative la plus proche du palier visé, par en dessous —
+      // ce que le commentaire annonçait déjà, mais que le code ne faisait pas :
+      // sans la borne, une grille très au-dessus du plafond devenait la
+      // « meilleure » et interdisait à toutes les suivantes de la remplacer.
+      if (rating.score <= ceiling && (best === null || rating.score > best.rating.score)) {
         best = { grid, solution, rating };
       }
     }
