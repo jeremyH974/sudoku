@@ -3,9 +3,9 @@
 Générateur et jeu de Sudoku **sans rien à installer** : tout tourne dans le navigateur.
 Aucune publicité, aucun compte, aucun suivi, aucune requête réseau après le chargement.
 
-> **État : incrément 4 terminé.** Le studio d'impression produit des cahiers avec corrigés
-> détachables, et chaque grille imprimée porte un QR code qui la rouvre à l'écran — la même
-> grille, avec la même difficulté calibrée.
+> **État : incrément 5 terminé.** La partie en cours survit à la fermeture de l'onglet, et
+> l'application est installable avec un service worker qui met tout en cache.
+> ⚠️ Le fonctionnement hors ligne **n'a pas pu être vérifié** — voir la réserve plus bas.
 
 ## Démarrer
 
@@ -75,6 +75,24 @@ la technique employée. Ici la révélation est graduée :
 
 L'indice part de **l'état réel de la partie**, pas de la grille de départ. Si une valeur posée
 est fausse — même sans conflit visible — il le dit plutôt que de conseiller dans le vide.
+
+## La partie est sauvegardée
+
+Fermer l'onglet et revenir plus tard ne coûte rien : grille, saisies, notes, historique
+d'annulation et case sélectionnée sont conservés. La perte de progression est la huitième
+douleur relevée chez les joueurs de sudoku ; elle n'a pas lieu d'être.
+
+`localStorage` plutôt qu'IndexedDB : une partie tient dans quelques centaines d'octets, et le
+stockage synchrone garantit que l'état est là **avant le premier rendu**, sans scintillement.
+IndexedDB imposerait un schéma, des migrations et de l'asynchrone pour un besoin qui tient en une
+ligne — il se justifiera le jour où l'on stockera une bibliothèque ou des statistiques.
+
+Trois règles tenues : le format est **versionné** (une sauvegarde d'une autre version est ignorée,
+jamais devinée), tout accès est enveloppé dans un `try` (en navigation privée, la simple lecture
+lève), et une sauvegarde corrompue fait repartir sur une partie neuve plutôt que de planter.
+
+L'écriture est **différée** de 400 ms, avec un enregistrement immédiat quand l'onglet passe en
+arrière-plan : sauvegarder à chaque frappe sérialiserait la partie des dizaines de fois par minute.
 
 ## Le thème
 
@@ -231,12 +249,40 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
 - **Aucune limite d'erreurs**, annulation illimitée qui restaure aussi les notes.
 - **La couleur n'est jamais le seul porteur d'information.**
 
+## Hors ligne : en place, mais non vérifié
+
+Le service worker est configuré (précaching complet, 14 entrées, 174 Kio), le manifeste est
+valide, les icônes sont générées, et la mise à jour passe par une bannière plutôt que par un
+rechargement forcé — recharger la page sous les doigts de quelqu'un en train de résoudre une
+grille est brutal.
+
+**Mais l'enregistrement du service worker n'a pas pu être constaté.** Dans le navigateur
+automatisé utilisé pendant le développement, `navigator.serviceWorker.register('/sw.js')` échoue
+avec un laconique « unknown error when fetching the script », alors que le fichier est servi en
+`200` avec le bon type MIME, qu'il n'a aucune dépendance externe, et que le service worker de
+*développement* s'enregistrait, lui, sans difficulté. La cause n'a pas été identifiée depuis cet
+environnement.
+
+Autrement dit : le code suit les pratiques établies et le build produit ce qu'il faut, mais
+**personne n'a encore vu l'application démarrer sans réseau**. À vérifier dans un vrai navigateur :
+
+```bash
+pnpm build && pnpm --filter @sudoku/app exec vite preview
+```
+
+puis, dans l'onglet Application des outils de développement, contrôler que le service worker
+s'active — avant de couper le réseau et de recharger.
+
+Deux détails appris en chemin, consignés dans `vite.config.ts` : le service worker de
+développement est **désactivé**, car il survit à l'arrêt du serveur et sert ensuite un cache
+périmé sans rien indiquer ; et le runtime Workbox est **intégré** au service worker plutôt que
+chargé à part, pour réduire le nombre de pièces mobiles au démarrage.
+
 ## Suite
 
-Deux chantiers ouverts. **La PWA hors-ligne** : le service worker manque, si bien que recharger la
-page sans réseau échoue — la promesse « rien à installer » n'est pas encore tenue au sens fort.
 **Les techniques manquantes** : les 4 grilles refusées à tort de la calibration réclament XY-Wing
-(4,2), XYZ-Wing (4,4), Skyscraper et Turbot Fish. Elles sont purement additives — le registre est fait pour
+(4,2), XYZ-Wing (4,4), Skyscraper et Turbot Fish. Et **la vérification hors ligne** ci-dessus,
+qui demande un vrai navigateur. Elles sont purement additives — le registre est fait pour
 ça — et devraient à la fois combler ces refus et resserrer l'accord au-dessus de 4,0.
 
 Le plan complet est dans `docs/plan.md`.

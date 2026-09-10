@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Sudoku">
+  <title>Sudoku</title>
+  <!--
+    Icône volontairement réduite à un damier de 3×3, et non à une grille de 9×9.
+
+    À 48 pixels — la taille réelle sur un écran d'accueil — quatre-vingt-une
+    cases ne forment plus qu'un aplat gris. Trois bandes larges restent lisibles
+    à toutes les tailles, et le motif diagonal des cases pleines évoque un
+    remplissage en cours plutôt qu'une grille vide.
+
+    Marge de 96 unités sur 512, soit 18 % : le contenu tient dans la zone sûre
+    des icônes « maskable », que les lanceurs Android rognent en cercle.
+  -->
+  <rect width="512" height="512" rx="96" fill="#1f4e8c" />
+
+  <g transform="translate(96 96)">
+    <!-- Cases pleines, disposées en diagonale pour suggérer une progression. -->
+    <g fill="#ffffff" opacity="0.28">
+      <rect x="0" y="0" width="104" height="104" rx="8" />
+      <rect x="108" y="108" width="104" height="104" rx="8" />
+      <rect x="216" y="216" width="104" height="104" rx="8" />
+    </g>
+
+    <!-- Les traits de séparation, épais pour rester visibles en très petit. -->
+    <g stroke="#ffffff" stroke-width="10" stroke-linecap="round">
+      <line x1="104" y1="4" x2="104" y2="316" />
+      <line x1="212" y1="4" x2="212" y2="316" />
+      <line x1="4" y1="104" x2="316" y2="104" />
+      <line x1="4" y1="212" x2="316" y2="212" />
+    </g>
+
+    <rect
+      x="0"
+      y="0"
+      width="320"
+      height="320"
+      rx="12"
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="14"
+    />
+  </g>
+</svg>

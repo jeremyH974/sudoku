@@ -17,6 +17,8 @@ import {
 } from '@sudoku/engine';
 import type { Level, LeveledPuzzle, Rating, Step, Symmetry } from '@sudoku/engine';
 import { engine } from './engineClient.js';
+import { toSnapshot } from './storage.js';
+import type { GameSnapshot, RestoredGame } from './storage.js';
 
 /** Un coup annulé : on restaure la valeur ET les notes précédentes. */
 interface Move {
@@ -169,6 +171,46 @@ export class Game {
       exact: rating.level !== null,
     });
     return true;
+  }
+
+  /** Instantané sérialisable de la partie, pour la sauvegarde. */
+  snapshot(): GameSnapshot {
+    return toSnapshot({
+      puzzle: this.puzzle,
+      solution: this.solution,
+      values: this.values,
+      notes: this.notes,
+      history: this.history,
+      selected: this.selected,
+      rating: this.rating,
+      seed: this.seed,
+      clues: this.clues,
+    });
+  }
+
+  /**
+   * Reprend une partie sauvegardée.
+   *
+   * La notation est **recalculée** plutôt que restaurée : elle contient tout le
+   * chemin de résolution, bien trop volumineux pour être écrit à chaque coup,
+   * alors qu'il se recalcule en une milliseconde. Même raisonnement que pour une
+   * grille ouverte depuis un code imprimé.
+   */
+  restoreFrom(saved: RestoredGame): void {
+    this.puzzle = [...saved.puzzle];
+    this.solution = [...saved.solution];
+    this.values = [...saved.values];
+    this.notes = [...saved.notes];
+    this.history = saved.history.map((move) => ({ ...move }));
+    this.selected = saved.selected;
+    this.seed = saved.seed;
+    this.clues = saved.clues;
+    this.clearHint();
+
+    const rating = rate(Uint8Array.from(saved.puzzle));
+    this.rating = rating;
+    this.level = rating.level ?? saved.level;
+    this.levelIsExact = rating.level !== null;
   }
 
   select(cell: number): void {

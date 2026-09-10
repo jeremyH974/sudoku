@@ -6,6 +6,8 @@
   import AnalysisPanel from './lib/AnalysisPanel.svelte';
   import PrintStudio from './print/PrintStudio.svelte';
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
+  import { loadGame, requestPersistence, saveGame } from './lib/storage.js';
+  import UpdateBanner from './lib/UpdateBanner.svelte';
 
   const game = new Game();
 
@@ -93,7 +95,57 @@
     };
   });
 
-  if (!openFromUrl()) void newPuzzle();
+  /**
+   * Au démarrage, dans l'ordre : un code d'URL, puis une partie sauvegardée,
+   * puis seulement une grille neuve.
+   *
+   * Cet ordre n'est pas arbitraire. Quelqu'un qui scanne un QR veut cette
+   * grille-là ; quelqu'un qui revient veut retrouver la sienne ; personne ne
+   * veut voir sa partie remplacée par une autre au simple fait d'avoir rouvert
+   * l'onglet — c'est le reproche récurrent fait aux applications existantes.
+   */
+  function start(): void {
+    if (openFromUrl()) return;
+
+    const saved = loadGame();
+    if (saved !== null) {
+      game.restoreFrom(saved);
+      announcement = 'Partie précédente restaurée.';
+      return;
+    }
+    void newPuzzle();
+  }
+
+  /**
+   * Sauvegarde différée.
+   *
+   * L'effet se réexécute à chaque changement de la partie et annule le report
+   * précédent : écrire à chaque frappe sérialiserait l'état des dizaines de fois
+   * par minute, pour un résultat identique. Un report court suffit, et
+   * `visibilitychange` garantit une écriture au moment où l'onglet passe en
+   * arrière-plan — le seul instant où l'on est sûr de ne pas être interrompu.
+   */
+  $effect(() => {
+    const snapshot = game.snapshot();
+    if (game.generating) return;
+
+    const timer = setTimeout(() => {
+      saveGame(snapshot);
+    }, 400);
+
+    const flush = (): void => {
+      if (document.visibilityState === 'hidden') saveGame(snapshot);
+    };
+    document.addEventListener('visibilitychange', flush);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', flush);
+    };
+  });
+
+  void requestPersistence();
+  start();
 </script>
 
 <main>
@@ -119,6 +171,8 @@
       {/each}
     </div>
   </header>
+
+  <div class="no-print"><UpdateBanner /></div>
 
   <nav class="tabs no-print" role="tablist" aria-label="Sections">
     <button

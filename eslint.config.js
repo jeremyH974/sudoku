@@ -7,6 +7,8 @@ export default tseslint.config(
       '**/dist/**',
       '**/node_modules/**',
       '**/coverage/**',
+      // Service worker et enregistreur produits par le plugin PWA.
+      '**/dev-dist/**',
       // Les composants Svelte sont verifies par svelte-check, qui comprend
       // leur syntaxe ; typescript-eslint ne sait pas les parser sans plugin.
       '**/*.svelte',
