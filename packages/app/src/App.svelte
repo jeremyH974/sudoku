@@ -95,9 +95,10 @@
       return;
     }
     records = loadRecords();
-    announcement = record.daily === null
-      ? 'Grille terminée, aucune erreur.'
-      : `Défi du ${record.daily} résolu.`;
+    const what = record.daily === null ? 'Grille terminée' : `Défi du ${record.daily} résolu`;
+    announcement = `${what} en ${formatClock(game.clock.elapsedMs)}${
+      record.mistakes === 0 ? ', sans une seule erreur' : ''
+    }.`;
   };
 
   void loadDailyCorpus().then((loaded) => {
@@ -320,7 +321,12 @@
             {formatClock(game.clock.elapsedMs)}
           </span>
           {#if game.isComplete}
-            Grille terminée, aucune erreur.
+            <!--
+              « sans une seule erreur » ne se dit que si c'est vrai du parcours,
+              pas seulement de l'état final : une grille complète est forcément
+              juste, ce qui rendrait la mention creuse.
+            -->
+            Grille terminée{game.mistakes === 0 ? ' sans une seule erreur' : ''}.
           {:else}
             {game.filledCount} / 81 cases remplies{game.conflicts.size > 0
               ? ` — ${String(game.conflicts.size)} en conflit`
@@ -328,6 +334,17 @@
           {/if}
           {#if game.daily !== null}
             <span class="badge">Défi du {game.daily}</span>
+          {/if}
+          {#if game.mistakes > 0}
+            <!--
+              Constaté, jamais reproché : il n'y a aucune limite d'erreurs dans
+              ce jeu, et ce compteur n'en est pas le début.
+            -->
+            <span class="muted-inline"
+              >{game.mistakes} valeur{game.mistakes > 1 ? 's' : ''} fausse{game.mistakes > 1
+                ? 's'
+                : ''} saisie{game.mistakes > 1 ? 's' : ''}</span
+            >
           {/if}
         </p>
 
@@ -605,6 +622,11 @@
     font-weight: 600;
     /* Largeur fixe : sans cela le compteur tressaute à chaque seconde. */
     font-variant-numeric: tabular-nums;
+  }
+
+  .muted-inline {
+    font-size: 0.82rem;
+    color: var(--text-faint);
   }
 
   .badge {
