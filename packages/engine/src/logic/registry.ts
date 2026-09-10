@@ -20,8 +20,10 @@ import type { TechniqueEntry } from './types.js';
  * Version 2 : ordre corrigé après calibration contre l'oracle (voir ci-dessous).
  * Version 3 : ajout des liens forts (4,0 à 4,2) et des wings (4,2 et 4,4), qui
  * s'intercalent entre le triplet caché et le quadruplet nu.
+ * Version 4 : les variantes « Direct » ne reconnaissent plus qu'un single
+ * caché, jamais un single nu (voir `techniques/direct.ts`).
  */
-export const RATING_VERSION = 3;
+export const RATING_VERSION = 4;
 
 /**
  * Ordre d'essai des techniques : **par difficulté croissante**.

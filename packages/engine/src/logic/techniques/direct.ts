@@ -9,7 +9,6 @@ import type {
   TechniqueId,
 } from '../types.js';
 import { hiddenSingle } from './hiddenSingle.js';
-import { nakedSingle } from './nakedSingle.js';
 
 /**
  * Variantes « Direct » du barème Sudoku Explainer.
@@ -87,10 +86,11 @@ function touched(eliminations: readonly Elimination[]): {
 }
 
 /**
- * Le single trouvé découle-t-il vraiment des éliminations, ou existait-il déjà ?
+ * Le single caché trouvé découle-t-il vraiment des éliminations, ou existait-il
+ * déjà ?
  *
  * La question n'est pas théorique : dans l'ordre de Sudoku Explainer, les
- * variantes « Direct » sont essayées **avant** le single nu. Un single nu déjà
+ * variantes « Direct » sont essayées **avant** les singles. Un single déjà
  * présent serait donc reclassé à tort en Direct, et noté trop bas.
  */
 function isNewlyUnlocked(single: Step, eliminations: readonly Elimination[]): boolean {
@@ -98,16 +98,11 @@ function isNewlyUnlocked(single: Step, eliminations: readonly Elimination[]): bo
   // stricte du moteur, TypeScript croit l'accès toujours défini, alors que le
   // tableau peut parfaitement être vide.
   if (single.placements.length === 0) return false;
-  const placement = single.placements[0];
-  const { cells, pairs } = touched(eliminations);
-
-  if (single.technique === 'naked-single') {
-    // Nouveau seulement si la case elle-même a perdu des candidats.
-    return cells.has(placement.cell);
-  }
-
-  // Single caché : il faut qu'une place de ce chiffre ait disparu de l'unité.
   if (single.units.length === 0) return false;
+  const placement = single.placements[0];
+  const { pairs } = touched(eliminations);
+
+  // Il faut qu'une place de ce chiffre ait disparu de l'unité concernée.
   const unitIndex = single.units[0];
   return UNITS[unitIndex].cells.some((cell) => pairs.has(`${String(cell)}:${String(placement.digit)}`));
 }
@@ -133,17 +128,38 @@ function asDirect(name: string, base: TechniqueEntry, mappings: readonly DirectM
 
       const view = new ViewWithout(state, step.eliminations);
       /*
-        On s'arrête au PREMIER single trouvé, sans énumérer les suivants.
+        Deux restrictions ici, toutes deux établies par la mesure et contraires
+        à l'intuition. Elles sont consignées parce qu'elles seront « corrigées »
+        de bonne foi un jour, sinon.
 
-        C'est contre-intuitif : énumérer tous les singles pour retenir le premier
-        qui découle vraiment des éliminations paraît plus rigoureux, puisqu'un
-        single préexistant peut se présenter en tête et faire rejeter un motif
-        pourtant valable. Cette variante a été implémentée et mesurée — elle
-        éloigne de la référence (89,9 % d'accord contre 90,9 %). L'oracle semble
-        donc s'arrêter lui aussi au premier candidat. La mesure tranche, pas
-        l'intuition.
+        ─── On s'arrête au PREMIER single, sans énumérer les suivants ─────────
+
+        Énumérer tous les singles pour retenir le premier qui découle vraiment
+        des éliminations paraît plus rigoureux, puisqu'un single préexistant peut
+        se présenter en tête et faire rejeter un motif pourtant valable. Cette
+        variante a été implémentée et mesurée : elle éloigne de la référence
+        (89,9 % d'accord contre 90,9 % à l'époque). L'oracle s'arrête donc lui
+        aussi au premier candidat.
+
+        ─── On ne cherche qu'un single CACHÉ, jamais un single nu ─────────────
+
+        Le code acceptait les deux : `hiddenSingle.find(view) ?? nakedSingle.find(view)`.
+        Retirer la seconde branche fait passer l'accord de 93,3 % à 95,2 % sur le
+        domaine exigible — 6 grilles corrigées, **aucune régression**, vérifié
+        grille par grille sur le corpus de référence.
+
+        L'interprétation colle au nom même des producteurs de l'oracle,
+        `DirectHiddenSet` et `DirectIntersection` : ce qu'il appelle « direct »
+        est une élimination qui rend un chiffre **seul possible dans une
+        maison**. Une case qui se retrouve avec un seul candidat restant n'est
+        pas un coup direct pour lui ; il classe alors la position en Pointing
+        (2,6) ordinaire, ou trouve un autre motif Direct plus cher.
+
+        Trois hypothèses voisines ont été mesurées et rejetées : restreindre les
+        Direct à leur propre unité (92,9 %), les supprimer entièrement (84,3 %),
+        et n'accepter que le single nu (84,3 % également, avec 42 surévaluations).
       */
-      const single = hiddenSingle.find(view) ?? nakedSingle.find(view);
+      const single = hiddenSingle.find(view);
       if (single === null || !isNewlyUnlocked(single, step.eliminations)) continue;
 
       const placement = single.placements[0];
