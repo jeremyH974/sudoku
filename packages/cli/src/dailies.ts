@@ -1,6 +1,14 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { LEVELS, encodeGrid, generateAtLevel, hasUniqueSolution, rate } from '@sudoku/engine';
+import {
+  LEVELS,
+  RATING_VERSION,
+  encodeGrid,
+  generateAtLevel,
+  hasUniqueSolution,
+  rate,
+  tryDecodeGrid,
+} from '@sudoku/engine';
 import type { Level } from '@sudoku/engine';
 
 /**
@@ -65,8 +73,14 @@ interface Corpus {
 interface Verification {
   generatedAt: string;
   ratingVersion: number;
-  /** Jour civil → score attendu par niveau. */
-  scores: Record<string, number[]>;
+  /**
+   * Jour civil → score attendu par niveau.
+   *
+   * `| undefined` comme pour `Corpus.days`, et pour la même raison : indexer par
+   * une clé absente rend `undefined` à l'exécution, et sans cette mention le
+   * linter réclamerait le retrait de la garde qui protège de ce cas.
+   */
+  scores: Record<string, number[] | undefined>;
 }
 
 const pad = (value: number, width = 2): string => String(value).padStart(width, '0');
@@ -156,13 +170,70 @@ function main(): void {
     wanted.push(dayKey(date));
   }
 
-  const missing = wanted.filter((day) => (corpus.days[day]?.length ?? 0) !== levels.length);
+  /*
+    Un créneau est « à refaire » s'il est absent **ou** si la grille qu'il porte
+    n'a plus le niveau qu'il annonce.
+
+    Ce second cas n'est pas théorique : un changement de barème déplace des
+    grilles d'un palier. L'incrément 9 en a bougé une sur vingt-deux. Vérifier
+    plutôt que se fier à la présence permet de ne refaire que ces créneaux-là et
+    de laisser les autres intacts — un corpus qui se réécrirait en entier à
+    chaque version se retéléchargerait en entier à chaque mise à jour.
+  */
+  const slotsToRedo = new Map<string, number[]>();
+  let refreshed = 0;
+  for (const day of wanted) {
+    const codes = corpus.days[day] ?? [];
+    const wrong: number[] = [];
+    const scores: number[] = [];
+    levels.forEach((level, index) => {
+      const code = codes.at(index);
+      const grid = code === undefined || code === '' ? null : tryDecodeGrid(code);
+      if (grid === null) {
+        wrong.push(index);
+        scores.push(0);
+        return;
+      }
+      const rating = rate(grid);
+      if (rating.outcome !== 'solved' || rating.level !== level) wrong.push(index);
+      scores.push(rating.score);
+    });
+
+    /*
+      Les étiquettes se rafraîchissent, les grilles ne bougent pas.
+
+      Un changement de barème déplace des scores sans forcément changer de
+      palier : la grille reste au bon créneau, seul le nombre attendu par le
+      fichier de vérification est périmé. Le recalculer ici évite de régénérer
+      une grille parfaitement valide — et c'est très exactement la règle que ce
+      corpus s'est donnée.
+    */
+    if (wrong.length === 0 && codes.length === levels.length) {
+      const previous = verification.scores[day];
+      if (previous === undefined || previous.some((value, i) => value !== scores.at(i))) {
+        verification.scores[day] = scores;
+        refreshed++;
+      }
+    } else {
+      slotsToRedo.set(day, wrong);
+    }
+  }
+  const missing = [...slotsToRedo.keys()];
+  const slotCount = [...slotsToRedo.values()].reduce((n, list) => n + list.length, 0);
   console.log(
     `Corpus quotidien : ${String(Object.keys(corpus.days).length)} jours déjà présents, ` +
-      `${String(missing.length)} à produire (${String(levels.length)} grilles par jour).`,
+      `${String(missing.length)} jour(s) à retoucher, ${String(slotCount)} créneau(x) à produire, ` +
+      `${String(refreshed)} jour(s) dont les scores attendus ont changé.`,
   );
   if (missing.length === 0) {
-    console.log('Rien à faire.');
+    if (refreshed > 0) {
+      verification.generatedAt = new Date().toISOString();
+      verification.ratingVersion = RATING_VERSION;
+      writeJson(verificationPath, { ...verification, scores: sortRecord(verification.scores) });
+      console.log(`Étiquettes rafraîchies : ${verificationPath}`);
+    } else {
+      console.log('Rien à faire.');
+    }
     return;
   }
 
@@ -171,21 +242,27 @@ function main(): void {
   let failures = 0;
 
   for (const day of missing) {
-    const codes: string[] = [];
-    const scores: number[] = [];
+    const codes = [...(corpus.days[day] ?? [])];
+    const scores = [...(verification.scores[day] ?? [])];
+    while (codes.length < levels.length) codes.push('');
+    while (scores.length < levels.length) scores.push(0);
 
-    for (const level of levels) {
-      const produced = generateExact(level, `daily-${day}-${level}`);
+    for (const index of slotsToRedo.get(day) ?? []) {
+      const level = levels.at(index);
+      if (level === undefined) continue;
+      // La graine porte le rang de la retouche : sans cela, régénérer un créneau
+      // redonnerait la grille qui vient d'être écartée.
+      const produced = generateExact(level, `daily-${day}-${level}-v${String(RATING_VERSION)}`);
       if (produced === null) {
         failures++;
-        console.log(`  ⚠ ${day} · ${level} : niveau non atteint, jour laissé incomplet.`);
-        break;
+        console.log(`  ⚠ ${day} · ${level} : niveau non atteint, créneau laissé en l'état.`);
+        continue;
       }
-      codes.push(produced.code);
-      scores.push(produced.score);
+      codes[index] = produced.code;
+      scores[index] = produced.score;
     }
 
-    if (codes.length === levels.length) {
+    if (codes.every((code) => code !== '')) {
       corpus.days[day] = codes;
       verification.scores[day] = scores;
     }
@@ -193,7 +270,7 @@ function main(): void {
     // Écriture après chaque jour : une interruption ne perd rien.
     done++;
     verification.generatedAt = new Date().toISOString();
-    verification.ratingVersion = rate(new Uint8Array(81)).ratingVersion;
+    verification.ratingVersion = RATING_VERSION;
     writeJson(corpusPath, sortDays(corpus));
     writeJson(verificationPath, { ...verification, scores: sortRecord(verification.scores) });
 

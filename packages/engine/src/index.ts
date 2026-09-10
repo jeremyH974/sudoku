@@ -11,3 +11,4 @@ export * from './solver/index.js';
 export * from './generate/index.js';
 export * from './logic/index.js';
 export * from './io/index.js';
+export * from './rating/index.js';

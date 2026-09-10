@@ -52,17 +52,27 @@ describe('corpus des leçons', () => {
     expect(Object.keys(corpus.grids)).toHaveLength(TECHNIQUE_CATALOGUE.length);
   });
 
-  it('n’a besoin d’aucune exception : les vingt-quatre ont un exercice', () => {
+  it('n’a qu’une seule technique sans exercice, et l’oracle est d’accord', () => {
     /*
-      Ce chiffre est une **mesure**, pas une intention. Deux sondes préparatoires
-      avaient conclu que le quadruplet nu était hors d'atteinte — zéro occurrence
-      sur ~22 000 échanges. La génération complète, qui insiste sur plusieurs
-      graines et renonce à la symétrie, en produit trois en 55 secondes. Si une
-      évolution du registre rendait une technique inatteignable, ce test le dirait
-      au lieu de laisser l'interface perdre une leçon en silence.
+      Cette liste est une **mesure**, pas une intention.
+
+      À l'incrément 8, les vingt-quatre avaient un exercice — après que deux
+      sondes préparatoires eurent conclu à tort que le quadruplet nu était hors
+      d'atteinte. L'incrément 9 a resserré les variantes « Direct » et la paire
+      revendiquée directe est devenue introuvable : 4 000 tentatives, les deux
+      symétries, trois minutes chacune, rien.
+
+      Ce n'est pas une perte, c'est un **accord**. Sur les 335 grilles du corpus
+      d'oracle, Sudoku Explainer ne rapporte lui non plus **aucune** « Direct
+      Claiming » — là où il rapporte quatre « Direct Pointing » et trente
+      « Direct Hidden Pair ». Ne pas savoir en fabriquer, c'est se comporter
+      comme la référence.
+
+      Si une évolution du registre en rendait une autre inatteignable, ce test le
+      dirait au lieu de laisser l'interface perdre une leçon en silence.
     */
     const empty = TECHNIQUE_CATALOGUE.filter((info) => (corpus.grids[info.id] ?? []).length === 0);
-    expect(empty.map((info) => info.id)).toEqual([]);
+    expect(empty.map((info) => info.id)).toEqual(['direct-claiming']);
   });
 
   it('livre des grilles décodables, à solution unique, résolues sans deviner', () => {

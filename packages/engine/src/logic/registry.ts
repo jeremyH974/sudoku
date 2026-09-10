@@ -22,8 +22,11 @@ import type { TechniqueEntry, TechniqueId } from './types.js';
  * s'intercalent entre le triplet caché et le quadruplet nu.
  * Version 4 : les variantes « Direct » ne reconnaissent plus qu'un single
  * caché, jamais un single nu (voir `techniques/direct.ts`).
+ * Version 5 : ce single doit en outre être trouvé dans une boîte, ou dans l'une
+ * des maisons que nomme le motif de base — trouvé ailleurs, l'oracle ne crédite
+ * pas de coup direct.
  */
-export const RATING_VERSION = 4;
+export const RATING_VERSION = 5;
 
 /**
  * Ordre d'essai des techniques : **par difficulté croissante**.

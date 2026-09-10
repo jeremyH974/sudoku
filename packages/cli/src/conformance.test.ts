@@ -50,18 +50,28 @@ const reference = JSON.parse(readFileSync(referencePath, 'utf8')) as Reference;
 const EXACTNESS_THRESHOLD = 4.0;
 
 /**
- * Plancher d'accord mesuré à la calibration de référence : 296 grilles sur 313
- * sous le seuil, soit 94,6 %.
+ * Plancher d'accord mesuré à la calibration de référence : 310 grilles sur 317
+ * sous le seuil, soit 97,8 %.
  *
  * Progression : 91,4 % (incrément 3) → 93,3 % (liens forts et wings) → 94,6 %
- * (variantes « Direct » restreintes au single caché).
+ * (variantes « Direct » restreintes au single caché) → 97,8 % (le single débloqué
+ * doit être trouvé dans une boîte ou dans une maison du motif).
+ *
+ * ─── Le dernier gain a été validé hors échantillon, et cela comptait ────────
+ *
+ * La règle avait été choisie en rejouant huit variantes sur le corpus de
+ * référence de l'époque : six grilles de gain sur 313, assez peu pour que le
+ * surapprentissage soit une hypothèse sérieuse. Un corpus neuf a donc été
+ * produit sous une autre graine, et **les deux règles rejouées dessus** :
+ * l'ancienne 301/317 (95,0 %), la nouvelle 310/317 (97,8 %). Le gain se
+ * reproduit, et l'erreur se rééquilibre de 1 sur / 15 sous à 2 sur / 5 sous.
  *
  * Volontairement placé un point en dessous du résultat constaté. Trop serré, il
  * casserait au moindre remaniement légitime ; trop lâche, il laisserait passer
  * une régression. L'intention est d'attraper un changement d'ordre ou de
  * détection, pas de figer un centième.
  */
-const MINIMUM_AGREEMENT = 0.93;
+const MINIMUM_AGREEMENT = 0.96;
 
 describe('conformité à l’oracle', () => {
   it('dispose d’une référence cohérente avec la version du barème en vigueur', () => {

@@ -8,6 +8,7 @@ import {
   generateForTechnique,
   hasUniqueSolution,
   rate,
+  tryDecodeGrid,
 } from '@sudoku/engine';
 import type { TechniqueId } from '@sudoku/engine';
 
@@ -182,18 +183,44 @@ function main(): void {
 
   const started = Date.now();
   for (const info of wanted) {
-    const existing = corpus.grids[info.id] ?? [];
-    if (existing.length >= options.grids) {
-      console.log(`  ${info.id.padEnd(21)} déjà complet (${String(existing.length)}).`);
-      continue;
+    /*
+      On revérifie ce qui est déjà là avant de compter.
+
+      Un changement de barème peut retirer sa technique à une grille : elle reste
+      valide, mais elle n'illustre plus la leçon. L'incrément 9 en a écarté huit
+      sur soixante-douze. Les garder reviendrait à faire pratiquer une technique
+      sur une grille qui ne l'exige pas — le mensonge exact que ce corpus existe
+      pour éviter.
+    */
+    const kept = (corpus.grids[info.id] ?? []).filter((code) => {
+      const grid = tryDecodeGrid(code);
+      if (grid === null) return false;
+      const rating = rate(grid);
+      return rating.outcome === 'solved' && rating.hardestTechnique === info.id;
+    });
+    const dropped = (corpus.grids[info.id] ?? []).length - kept.length;
+    if (dropped > 0) {
+      console.log(`  ↻ ${info.id.padEnd(21)} ${String(dropped)} grille(s) écartée(s) par le barème.`);
     }
 
-    const codes = [...existing];
-    const checks = [...(verification.grids[info.id] ?? [])];
+    const codes = [...kept];
+    // Les vérifications suivent les grilles conservées, pas leur ancien rang.
+    const checks = codes.map((code) => {
+      const rating = rate(tryDecodeGrid(code)!);
+      return {
+        score: rating.score,
+        clues: [...tryDecodeGrid(code)!].filter((v) => v !== 0).length,
+        stepIndex: rating.steps.findIndex((step) => step.technique === info.id),
+      };
+    });
     const at = Date.now();
 
+    const before = codes.length;
     for (let n = codes.length; n < options.grids; n++) {
-      const produced = produce(info.id, `lesson-${info.id}-${String(n)}`, options.budgetMs);
+      // La version du barème entre dans la graine : régénérer après un
+      // changement ne doit pas reproduire la grille qu'on vient d'écarter.
+      const seed = `lesson-${info.id}-${String(n)}-v${String(RATING_VERSION)}`;
+      const produced = produce(info.id, seed, options.budgetMs);
       if (produced === null) break;
       codes.push(produced.code);
       checks.push({
@@ -212,6 +239,12 @@ function main(): void {
     writeJson(corpusPath, { ...corpus, grids: sortRecord(corpus.grids) });
     writeJson(verificationPath, { ...verification, grids: sortRecord(verification.grids) });
 
+    if (before >= options.grids && dropped === 0) {
+      // Rien à produire : seules les vérifications ont pu bouger, et elles
+      // viennent d'être recalculées ci-dessus.
+      console.log(`  ${info.id.padEnd(21)} déjà complet (${String(codes.length)}).`);
+      continue;
+    }
     const mark = codes.length >= options.grids ? '✓' : codes.length > 0 ? '~' : '✗';
     console.log(
       `  ${mark} ${info.id.padEnd(21)} ${info.difficulty.toFixed(1)}  ` +

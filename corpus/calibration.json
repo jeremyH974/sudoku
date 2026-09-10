@@ -1,39 +1,39 @@
 {
-  "generatedAt": "2026-09-10T15:21:56.440Z",
-  "ratingVersion": 4,
+  "generatedAt": "2026-09-10T19:37:05.174Z",
+  "ratingVersion": 5,
   "options": {
     "randomCount": 300,
     "perLevel": 8,
-    "seed": "large-1"
+    "seed": "validation-9"
   },
   "summary": {
-    "total": 334,
-    "solvedByUs": 329,
-    "agreed": 309,
-    "agreementRate": 0.939209726443769,
-    "agreedBelowThreshold": 296,
-    "totalBelowThreshold": 313,
+    "total": 335,
+    "solvedByUs": 330,
+    "agreed": 321,
+    "agreementRate": 0.9727272727272728,
+    "agreedBelowThreshold": 310,
+    "totalBelowThreshold": 317,
     "refused": 5,
-    "wronglyRefused": 1
+    "wronglyRefused": 0
   },
   "techniquePairs": [
     {
       "ours": "Single caché en boîte",
       "theirs": "Hidden Single",
-      "count": 166,
-      "agreeing": 166
+      "count": 162,
+      "agreeing": 162
     },
     {
       "ours": "Single caché en ligne",
       "theirs": "Hidden Single",
-      "count": 70,
-      "agreeing": 70
+      "count": 78,
+      "agreeing": 78
     },
     {
       "ours": "Paire cachée directe",
       "theirs": "Direct Hidden Pair",
-      "count": 27,
-      "agreeing": 27
+      "count": 30,
+      "agreeing": 30
     },
     {
       "ours": "Skyscraper",
@@ -42,74 +42,44 @@
       "agreeing": 12
     },
     {
+      "ours": "Paire pointante",
+      "theirs": "Pointing",
+      "count": 9,
+      "agreeing": 9
+    },
+    {
       "ours": "XY-Wing",
       "theirs": "XY-Wing",
       "count": 8,
       "agreeing": 8
     },
     {
-      "ours": "Paire pointante directe",
-      "theirs": "Direct Pointing",
-      "count": 7,
-      "agreeing": 7
-    },
-    {
-      "ours": "Paire pointante",
-      "theirs": "Pointing",
+      "ours": "Single nu",
+      "theirs": "Naked Single",
       "count": 4,
       "agreeing": 4
     },
     {
-      "ours": "Paire cachée directe",
-      "theirs": "Pointing",
-      "count": 3,
-      "agreeing": 0
+      "ours": "Paire pointante directe",
+      "theirs": "Direct Pointing",
+      "count": 4,
+      "agreeing": 4
     },
     {
-      "ours": "XYZ-Wing",
-      "theirs": "XYZ-Wing",
+      "ours": "Paire cachée",
+      "theirs": "Hidden Pair",
+      "count": 4,
+      "agreeing": 4
+    },
+    {
+      "ours": "Paire nue",
+      "theirs": "Naked Pair",
       "count": 3,
       "agreeing": 3
-    },
-    {
-      "ours": "XY-Wing",
-      "theirs": "Grouped 2 Strong links 101",
-      "count": 3,
-      "agreeing": 0
     },
     {
       "ours": "X-Wing",
       "theirs": "X-Wing",
-      "count": 3,
-      "agreeing": 3
-    },
-    {
-      "ours": "Paire pointante directe",
-      "theirs": "Pointing",
-      "count": 2,
-      "agreeing": 0
-    },
-    {
-      "ours": "Single nu",
-      "theirs": "Naked Single",
-      "count": 2,
-      "agreeing": 2
-    },
-    {
-      "ours": "Paire pointante directe",
-      "theirs": "Direct Hidden Pair",
-      "count": 2,
-      "agreeing": 0
-    },
-    {
-      "ours": "Triplet caché direct",
-      "theirs": "Pointing",
-      "count": 2,
-      "agreeing": 0
-    },
-    {
-      "ours": "Triplet caché direct",
-      "theirs": "Direct Hidden Triplet",
       "count": 2,
       "agreeing": 2
     },
@@ -117,6 +87,30 @@
       "ours": "Paire cachée",
       "theirs": "Naked Pair",
       "count": 2,
+      "agreeing": 0
+    },
+    {
+      "ours": "Triplet caché direct",
+      "theirs": "Pointing",
+      "count": 2,
+      "agreeing": 0
+    },
+    {
+      "ours": "Paire revendiquée",
+      "theirs": "Claiming",
+      "count": 2,
+      "agreeing": 2
+    },
+    {
+      "ours": "XY-Wing",
+      "theirs": "Grouped 2 Strong links 101",
+      "count": 2,
+      "agreeing": 0
+    },
+    {
+      "ours": "Paire cachée directe",
+      "theirs": "Pointing",
+      "count": 1,
       "agreeing": 0
     },
     {
@@ -132,107 +126,29 @@
       "agreeing": 0
     },
     {
-      "ours": "Paire revendiquée directe",
-      "theirs": "Direct Hidden Triplet",
-      "count": 1,
-      "agreeing": 0
-    },
-    {
       "ours": "Triplet caché direct",
       "theirs": "Naked Pair",
       "count": 1,
       "agreeing": 0
     },
     {
-      "ours": "Paire pointante directe",
-      "theirs": "Naked Single",
-      "count": 1,
-      "agreeing": 0
-    },
-    {
-      "ours": "Paire pointante",
-      "theirs": "Naked Pair",
-      "count": 1,
-      "agreeing": 0
-    },
-    {
-      "ours": "Paire revendiquée",
-      "theirs": "Claiming",
-      "count": 1,
-      "agreeing": 1
-    },
-    {
-      "ours": "Paire nue",
-      "theirs": "Naked Pair",
-      "count": 1,
-      "agreeing": 1
-    },
-    {
-      "ours": "Paire nue",
-      "theirs": "Hidden Pair",
-      "count": 1,
-      "agreeing": 0
-    },
-    {
-      "ours": "Paire cachée",
-      "theirs": "Hidden Pair",
-      "count": 1,
-      "agreeing": 1
-    },
-    {
       "ours": "Cerf-volant",
       "theirs": "2 Strong links 001",
+      "count": 1,
+      "agreeing": 1
+    },
+    {
+      "ours": "Turbot Fish",
+      "theirs": "XY-Wing",
       "count": 1,
       "agreeing": 1
     }
   ],
   "divergences": [
     {
-      "puzzle": "8...2........39.78..95..14...1.624.9....1....4.289.7...93..72..24.98........4...6",
-      "seed": "alea-633885358",
-      "source": "aleatoire-26",
-      "ours": {
-        "outcome": "solved",
-        "score": 1.7,
-        "technique": "direct-pointing",
-        "label": "Paire pointante directe",
-        "level": "moyen",
-        "steps": 50
-      },
-      "oracle": {
-        "index": 58,
-        "er": 2.6,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Pointing"
-      },
-      "delta": -0.9000000000000001
-    },
-    {
-      "puzzle": "...3..1.....21.4...5.6.97.2...9..37..1.....9..35..4...5.31.7.2...7.96.....8..3...",
-      "seed": "alea-4061883286",
-      "source": "aleatoire-26",
-      "ours": {
-        "outcome": "solved",
-        "score": 1.7,
-        "technique": "direct-pointing",
-        "label": "Paire pointante directe",
-        "level": "moyen",
-        "steps": 53
-      },
-      "oracle": {
-        "index": 246,
-        "er": 2.6,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Pointing"
-      },
-      "delta": -0.9000000000000001
-    },
-    {
-      "puzzle": "5.1...3...7.9.6..89..8.....36..8.7.....6.4.....7.5..26.....8..16..5.3.7...8...6.4",
-      "seed": "alea-1691851040",
-      "source": "aleatoire-26",
+      "puzzle": "6..1....5...5.8..3.5.7..12.93.....5...5...2...7.....18.61..5.3.5..3.4...8....9..1",
+      "seed": "alea-2792647752",
+      "source": "aleatoire-20",
       "ours": {
         "outcome": "solved",
         "score": 2,
@@ -242,7 +158,7 @@
         "steps": 53
       },
       "oracle": {
-        "index": 33,
+        "index": 79,
         "er": 2.6,
         "pearl": 1.2,
         "diamond": 1.2,
@@ -251,9 +167,9 @@
       "delta": -0.6000000000000001
     },
     {
-      "puzzle": "....63..8...2......278..43...6..2.5.2.......3.9.4..7...75..986......1...9..72....",
-      "seed": "alea-962612963",
-      "source": "aleatoire-20",
+      "puzzle": ".....1875.4..7......12...6.695.......7.....5.......392.2...81......4..3.1643.....",
+      "seed": "alea-2060554318",
+      "source": "aleatoire-26",
       "ours": {
         "outcome": "solved",
         "score": 2,
@@ -263,154 +179,49 @@
         "steps": 55
       },
       "oracle": {
-        "index": 170,
-        "er": 2.6,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Pointing"
-      },
-      "delta": -0.6000000000000001
-    },
-    {
-      "puzzle": "8.....7...92.......6..724.5.39.4..7....3.7....7..9.24.9.651..8.......16...3.....4",
-      "seed": "alea-3516166500",
-      "source": "aleatoire-26",
-      "ours": {
-        "outcome": "solved",
-        "score": 2,
-        "technique": "direct-hidden-pair",
-        "label": "Paire cachée directe",
-        "level": "moyen",
-        "steps": 53
-      },
-      "oracle": {
-        "index": 183,
-        "er": 2.6,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Pointing"
-      },
-      "delta": -0.6000000000000001
-    },
-    {
-      "puzzle": "...4..6.2.5...1..44..673..1.....65...8.....6...75.....8..264..56..9...8.7.1..8...",
-      "seed": "alea-3628331517",
-      "source": "aleatoire-26",
-      "ours": {
-        "outcome": "solved",
-        "score": 1.9,
-        "technique": "direct-claiming",
-        "label": "Paire revendiquée directe",
-        "level": "moyen",
-        "steps": 53
-      },
-      "oracle": {
-        "index": 218,
+        "index": 289,
         "er": 2.5,
         "pearl": 1.2,
         "diamond": 1.2,
         "technique": "Direct Hidden Triplet"
       },
-      "delta": -0.6000000000000001
+      "delta": -0.5
     },
     {
-      "puzzle": ".5..7...44...827...1.......78...45..5..8.9..2..27...36.......1...546...83...1..4.",
-      "seed": "cible-moyen-1249595453",
-      "source": "cible-moyen",
+      "puzzle": ".7..3.62....2....1..2..58.95...2....19.....46....1...33.46..7..2....3....86.4..5.",
+      "seed": "cible-difficile-2256105725",
+      "source": "cible-difficile",
       "ours": {
         "outcome": "solved",
-        "score": 1.7,
-        "technique": "direct-pointing",
-        "label": "Paire pointante directe",
-        "level": "moyen",
+        "score": 2.5,
+        "technique": "direct-hidden-triple",
+        "label": "Triplet caché direct",
+        "level": "difficile",
         "steps": 53
       },
       "oracle": {
-        "index": 293,
-        "er": 2.3,
+        "index": 305,
+        "er": 3,
         "pearl": 1.2,
         "diamond": 1.2,
-        "technique": "Naked Single"
+        "technique": "Naked Pair"
       },
-      "delta": -0.5999999999999999
+      "delta": -0.5
     },
     {
-      "puzzle": "3.1.5...7.8....1...7...63.514.56.8.....2.1.....6.93.415.46...1...9....7.8...2.9.6",
-      "seed": "alea-1196282698",
+      "puzzle": "......2.94.9.523...3..1456..4.1..9..9.......4..6..9.1..6349..7...472.6.57.5......",
+      "seed": "alea-3403358310",
       "source": "aleatoire-32",
       "ours": {
         "outcome": "solved",
-        "score": 2,
-        "technique": "direct-hidden-pair",
-        "label": "Paire cachée directe",
-        "level": "moyen",
-        "steps": 49
-      },
-      "oracle": {
-        "index": 217,
-        "er": 2.5,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Direct Hidden Triplet"
-      },
-      "delta": -0.5
-    },
-    {
-      "puzzle": ".....2.....85....3..68...513...2.14...1.5.3...49.6...757...68..1....74.....2.....",
-      "seed": "alea-1521673932",
-      "source": "aleatoire-26",
-      "ours": {
-        "outcome": "solved",
-        "score": 2.5,
-        "technique": "direct-hidden-triple",
-        "label": "Triplet caché direct",
-        "level": "difficile",
-        "steps": 54
-      },
-      "oracle": {
-        "index": 279,
-        "er": 3,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Naked Pair"
-      },
-      "delta": -0.5
-    },
-    {
-      "puzzle": ".49..1.6...86.....6....9..1..7..2..6.2.....8.3..1..4..1..8....9.....65...5.7..24.",
-      "seed": "cible-difficile-1129087076",
-      "source": "cible-difficile",
-      "ours": {
-        "outcome": "solved",
-        "score": 2.6,
-        "technique": "pointing",
-        "label": "Paire pointante",
-        "level": "difficile",
-        "steps": 56
-      },
-      "oracle": {
-        "index": 299,
-        "er": 3,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Naked Pair"
-      },
-      "delta": -0.3999999999999999
-    },
-    {
-      "puzzle": "2.....43.7.8.42.....16......6..3.5.9.........8.9.7..4......38.....51.3.6.83.....7",
-      "seed": "cible-expert-301093973",
-      "source": "cible-expert",
-      "ours": {
-        "outcome": "solved",
         "score": 3.4,
         "technique": "hidden-pair",
         "label": "Paire cachée",
         "level": "expert",
-        "steps": 58
+        "steps": 51
       },
       "oracle": {
-        "index": 306,
+        "index": 116,
         "er": 3,
         "pearl": 1.2,
         "diamond": 1.2,
@@ -419,8 +230,8 @@
       "delta": 0.3999999999999999
     },
     {
-      "puzzle": "............1.672...58.4..6.3...8..75.8...1.46..2...5.1..6.75...673.2............",
-      "seed": "cible-expert-3560635439",
+      "puzzle": ".7.......4.158.9..8..2....33....4..1..96.37..6..8....91....2..4..3.496.7.......1.",
+      "seed": "cible-expert-2877927020",
       "source": "cible-expert",
       "ours": {
         "outcome": "solved",
@@ -428,10 +239,10 @@
         "technique": "hidden-pair",
         "label": "Paire cachée",
         "level": "expert",
-        "steps": 62
+        "steps": 55
       },
       "oracle": {
-        "index": 308,
+        "index": 314,
         "er": 3,
         "pearl": 1.2,
         "diamond": 1.2,
@@ -440,93 +251,9 @@
       "delta": 0.3999999999999999
     },
     {
-      "puzzle": "3.2..16...1..8......9.....1...2.89..9..1.6..5..67.3...4.....3......6..7...54..2.6",
-      "seed": "cible-expert-3154213469",
-      "source": "cible-expert",
-      "ours": {
-        "outcome": "solved",
-        "score": 3,
-        "technique": "naked-pair",
-        "label": "Paire nue",
-        "level": "expert",
-        "steps": 58
-      },
-      "oracle": {
-        "index": 310,
-        "er": 3.4,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Hidden Pair"
-      },
-      "delta": -0.3999999999999999
-    },
-    {
-      "puzzle": "5..4....834..5.2.....7.6...864...9.............9...851...3.5.....3.6..851....2..9",
-      "seed": "alea-3944424001",
+      "puzzle": "6..8..1.3.8...5.2....49....2.....35.5.3...8.7.67.....4....13....9.7...3.7.1..6..2",
+      "seed": "alea-4293593511",
       "source": "aleatoire-20",
-      "ours": {
-        "outcome": "solved",
-        "score": 1.7,
-        "technique": "direct-pointing",
-        "label": "Paire pointante directe",
-        "level": "moyen",
-        "steps": 55
-      },
-      "oracle": {
-        "index": 133,
-        "er": 2,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Direct Hidden Pair"
-      },
-      "delta": -0.30000000000000004
-    },
-    {
-      "puzzle": "..5.....7....34....8.9.1..3.5.2..3.6.4.....1.7.6..3.5.8..3.5.6....68....9.....2..",
-      "seed": "alea-1879547881",
-      "source": "aleatoire-20",
-      "ours": {
-        "outcome": "solved",
-        "score": 1.7,
-        "technique": "direct-pointing",
-        "label": "Paire pointante directe",
-        "level": "moyen",
-        "steps": 55
-      },
-      "oracle": {
-        "index": 165,
-        "er": 2,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Direct Hidden Pair"
-      },
-      "delta": -0.30000000000000004
-    },
-    {
-      "puzzle": "97.2..1..62.....9....1........64.5.1.6.....7.4.5.17........8....5.....47..4..2.53",
-      "seed": "cible-difficile-135547257",
-      "source": "cible-difficile",
-      "ours": {
-        "outcome": "solved",
-        "score": 2.5,
-        "technique": "direct-hidden-triple",
-        "label": "Triplet caché direct",
-        "level": "difficile",
-        "steps": 55
-      },
-      "oracle": {
-        "index": 301,
-        "er": 2.6,
-        "pearl": 1.2,
-        "diamond": 1.2,
-        "technique": "Pointing"
-      },
-      "delta": -0.10000000000000009
-    },
-    {
-      "puzzle": ".....843.....51..79..23.16..1.....8...4...3...9.....5..39.45..26..39.....278.....",
-      "seed": "cible-difficile-70723971",
-      "source": "cible-difficile",
       "ours": {
         "outcome": "solved",
         "score": 2.5,
@@ -536,7 +263,7 @@
         "steps": 53
       },
       "oracle": {
-        "index": 304,
+        "index": 242,
         "er": 2.6,
         "pearl": 1.2,
         "diamond": 1.2,
@@ -545,29 +272,29 @@
       "delta": -0.10000000000000009
     },
     {
-      "puzzle": "1.8.269..5.63.......97.......1....2.3.5.8.4.1.6....8.......13.......36.4..394.1.2",
-      "seed": "alea-1453282433",
-      "source": "aleatoire-20",
+      "puzzle": ".7...4..3.493..7....5.7.9.6...7...3..36...28..9...6...9.7.1.4....2..537.5..6...9.",
+      "seed": "cible-difficile-1743686769",
+      "source": "cible-difficile",
       "ours": {
         "outcome": "solved",
-        "score": 4.2,
-        "technique": "xy-wing",
-        "label": "XY-Wing",
-        "level": "diabolique",
-        "steps": 59
+        "score": 2.5,
+        "technique": "direct-hidden-triple",
+        "label": "Triplet caché direct",
+        "level": "difficile",
+        "steps": 51
       },
       "oracle": {
-        "index": 147,
-        "er": 4.3,
+        "index": 299,
+        "er": 2.6,
         "pearl": 1.2,
         "diamond": 1.2,
-        "technique": "Grouped 2 Strong links 101"
+        "technique": "Pointing"
       },
-      "delta": -0.09999999999999964
+      "delta": -0.10000000000000009
     },
     {
-      "puzzle": "1.976.......5.1.8......21.38....53.2.2.....1.7.19....83.62......5.1.9.......567.4",
-      "seed": "cible-diabolique-1483641229",
+      "puzzle": "...18..3.8....3..12...7.6....87....4..6...3..3....17....5.1...74..8....9.1..95...",
+      "seed": "cible-diabolique-906140486",
       "source": "cible-diabolique",
       "ours": {
         "outcome": "solved",
@@ -575,7 +302,7 @@
         "technique": "xy-wing",
         "label": "XY-Wing",
         "level": "diabolique",
-        "steps": 55
+        "steps": 65
       },
       "oracle": {
         "index": 323,
@@ -587,8 +314,8 @@
       "delta": -0.09999999999999964
     },
     {
-      "puzzle": "...1.....7.4..5...95....41..67.2....3.8...5.1....1.73..32....48...8..3.7.....6...",
-      "seed": "cible-diabolique-2032111105",
+      "puzzle": "..9...8.25.68.3...7....2...2.173..8....154....6..981.3...6....7...3.19.89.4...3..",
+      "seed": "cible-diabolique-783585718",
       "source": "cible-diabolique",
       "ours": {
         "outcome": "solved",
@@ -596,10 +323,10 @@
         "technique": "xy-wing",
         "label": "XY-Wing",
         "level": "diabolique",
-        "steps": 57
+        "steps": 52
       },
       "oracle": {
-        "index": 327,
+        "index": 324,
         "er": 4.3,
         "pearl": 1.2,
         "diamond": 1.2,
@@ -608,10 +335,5 @@
       "delta": -0.09999999999999964
     }
   ],
-  "wronglyRefused": [
-    {
-      "puzzle": "78..32.....46.......6.9.78..2......5.97.2.81.1......9..75.6.1.......32.....78..49",
-      "oracleEr": 4.5
-    }
-  ]
+  "wronglyRefused": []
 }

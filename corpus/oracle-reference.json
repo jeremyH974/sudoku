@@ -1,2343 +1,2350 @@
 {
   "oracle": "SukakuExplainer v1.18.1, mode serate, --revisedRating=0",
-  "ratingVersion": 4,
-  "generatedAt": "2026-09-10T15:21:56.441Z",
+  "ratingVersion": 5,
+  "generatedAt": "2026-09-10T19:37:05.177Z",
   "grids": [
     {
-      "puzzle": "651..7...47...258...34.591793654.7...87...16...4.763597426.98...983...72...7..491",
+      "puzzle": "..1.4.3..8...23451.5.....29.762381941.24.75.338415926.71.....4.23859...6..9.1.8..",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "7..486...9..5..7.841.97.....4..376..86.2.9.71..216..3.....92.646.7..5..2...618..7",
+      "puzzle": "..34897.59...7.....56.1.9.4..5..1..8872...6911..8..3..6.9.5.24.....3...65.72648..",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".2....64...52.......6..7...45..83926.3.9.4.5.96157..38...7..2.......15...93....1.",
+      "puzzle": "9..7..8.34.1..9..7..7..2.4.783....6....8.3....1....385.2.5..4..5..3..1.81.4..8..2",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".9.6.4.3....7.....5.13....8.5...6..3.6..4..2.3..2...8.2....73.9.....5....3.8.1.6.",
+      "puzzle": ".9..3..65...5.8.9...2....1.9.3..4.....6...5.....2..8.7.2....1...5.8.2...16..7..5.",
       "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..1........354..9...4..1.37.8..6.....3.4.8.2.....9..5.45.7..8...9..361........9..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".3418.5.9.56......7.8.43.12.476182.5..24.71..8.325976.32.79.8.6......35.4.5.6192.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...9..742.....3981419..2..37...5.3..963...158..2.9...43..1..2976972.....128..9...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".9..2..8...1.4.9....87....5.6.135.7..17...52..4.972.3.2....36....6.9.2...8..1..9.",
+      "puzzle": "..6..1......2.5..9.819...6.37....2..1.2...3.6..5....98.5...692.4..8.2......7..5..",
       "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "7..49.563...2......61..7..4..6....1.1.7...9.8.9....6..6..9..37......4...389.75..6",
+      "puzzle": "814573..2..32.15....9864.1....3....81589462372....5....9.6328....27.96..6..458329",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "81.35...9.75...8.46.4287...2..69...19...3...21...42..7...9283.57.9...24.5...76.98",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7.2.4.....8.5...67....974..2..4...3.8.67.39.2.4...9..8..321....12...4.7.....7.2.5",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "......2......27..91..9..68.9...58.32.........63.41...5.51..2..67..53......8......",
       "oracleEr": 2,
       "oracleTechnique": "Direct Hidden Pair",
       "ourScore": 2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..634.98...1..65.7...5.......9..4...2..8.3..6...6..7.......1...3.74..8...45.826..",
+      "puzzle": "8....32.7.73.4519...172.36.12...46.9.642.783.3.81...24.35.619...1283.57.6.95....3",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5678..43.2.954.7...4..72....5.93.1...1.....2...6.15.7....42..1...5.683.7.91..7248",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "538..9.....4...8526.7.1.......1.75..3.9.8.2.1..13.2.......5.7.3893...4.....2..689",
       "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "64.152.8.2.38...6..1..43.2.43..265.87.54.16.28.693..74.7.31..4..6...48.9.8.269.57",
-      "oracleEr": 1.2,
+      "puzzle": "...6..9......13.5.3..724..8.8....16..3.....7..51....3.8..391..6.1.56......9..2...",
+      "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
+      "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".7.285.93...3.4..1..47.1...58..231.7.2.....8.6.795..24...1.28..2..5.6...36.879.4.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....6...58...4.971.97.5..64..6..7...15.....27...6..5..67..3.45.249.7...65...1....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....4..7....2...5.73...9...3.7.241...8...2...126.9.8...5...89.1...4....3..9.....",
+      "puzzle": "73...............556289.....71..3..9...2.1...2..4..13.....175969...............23",
       "oracleEr": 2,
       "oracleTechnique": "Direct Hidden Pair",
       "ourScore": 2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "....1..7......7.2.8...5916.79.86..1.5.......9.2..93.57.8597...2.6.3......3..2....",
+      "puzzle": "15..792.6462.3....8....43.1....165.23169527845.438....6.17....5....9.1789.752..63",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7...16..3.5...4.81.....524687..5...2561...4983...4..174891.....13.4...7.6..58...4",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...642...1.97..36......347...81...93.5.....1.31...96...215......37..15.6...326...",
       "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "91...5736347816...256..3...4.9.61....617.239....49.1.2...1..247...6279537925...18",
+      "puzzle": "..9.....7.549...12....7..3..82.3.......6.4.......5.94..7..8....19...278.5.....3..",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "84..917...12...4..3572649...8.3....6...746...7....5.9...8957642..4...35...543..19",
+      "puzzle": "7.6..38.9.13.8............3...7...8...51.86...9...6...6............6.51.3.15..7.2",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..63.52.8723.6.51.5.891.76325.6..8.....4.9.....9..7.35874.963.1.32.4.9566.51.34..",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "....1783.1..2.5...57..9.....4.1..967.6.....1.312..9.4.....8..56...5.2..4.5943....",
+      "puzzle": ".5..348...14.9..3783.25....3.281..5....3.5....8..296.3....61.7292..8.16...357..8.",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..7..9....86..3....9.872....6....28..5.4.6.7..74....1....781.3....3..64....2..8..",
+      "puzzle": "7..3...6.356..1..8..1.96....7345.9.............8.7941....26.1..6..9..785.4...7..2",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..7392.45....5..97...1......1....5.2..5.7.3..7.2....8......1...17..2....62.7348..",
       "oracleEr": 2,
       "oracleTechnique": "Direct Hidden Pair",
       "ourScore": 2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".94.1..6...75.2......6....7.6.1..83..29...17..18..3.2.1....6......2.17...7..5.24.",
+      "puzzle": "6..5..948592..1.6..7.6.91...6598.4..1892.4753..3.7568...83.6.7..1.7..534357..2..6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6.27.8.41....4......32.67..48.5.79.623.....177.91.4.35..48.26......9....32.4.51.8",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".3.1..479..4........98..5..94.5162....7.2.9....2794.65..1..27........1..825..1.9.",
       "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "8.73592.....48..7..3.6.19.8978246..11..7.5..93..9187264.18.7.9..8..93.....31248.5",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..8.3.569...2...7.743..91.8.2.89.4...59...23...1.62.9.3.29..641.9...6...186.4.9..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....62.99.4...8755.24.....2358........3.9........2583.....41.8421...9.73.92.....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "4.9...52..8...2.....3.9.....48..1..3...987...9..2..16.....7.4.....5...3..64...8.1",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1.......9.57...6....25..898..9...7...15.34...2...7..613..24....5...93.8.......1.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".264..9155.9.614......92367.4..2.69.865...723.92.3..5.63124......715.2.6254..913.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".9....3...43.5..8..7.3.95..9.7.832543.4...7.125167.9.8..65.8.2..2..3.81...5....9.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".9.87.....56..9...3271....8.81.5..6.7.......9.6..8.75.9....1586...6..41.....34.9.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...5..9..89.4....3.5.9.26.7.35..........1..........19.5.31.9.7.9....6.14..2..4...",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..684.5...34.79..28....56..9651834.771..6..584.2957316..14....53..52.89...8.912..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "73.6.9241..5..4..6...8.29...12.8.36...3...7...87.6.52...95.6...8..2..4..2513.8.97",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7.2..13..48.5......914.....6....81..14.7.5.83..72....6.....683......7.19..89..6.2",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5.1...3...7.9.6..89..8.....36..8.7.....6.4.....7.5..26.....8..16..5.3.7...8...6.4",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".8..34.....75.9..........4917....4368.......7429....1875..........8.53.....61..7.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "634..19....79..3.1195372.485.8.2...7..2.9.1..9...8.2.378.2395142.9..87....35..829",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "9.....2....32.48.92749..1.38.152..3...2.6.5...5..839.21.9..74254.76.53....8.....7",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "327.5.9.8...7..5...15.9.4...7.9.13......8......63.7.8...1.7.69...9..3...8.3.1.724",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..7.259...6.4...1..3....2.5.9...3......567......8...4.9.4....5..7...1.2...135.7..",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5896..37..2...9.8.....7......19..5..24.....96..3..48......1.....3.4...1..54..8269",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7.3185266..4.5937..2.96..4261.8...5...5.2...7...6.8428..64.7..5478.9..1136257.9.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "51864.7...9.2531....38.....1..5.63.43.......72.61.7..9.....85....1965.7...7.24961",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...26.4.7145..92.......4..5.8..2.1.4...6.1...9.1.7..5.6..5.......71..5292.9.47...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".3.2.5......4..853..9....1.....2..46..2...3..46..8.....1....9..295..4......3.6.2.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "937...6.......8....15...4..1.295.36....2.6....49.372.1..4...17....5.......1...536",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".9.87..1.71...283.4281..6..9.3417.6..546.897..6.5931.8..9..1426.423...51.7..64.8.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".9.8...37.7.1.9..85....39.62.75.8...3.86.47.2...2.76.57.59....38..4.6.2.62...5.7.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "28.3.4....3.158..2.1.....53..7....15.9.....6.56....2..95.....7.8..693.2....4.5.89",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...8....2....3..57..4..26......7.1.527..1..434.1.6......91..2..64..8....7....3...",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3..4....9.9........56...48...5.17..4..32.97..9..84.3...21...65........7.6....5..1",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2614...3..43.1..7..58.2941.63..5.7.91.2.9.8.38.5.3..64.2916.34..8..4.69..1...3582",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1.6.9.3.32......6.9.5.241..831652..4.......3..239468..362.8.7.9......25.7.9.3.6.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..5.82.....3.....7..16.389216....9..9.7...6.4..4....184362.51..8.....2.....84.3..",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".9.62...3.3....84..7...4..12.7.6.................1.9.56..3...7..15....3.7...82.6.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2.7..1.4....2...1..8..5.6.2..1.....6546...2383.....1..9.8.4..6..1...3....6.9..5.3",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "349.....271..36.84568724....53...4..8945.7213..6...95....85264768.34..254.....839",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..472.9......6..516..3.8724...47..13..16.38..57..91...1372.6..545..3......2.471..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".42...3...9...32641..9.....3....764.5..6.4..2.643....5.....1..64815...7...3...15.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8...2........39.78..95..14...1.624.9....1....4.289.7...93..72..24.98........4...6",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...4.13....96...5.8.3.2..19.84.......3.....4.......67.75..8.2.6.4...21....69.7...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".4...8.3.7.69..8.55283.614.3.5..1.6.47.653.18.6.8..9.3.531.94726.4..25.1.1.4...9.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3....5.7..89...23.7..12.85.8.62..3...357.618...7..86.5.93.74..2.78...94..5.6....8",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".27..1..3...56....36.2....9..1...948.43...65.786...3..5....7.26....85...1..6..79.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...89...6..34.7....98..25...7....6..25.....41..9....3...46..35....7.51..6...38...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....5......3..79.1.4...6.2.6..4.....23...46.....2..1.8.7...5.3.52..4......8.....",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "63.41..8.8...2....17..83..4526874.313..951..279.3624589..24..75....9...6.6..35.19",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7..2.59.2.95.417.6.5..3.84.....87..3.8...9.2..64.....83.1..6.9.427.68.1.61.8..5.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "6...7.1...1...8..5.9.3.146...7.....616.7.5.495.....8...389.7.5.4..8...9...1.5...8",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".4......88..1..3..671.8...5.23.57...............21.73.2...7.186..9..4..37......2.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "6.7.9....3....7...59....7.8..8..3..1...286...2..5..3..4.2....53...3....2....5.4.6",
-      "oracleEr": 4,
-      "oracleTechnique": "Skyscraper 011",
-      "ourScore": 4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8....297.4..61782527..8..3..6..2315.351...249.2419..6..8..3..12137258..4.429....3",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".945.86..625...3.48.73...5..497.2.....8.6.5.....8.914..8...57.69.3...215..61.349.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".68......2..36.1.....5.86.7.369.5...8.4...2.9...4.731.7.16.3.....3.74..1......78.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7...2..4.8..54.....47...39......79.5...6...1.46......43...91.....42..8.1..8...6.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2....1.5....57...3...8....63.....92582.....67516.....84....6...9...15....7.3....9",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..695872.1.8.4....9..6..845..219653.3.9.8.1.6.153742..591..7..3....3.9.7.835694..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7....6.29.238..4...69...57..8.9.4.1.342...957.9.7.3.8..36...79...1..784.97.6....2",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7..9128......81.46.8.....5257.....1..6...7..9.....6485.....8.71.97......8432..1.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "87......92...7.1..1.5.2......7.61..2..3...9..9..35.7......3.5.7..4.1...83......24",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3...951.2..1..2..7.9......47..1.......86.37.......8..36......4.2..8..9..5.926...8",
-      "oracleEr": 4,
-      "oracleTechnique": "Skyscraper 011",
-      "ourScore": 4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8726451...63.2...791.7...24.9.5..4867..4.1..2348..6.1.58...2.411...5.26...9314578",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1894..5....4..2.......987.193.1.648.8..7.4..9.478.9.153.824.......9..2....6..5974",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "78..61.4..5......6.6.39.8.1.47.56...............74.62.5.8.17.6.1......3..2.53..17",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....5..1985...1.....74...3...6.7..9.9..564..8.4..9.7...1...59.....9...7349..2....",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 2.6,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "4..9.6.7.6....1...8...3...5...7..4...43...58...9..4...1...2...4...8....7.5.1.7..3",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".2..3.9.....5.817.8172.4.6.75..4.69119.675.38632.8..57.6.8.3729.857.9.....9.2..1.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1839..522497.5.3..5..2..7...7...32..9.....4..21...6...7..8..1..3.9.276868..7359.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".84.62....5679...47..4...2..4...925...........238...7..6...5..28...3614....14.76.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".92......5....73....14..5.2.2..5..4...61.97...3..4..8.6.8..59....38....7......26.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..51....27.4.39.......6..8...1....9...73185...5....3...7..4.......57.8.31....24..",
+      "puzzle": "...7.81...9.....73....91.2..46......789.6.354......69..7.65....56.....4...42.9...",
       "oracleEr": 2.3,
       "oracleTechnique": "Naked Single",
       "ourScore": 2.3,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".46287.9.9...45.785.796.41..1..7.9..8.35.61.4..4.1..5..69.245.175.63...9.2.85976.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...8...3..36519.48.1.3..6.21...43.9...52.14...6.79...17.2..6.1.49.15728..5...8...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "19.82..47...9368.1........2.5......8..61.45..9......6.5........2.7493...84..67.93",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....39..831...4.....42.......74..35.4.......6.25..17.......34.....8...219..56....",
-      "oracleEr": 4.4,
-      "oracleTechnique": "XYZ-Wing",
-      "ourScore": 4.4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "6.......8.3..84....246...9......8..4.7.392.8.1..7......9...685....97..2.2.......1",
+      "puzzle": "2..1.7...85.64..1..7..5.....1..8..5...5...6...4..1..3.....6..7..8..93.62...5.1..9",
       "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "...98.2769.6..35.12.7.5.43.3...6.1948.94.13.7451.3...8.18.4.9.27.36..8.5624.98...",
+      "puzzle": ".4739...1.168543...857.24..73....5284..1.5..3659....47..45.378...268193.8...4721.",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".183976....58...37.6.5...1..5..391.8..3...9..9.165..2..3...1.9.67...53....296357.",
+      "puzzle": "51.8....2.73.1..5.8...3.1..327..958.1..5.2..7.653..291..1.2...9.3..9.72.9....8.13",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".3..........836.2.6..5.189..6.4..2..4.21.35.7..1..5.4..473.2..6.5.698..........1.",
+      "puzzle": "..473.51....4...78...2.934........9428.....3547........958.4...71...6....48.972..",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..79..4..3.48....5.2..3...7...7..9.14.8...5.27.1..9...5...9..1.1....47.9..9..18..",
+      "puzzle": "...63...5.......87..9.8.2...217......4.3.1.7......894...6.1.4..13.......5...96...",
       "oracleEr": 2,
       "oracleTechnique": "Direct Hidden Pair",
       "ourScore": 2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "68.9..5....9.......2.8.3..4.....1.9...32.71...6.5.....7..1.5.8.......2....1..4.35",
-      "oracleEr": 4.2,
-      "oracleTechnique": "XY-Wing",
-      "ourScore": 4.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".946..2.331..82.56.26...478.71235.....81.65.....89413.183...62.76.52..412.5..178.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".4153..289.5.28..3.......7.4.9.637..5..4.7..1..381.9.2.5.......3..65.1.429..7185.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..453......9..26.7...4.6..8493...8.2...3.8...5.7...3647..1.3...9.62..1......592..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "9.25..3.7...1...4.....2.6.55..2.....8.7...1.9.....5..23.4.1.....9...7...7.6..49.1",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7..2..4.82..1.....5...4..73.19.......51.62.......75.49..4...5.....9..83.1..3..7.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..5..9..2148...7.529.547.3..5.92467.634...289.27863.1..8.251.465.9...3214..3..8..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....6.4....6..2951.1.7..2.3.415876.9..5...1..6.943182.9.7..4.8.8649..3....3.2....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....28.4.......2.14.75..986..1.4...953..1..689...6.1..856..27.33.4.......1.38....",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....81..32.7.9...4.134.2..64.1....6...........6....7.87..3.569.1...4.5.76..97....",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".3.75...91....2..575.1.9.....1....73..8...6..39....8.....4.3.278..2....42...91.8.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".732.496.8.25...7.19.7.6.8564..7...82.7.5.6.33...4..1973.4.8.96.2...58.7.813.745.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".3..8..276.2.9..5.1..2349.6321...5.9.........8.6...7122.3569..8.6..7.2.197..1..3.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..45.....9.64.1..35.1.6..7.....4683...3.8.6...8235.....4..2.7.63..6.52.8.....43..",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1...8.....34..2.......5.73..5.1...878.....292...8.4..46.9.......7..15.....3...8.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3..8.7............5.86.23.9...1.84.76.......87.92.6...8.25.31.4............4.1..5",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..71..3...527384.1613....8779..6.1..368.1.925..1.9..7853....7142.437159...9..58..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "573...41.....36..9.6.5....728.17.6.4.9.4.5.8.3.1.89.726....4.2.1..36.....58...963",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".........629..51.3.35..4.62....9.27..7.6.3.9..51.2....79.1..52.2.65..389.........",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...27..8...49....6.8.5..9....27..1.3.71...59.4.9..86....8..9.3.7....68...9..37...",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "82.3......3.824.51164.9..8.4..251.3.3.26485.7.5.973..8.8..6.17591.537.4......2.69",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8.57.1.9.63..894..4.92.......4..8..67.84.35.22..6..9.......41.5..697..84.4.8.52.9",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "9...84.....537.41....1...6..5...172.2..8.7..6.769...4..4...8....62.139.....54...3",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2.6.....4...9..8...7.2.39...8.6...9....734....6...9.7...35.6.8...5..7...6.....1.3",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "......36.....87...64..138....1..4..58.5...7.24..5..9....649..13...72.....92......",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..52976...9..6.512.2.35..8725...8..963.549.788..6...5371..25.4.948.7..2...24837..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7.85......156.8...2...97158..4..9.3..291.374..3.8..6..37298...4...7.128......59.6",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".6..43.9.7....5.83.54.97..6........28..936..46........9..36.54.53.4....9.2.51..3.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "72...4.51....6.....382...9495......6...6.8...2......4757...146.....3....89.7...25",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5.1..6.89....9.51...6..2....6.....72...1.5...14.....9....9..7...32.6....71.2..6.4",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7..9.24.8.9.43..6.524..6..1.7...89258126.97344593...1.2..5..679.6..94.8.9.72.1..3",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".539672.8........5..4.35.1.9.257....67.3.9.24....213.9.1.74.8..5........8.625319.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".34...1..6..54.....7....643..7.95..634.....899..32.4..859....6.....76..8..6...23.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "4..9.51...56......7......3839...14.6..2...3..1.42...9593......4......21...73.6..9",
-      "oracleEr": 4.4,
-      "oracleTechnique": "XYZ-Wing",
-      "ourScore": 4.4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5..4....834..5.2.....7.6...864...9.............9...851...3.5.....3.6..851....2..9",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".5..7834..875..1621.9.6.7.58.37.95.65.......42.48.69.19.8.2.6.7461..725..2561..9.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..2..51..35.9..62.1.42.7.3..35.1.7..4..5.8..3..9.7.41..2.7.38.6.83..4.51..61..3..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...4..1.9...7.26...34.1...79....5.71.2.9.1.6.71.3....28...9.41...15.3...4.7..8...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".3...1..9.......3....74.5.2..8..5..7.654.798.1..8..3..2.7.34....9.......5..1...7.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "9.5.1.6..763.2.1952415968..6...7..3..7.2.1.4..3..4...7..6382751328.5.469..7.6.3.2",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5..9..36414..26..998.43..7.618.9.................4.615.9..54.323..21..97824..9..6",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3...7.2...7.2.439..2...9.....832.1.9...8.7...6.2.418.....4...1..376.8.4...5.1...3",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....15..66....32.....62.1...13..84.72.......17.81..39...7.36.....52....34..57....",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....72.876.84....9......6..2..3...4..9...5..5...8..7..8......7....65.821.53.....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".61425893...8..51...317..2.1275....46.47.29.58....3172.1..572...56..1...27896435.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "9.5.42183....6...934.1.8..627.6.9....1..5..9....3.7.141..9.5.428...3....45928.3.1",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".3..8..56...5..12.7..13..891..6..8.....4.8.....4..1..534..65..1.15..4...89..1..4.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7.2.6.....8..4..6..173...2..2....9..54...82..6....1..1...672..4..9..5.....4.1.8.",
+      "puzzle": ".5...9.762...6..4..1.7.4..2....473.............319....7..9.3.8..2..1...418.4...2.",
       "oracleEr": 1.7,
       "oracleTechnique": "Direct Pointing",
       "ourScore": 1.7,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "1.8.269..5.63.......97.......1....2.3.5.8.4.1.6....8.......13.......36.4..394.1.2",
-      "oracleEr": 4.3,
-      "oracleTechnique": "Grouped 2 Strong links 101",
-      "ourScore": 4.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "498.5.32.235.9..4167...4.851..53..62..6...5..58..62..395.7...3871..8.456.63.4.719",
+      "puzzle": ".14...5...896.51.46..91.832..1..2745.28.4.69.4735..2..742.61..81.54.832...6...41.",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "6.8.7...14.261....3.....456..68.514...47.16...712.65..829.....5....598.21...2.9.4",
+      "puzzle": "7..9.6....3.175.2616...857....8....229.5.3.848....4....286...3797.352.4....7.1..5",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "...1.593..8...4..1..5....74.....234..536.782..684.....51....4..8..5...9..423.9...",
+      "puzzle": "38.6..9........6...7..9853...3.7..6991.....2886..4.1...9523..4...2........8..4.96",
       "oracleEr": 1.5,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "....37..5...96....4.85...7.8.....7.292.....846.3.....9.6...81.7....43...2..15....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "6..17...417..3..5...46....8.6......3..8...5..4......2.8....92...4..2..757...86..1",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3.46258..98..376...164.....138746.5..5.2.8.6..9.513487.....257...987..16..39512.8",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "91...245...38..6.948.16..7.5379...4...........4...1536.5..28.933.1..78...983...24",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "86..2....47.....25.2.47.3......4..592.5.8.4.694..1......6.57.9.35.....61....6..83",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8..1..9..5....27...37..6....534....9.........2....864....6..38...97....1..8..1..4",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....63...6..7..1..18.9...21..4...5.4..5.9..8.8...2..99...2.43..4..5..2...59.....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...3.978.6..4..25.94..2.36187.296513...1.5...215834.76153.4..27.82..3..5.967.2...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".79.1......8.3914...562.9.....97.38698.....51536.81.....2.536...6349.5......6.79.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....193.3.2.9.1.8.5.3...626..7...95.........52...3..126...9.8.7.3.6.4.9.952.....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".2......7.19........5.63....634.98...5..3..9...86.574....15.9........62.9......8.",
+      "puzzle": "3........8..394.7....7.6.3..47.1.2....3...1....1.5.38..9.6.2....5.931..2........6",
       "oracleEr": 1.7,
       "oracleTechnique": "Direct Pointing",
       "ourScore": 1.7,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "68517....2...9385.91325847.......6.7.21.8.39.5.7.......58469732.4281...9....25148",
+      "puzzle": "298413.656539..481..76......31..495...4...1...251..83......95..586..132934.852617",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "9..7.156.43.56.....659..3..8..21.6..5.6...1.3..9.54..8..3..582.....29.36.413.6..9",
+      "puzzle": "645..8.9.....49.571..56.48...39...48.5.....3.81...42...81.52..953.79.....7.4..523",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "21...9....3..75...7..6.2..3.6.738...17.....36...156.9.6..5.3..1...49..5....2...79",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..5.....7....34....8.9.1..3.5.2..3.6.4.....1.7.6..3.5.8..3.5.6....68....9.....2..",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "92..5..6.457..692..8.7.2534..5..3..7314.2.8967..4..1..2319.8.7..796..482.4..7..19",
+      "puzzle": "..3.........259.7..75.862.1.9..28..7..7...8..6..43..9.5.184.72..4.791.........4..",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "2..7..3.4.8...579.761..45.2....17.56...2.8...15.96....4.65..128.791...3.5.2..6..9",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".79..5.1.35.1...7..6....2..6...9..42.9.2.6.8.74..3...9..8....3..2...4.51.3.7..92.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..5.9..174.28..9.6.9.......721......35.....42......178.......8.2.7..53.998..1.2..",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....63..8...2......278..43...6..2.5.2.......3.9.4..7...75..986......1...9..72....",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".984..75614697...87.568....6.2..1..3..47281..8..3..4.2....572.95...94631219..654.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".73.6.182.48..1.67...8.75.4....794..9.......3..765....7.23.8...63.7..21.851.4.37.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "75..2.8....3.....728....4......68394..69.52..93724......1....826.....7....8.7..59",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".54....3....46..5993......8....26..1..5...9..2..94....8......6262..14....9....31.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "......34..8..3.2...47..19..7...86....6.....9....95...1..21..56...3.6..2..76......",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..95867211.5.2769..6....5.84.17..9...3.459.1...7..38.62.4....8..7394.1.55968314..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".6.8..5.2....653173.5...6.48...91...19.7.4.56...52...15.3...4.994735....6.8..7.3.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..49..8.....2..16.....87....8.3796.116.....473.7641.5....75.....16..2.....2..35..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "9.8..1245....4.3...3..7.9.8........1.937.658.6........5.1.6..3...7.1....3498..1.6",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".83.6.2..5...48136..63.2..979.235..863.1.4.272..786.913..4.97..84265...3..9.2.46.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...39.28..7.85..6.289.6.5.73..58...4.9.....5.5...74..37.1.2.395.2..39.4..36.45...",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".315...289..1...7..5.3...1..2..4.53...6...2...73.1..6..4...2.8..8...1..431...875.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8.....7...92.......6..724.5.39.4..7....3.7....7..9.24.9.651..8.......16...3.....4",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".351....829....1..1...6.....2....4.7..93.62..8.4....3.....8...6..3....519....582.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1.6548..3.5..7681.7.4...5.25.1823..64.3...9.82..9643.18.5...2.7.3245..8.9..1826.5",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "26..938.5.18.6....53.7..1.2..3.86...82.....36...32.5..3.1..9.84....5.39.9.743..51",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "6...3..8......42..8942..5..3...1.8..7.89.31.6..9.8...4..2..1658..13......6..2...3",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".4....29.3....58......9...4..12.9.5.4.8...9.6.2.5.64..2...3......49....3.13....7.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2.........569..1..4..513.......9..3.18.....47.2..6.......326..8..8..925.........9",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....49..14..318.2..91.753..97.5.18..324786159..89.4.76..289.71..3.452..88..16....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....58175...7.....173984.....632.786.1...5.378.519.....694728.....5...18451.....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "4...9..2......459.2.3..7.6..4..21...6.28.34.9...94..8..7.1..9.8.294......3..5...1",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "......9..12....3.....2.9.18....7...5.461.582.2...6....39.6.7.....8....63..1......",
-      "oracleEr": 4.1,
-      "oracleTechnique": "2-String Kite 012",
-      "ourScore": 4.1,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "4.8..75.....41...737..29....8....9.....986.....2....7....69..428...32.....97..6.8",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2659..7.3.8..34.5.93..5.8214298....5.56...98.1....5362843.1..96.9.34..1.5.7..9438",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1..6....92.41.7684....839164.53....7.......6....87.435849....7276.43.15....5..8.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..1...6.75.7.....22..697.1.1.257...3....4....6...195.4.2.751..84.....7.93.5...2..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7....9.4...9.....1..1.756.....5..98.6..8.1..3.58..3.....475.1..2.....3...8.2....5",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....83...9..5.1.......4.6...3..1.896...4...341.3..7...6.4.......5.8..9...72.....",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2.3....67.8769.3156..7...8936..175..72.5.6.34..924..7693...5..2176.2985.54....6.1",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".93..65.....48.3.7.8.3.2.1.876....4995..4..3232....875.1.8.7.5.7.8.51.....59..78.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1..57...6.8..9.....7.3.62485.7....34.......91....2.65326.7.9.....1..4.2...29..3.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...75.2.....8.2..5....6..1.3...1.829..7...4..629.4...7.1..8....4..2.3.....2.94...",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "6....3....5..4.8.6.216.5....8.....7.4...1...2.3.....9....1.693.5.3.2..6....9....4",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "4.1.93..5.3.81647....4.5..361.95473.89.....46.54687.911..5.9....69378.5.5..14.6.9",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".54.6.892...3.85.7.87.2..3.5...42....61...25....85...9.2..3.48.7.84.6...649.8.71.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".347..1.518........9.8.17...4..2..19...5.6...52..1..6...12.4.5........713.2..984.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....5..3..1.974....4....798..7...26....3....36...1..562....5....842.9..4..5.....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..9..7..55.....27..7...184.4...96......5.3......27...6.234...9..91.....47..3..1..",
-      "oracleEr": 4,
-      "oracleTechnique": "Skyscraper 011",
-      "ourScore": 4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "46928...738...6...75.93.1..9.4.7863.6.53.97.4.7364.2.9..8.62.73...4...212...13546",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5.9...3818..6..4924...9...67......349.14.65.728......96...7...5195..8..3327...9.8",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".45.......689..7...9.52.4835..261...............493..8619.45.3...7..294.......15.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8..79..5.12....497..........9.8....6..71.49..5....6.4..........478....19.6..89..2",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "39...1...7...42.8..2...6.75.87.....46.......84.....73.94.6...5..6.78...3...1...26",
-      "oracleEr": 4.2,
-      "oracleTechnique": "XY-Wing",
-      "ourScore": 4.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1.97..68423...15976.7..9....6..9.8513.1.8.4.9985.2..6....2..9.88934...16726..83.5",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".16.35.7.4....8536...647.91..28.....5..794..3.....36..84.369...6735....9.5.47.36.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3.1.5...7.8....1...7...63.514.56.8.....2.1.....6.93.415.46...1...9....7.8...2.9.6",
-      "oracleEr": 2.5,
-      "oracleTechnique": "Direct Hidden Triplet",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...4..6.2.5...1..44..673..1.....65...8.....6...75.....8..264..56..9...8.7.1..8...",
-      "oracleEr": 2.5,
-      "oracleTechnique": "Direct Hidden Triplet",
-      "ourScore": 1.9,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1.6325478.....19522.....1..9841327..5..8.4..1..1596284..9.....74386.....7254896.3",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "67.29....83...1.49...3.865.3.142..6.2.......5.9..563.1.439.2...12.5...94....64.32",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...2..9.4....483.648653...2.1...2...5.......8...6...7.8...942619.412....1.3..6...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".4...6..5.6..2...9.7.4.5.1...57.....6..5.9..7.....81...8.1.7.9.7...9..6.2..8...7.",
-      "oracleEr": 4.2,
-      "oracleTechnique": "XY-Wing",
-      "ourScore": 4.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7..3....93....14....28...3...5...79..3.2.5..45...8...2...57....41....37....1..5.",
-      "oracleEr": 4,
-      "oracleTechnique": "Skyscraper 011",
-      "ourScore": 4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".58..43.29...82.656..5...98...4369878.9.1.6.3364897...53...1..928.75...44.13..57.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "43.1..7.97..45...3.9...254..86.2..1.2..9.4..8.1..7.39..513...6.6...85..13.9..1.75",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1.62..83.....8.....74.1..61.3.87.4.4.......9.5.24.3.86..8.21.....5.....27..64.9.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8..6....1.75......2..5..38...72...98.2..7..5.58...62...58..9..6......12.6....3..5",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "792...4.1..64297..384.7.92.457.6....1..752..4....1.579.71.4.685..51973..2.3...197",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7.3..186..9..5...21..3.64..48.5...97.75...64.93...4.51..96.5..45...8..1..479..5.6",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".51.73........4867.4.....3.1.2.967.5.........9.572.4.3.8.....9.2135........23.15.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..5..87.23.......49..14.3...14.5...6.........7...1.94...7.63..98.......34.67..2..",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1.6..2.....5..31..3..4.9.71...68...9.......6...91...22.1.3..4..48..9.....7..1.3.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".16297854.5..483...74.56..278.....19.43...52.19.....734..62.98...897..4.92148573.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....49...8...7.692.7382641.7...3.1.4.5.....3.4.1.5...6.2498736.318.6...9...21....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7....2.3.....7.5.4....5468.6..2.8.5..98...41..5.4.6..2.6398....5.9.2.....8.7....9",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...9.1..5....7...3..4...196.18....5.43.....62.2....31.349...2..1...8....6..4.3...",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1.795...6.2.....5..3...4..15...9..4..9..4..8..8..2...59..7...2..5.....7.4...193.8",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8...7.914.716..5.32..3197..3..7.86...4726538...84.1..7..2943..64.3..719.789.2...5",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".8..54.2.5..72.91....3..587.6.2..4.88.5...1.22.4..7.9.657..9....49.72..6.2.54..3.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1.79.6...6..7.54...4..826....1...75.2.......6.65...9....627..9...83.9..2...4.18.7",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".8...4.6..346.....6....1..22..81.5....1.5.6....8.46..34..3....1.....723..5.1...8.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "521.....34....67.1.......2....38.....74...83.....49....6.......1.56....93.....465",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....92.1789..6.3..72451.89.4.5.....11693752842.....7.5.86.54173..2.8..4954.13....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".7.3..6...9.8...3..1.592.4.95.12.8.41.4...3.97.8.59.16.4.687.2..8...1.6...9..5.8.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "2..4.579..4.7...83...3.16......4..6.5.7...9.8.2..5......25.4...79...6.5..548.2..6",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...3..1.....21.4...5.6.97.2...9..37..1.....9..35..4...5.31.7.2...7.96.....8..3...",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".8.254.1.....7...4.9...8........2.9714.....6897.4........5...7.5...3.....3.749.2.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".845..37....46.8..2.7.9.65.9.528.13.172.3.548.38.152.6.26.4.7.5..1.52....59..342.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "71...694.52693.7.88......53.715.3...............1.753.14......56.7.95821.853...79",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..78..1..5...73.4...1...23...451.6...5.3.9.1...3.845...75...3...1.73...2..6..87..",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "87...61...9....85...2.8.......96.....61...49.....37.......7.5...85....2...46...19",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".8.2.6.5...37............62..8..51..51.....79..41..3..42............95...5.6.4.3.",
+      "puzzle": "2.9..84.........38.......526...43..5.4.1.9.7.7..28...647.......32.........68..7.4",
       "oracleEr": 1.7,
       "oracleTechnique": "Direct Pointing",
       "ourScore": 1.7,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".1.3.527..72146.893...291......7.89.1.76985.3.98.5......193...843.81796..295.4.3.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5.9.163.7...5796.1...2.3.4..5.73..1...7...8...6..45.9..9.6.1...7.6854...8.539.4.2",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "8.9764....2....7...5.1...4....6.938.6.2...1.5.835.1....6...3.2...5....3....4956.7",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "......1.662.....7..548.6.9.....51....19...32....29.....3.1.765..4.....377.2......",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "69.1...3.4...6..5...58.......4.7.5....9...6....1.4.7.......73...3..2...7.7...5.12",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..1..6..99852.4....6.97..51.283614.77..452..86.389712.13..45.8....1.93768..6..5..",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".95...3.14..2...8.67..4..5272..534..35.....97..491..2318..3..75.3...8..45.7...83.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "41.3.6.2.....7..466..495.8...51....4....6....1....87...6.824..929..5.....3.6.9.72",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7.3....8...1.8..7..2.5....6...2.1..76.......11..6.4...9....8.2..7..5.3...1....6.5",
-      "oracleEr": 4.2,
-      "oracleTechnique": "XY-Wing",
-      "ourScore": 4.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....3..61...6..7.9.2......5..49......9.856.3......42..6......5.3.5..2...21..7....",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5..2.78.667..1.5.338.56.71.....9.657.6.175.8.457.8.....94.56.217.5.2..682.63.8..5",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".9...6721..2..7.49.76....58.34.61...6..2.5..7...87.16.34....51.92.3..8..1687...9.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "32.4.1.69.1....4....7..9....73524..8.........2..89673....2..9....5....2.19.7.8.53",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "52..7....63...8.1...1.568..3.2.....9.........9.....6.8..974.3...1.9...24....2..96",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".4.2756...6.4832.1.3261...7.7.8..4..2.67945.8..5..2.7.6...4712.3.4561.8...7928.6.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "13.75.649.56.1...8.7...6.358.39...6...........6...89.464.3...5.3...8.41.782.41.96",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".639..278.723.......5.27..9.8..6...4.........5...3..2.1..58.9.......675.659..184.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...9....2......3..71..3..65.58..17..2.......4..65..19.48..1..76..2......1....3...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".314.5.6.7..1....5.4.629.13.95.436714.3...8.968759.32.32.956.8.8....4..2.5.7.243.",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...6.4.299.1572.4.4.2..87.37....3....5.8.1.7....7....85.93..2.1.2.1953.418.2.6...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....78....8.3.95..93......67.8..4..55.27.31.83..5..7.92......57..98.7.6....46....",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "4...1..6.....378..7....4.231.....3...3.....9...4.....632.1....5..632.....1..5...9",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....8.71....4...83..2..76..43.71......8.2.5......48.37..42..1..52...4....17.9....",
+      "puzzle": "594..71...7..45...6..9......4...89....7...8....63...2......2..1...51..3...27..649",
       "oracleEr": 2.6,
       "oracleTechnique": "Pointing",
       "ourScore": 2.6,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "74.5..2369527.......314...56..38.52952.4.9.18389.51..71...257.......4693498..3.52",
+      "puzzle": ".42.1685..83..26711.537...2....51264.2.....1.45126....8...971.55961..48..1748.39.",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "1....257.529.78..4.37..6.....2.3.61..9.8.5.4..53.4.8.....5..48.3..98.256.852....1",
+      "puzzle": "4...8.9.2..8172.652...96..786..3....19.....73....2..866..25...454.3196..3.9.4...1",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "3.24.69...9..2..6..58...32....1...49.8..6..3.94...2....63...29..7..8..5...56.71.3",
+      "puzzle": ".46..5.1.27...45...9.72....91...6...83.....74...8...21....17.3...32...97.2.6..84.",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".....2.....85....3..68...513...2.14...1.5.3...49.6...757...68..1....74.....2.....",
+      "puzzle": "..153.92..78.....3...1.......43.....9..4.7..8.....56.......3...2.....81..65.423..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "62...734.3.784..1...823...6..698.1.7.9541268.8.2.734..5...289...8..647.2.735...64",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..581...2.4..9....1....4.9..74.52938.319.824.82974.15..5.3....1....7..2.2...853..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6....3.5......49.33..9....112...638.4..7.5..9.678...252....7..87.83......4.1....6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".5.........298..539....17..1..3...6....159....3...4..8..78....121..963.........9.",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".79....41612...75.54.719.26...841..74.8.7.6.37..936...16.328.74.84...53223....16.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "92.61..5.17.5.26..45.789....1.4....9...2.7...6....5.8....854.21..13.6.74.8..71.65",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....2....4..58.63.5649...1..39.5.8..7.....1..2.3.75..4...3165.63.74..2....5.....",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..12.8....587....6..2....915...46..3.........6..58...449....6..8....935....8.34..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".86..9........6..1.73.1..6.3.5.....6...5.4...9.....4.8.3..8.54.7..4........3..82.",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "35...87..729..58.48.429...3.73.192.5.9.5.3.7.5.847.93.6...315.29.27..168..59...47",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....682.39.2.7...44.8921..7.1...578.5.......1.791...5.6..3821.92...5.6.87.361....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6914.72.5.........8.569.....83.7..29.........46..8.71.....149.2.........7.29.3548",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...29.5..6.2.3..9......82.126......3.14...97.9......527.96......5..1.3.9..8.52...",
+      "oracleEr": 3.4,
+      "oracleTechnique": "Hidden Pair",
+      "ourScore": 3.4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "64931..2......8..1.3.27...5365.9721.7145.2689.8214.5732...81.5.4..6......5..29738",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5.7.....6.62.57.49...631.2.12..9...8.38...49.4...7..13.7.945...85.76.93.6.....2.5",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "37..5.8....938..5.1.89.6...214.........2.5.........982...7.31.8.4..293....2.1..69",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".42..9.....12.3..8......71....4..69...59.28...94..6....73......6..3.14.....6..38.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "95...7.....6.1..9......6..1.1.75.3..8.2...5.6..3.62.8.7..9......4..2.9.....3...58",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".9.6.......189325434.1...76.72.38169..39.45..65971.48.13...9.489243867.......1.9.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "1..6.....82.913476.9..75.8..8.13....23.....18....49.6..6.29..4.458367.29.....4..7",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...4..3.....9.7..5562..1.9..9.7..4.3..41.36..3.1..5.7..8.5..9671..3.9.....9..6...",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "21...4....85....966....7....7...2..8...169...3..7...6....3....985....64....4...37",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..3.4....47......2.289.5........1..52..4.7..69..6........2.958.1......47....6.9..",
+      "oracleEr": 2.3,
+      "oracleTechnique": "Naked Single",
+      "ourScore": 2.3,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "269.1.5.31..9....75..83.92.651..8.39.93.7.85.82.5..146.15.82..49....4..57.6.5.218",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "534.7...99.72.13.6..2.......563..1...938.546...1..259.......9..6.97.48.17...8.632",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2879.5..15...2....6.34.7.5.......6.2..8...5..7.6.......7.8.64.5....9...38..5.2167",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..57.....4.6....9.18...5.7.3...89.....8.4.9.....37...5.1.9...68.3....7.9.....62..",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2....649...31...5.....4...6.86.5.2....4...5....7.1.38.7...2.....6...37...324....5",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5.2..78..1.786...48..24.59.638.1.45.41..2..86.75.8.139.81.32..59...782.3..61..9.8",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....38579.....13..365.9.8..97...46..85.9.3.21..32...87..4.1.793..93.....63742....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".968...4.58.4..6.2..239.5..8....5.....9...8.....1....3..8.649..2.5..8.37.4...728.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".45..36.9..9.1..8...86...7.........1.1.5.2.6.7.........8...67...5..7.9..9.74..51.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6..1....5...5.8..3.5.7..12.93.....5...5...2...7.....18.61..5.3.5..3.4...8....9..1",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2.17685..9..42...8.78.912.3.93.7.45..6.1.2.9..82.4.63.8.735.12.6...84..5..56179.4",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "1..9.4..398.27..1.2....896...61...49..15.27..73...92...724....8.1..25.746..7.3..2",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".2.....3.8....567....89.2...82.56..7..72.95..6..71.42...5.32....481....9.3.....6.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "84............34...9.41...7.27..68.19.......41.85..62.2...85.1...12............72",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7..9..23....7......53.....9.728..69.3.1...8.5.49..531.9.....56......7....34..6..8",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "3.462..71...4.79.8.789.5.265317.....7.91.43.2.....671545.8.129.9.62.3...28..791.4",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..1.7.3....3.6952797...2.4...7...952.98...71.532...4...8.2...9572695.8....9.8.2..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "654.8...9..7...56...92......7.3.4.91..1...3..32.1.6.5......29...45...1..1...3.647",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "8.52.394......48......1...7.....1.7.9.1...3.2.4.7.....5...8......69......893.67.1",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....5.2.2.3..6.4...5.1..9.8..59....5.......8....28..6.6..5.7...3.7..1.2.5.1.....",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".49..63277..3..481...4.26..256..71.9873...2549.45..768..72.8...385..1..26219..87.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5.16.2..7..8.1.36.7.38..1...7...52..84.3.9.71..27...9...7..39.6.86.7.5..1..9.67.8",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".5..4.....3.9..81.79....53.3..52.6...2.8.6.7...6.71..8.79....86.15..7.2.....1..4.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "3.....286...4......513...4.5.6....94.........82....3.5.1...453......6...732.....9",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..569.......2..4.76.7....2...6.1...82.......63...6.7...8....9.19.3..5.......748..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4.6.281..2.563.48.98...4.6.6..971..27.9.8.5.63..562..8.9.8...31.63.958.4..431.9.5",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....4.26..9.17534.4...5.91.2....37573.....49514....6.69.7...8.48762.9..25.4.....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....1.986..5.....26..37..14.4...62.3...7.1...3.84...5.52..67..11.....4..836.5....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..563.2...49.2.8..........55..1...3.1.6...5.9.9...2..14..........1.7.34...2.469..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5..9.8....2...4.16.46...9....57.....4.......2.....94....8...14.91.4...2....3.1..5",
+      "oracleEr": 4,
+      "oracleTechnique": "Skyscraper 011",
+      "ourScore": 4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".6.5.8.2795.2738..2..6149....2.5.3414...6...9793.4.2....6735..8..9126.7353.4.9.1.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".1.7653...9...8..7.58.394....7384...4..5.1..8...9765....269.74.3..4...9...6857.2.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7.34.8....6...72..3.9......652..9..719...264..3..451......1.7..57...1....1.59.8.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "9.35...7.71....8......714..1.89...................26.4..932......4....62.8...53.9",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".9..38.....3...5..4....5....4986..5.6.1.5.8.2.2..4193....9....8..6...3.....61..9.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".539..1....13.24.94..8.752..2.64.9.893.528.146.8.91.5..124.6..53.62.58....4..923.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".8.351..4.41.....83697.8.5..736..4.....927.....2..467..2.4.93166.....54.1..563.2.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6.43..2.1.1..5...9.......3...85..3.2.562.198.2.1..74...6.......9...4..2.1.5..38.6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "8...9.541..3.7.8...6....7....6.....478.6.4.525.....6....8....3...4.2.1..395.8...6",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".1.7.4.3.6.35..7.8478326.912.1..3.....79524.....6..8.918.4953725.9..71.4.4.1.8.6.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "89.37..5.6....9..832185..7.5..78.26...........78.12..5.3..984211..4....3.4..31.86",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....3.51.17..95.4.6..2..9835.......6.1.....3.9.......4362..9..1.8.76..29.91.8....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "856...2..7.1..4...4.....7.6...97...5..8...6..5...16...1.5.....9...2..5.3..9...421",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7.2......1..7.4.2..4.2...35..4..1.9....623....2.9..1..26...9.7..1.3.7..6......5.9",
+      "oracleEr": 3.2,
+      "oracleTechnique": "X-Wing",
+      "ourScore": 3.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "8...54.9.2..38.74...6129.3.358.6.1...6481235...2.4.867.2.4789...89.35..6.4.69...3",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....529.4....69.1...3...26..85.3..294925.768336..9.74..48...3...3.67....5.618....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "......2.94.9.523...3..1456..4.1..9..9.......4..6..9.1..6349..7...472.6.57.5......",
       "oracleEr": 3,
       "oracleTechnique": "Naked Pair",
+      "ourScore": 3.4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7.............79854....8....5..7963..1..8..5..9451..7....7....22369.............3",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".......1.14.8.......86..5..5....9.26...374...91.2....4..6..79.......1.63.3.......",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..67..218...1..3.98..93675459...218..6.413.2..218...76143567..26.7..9...259..16..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "15.8..36.37.1...5......7.296...71.8582.....3191.68...279.5......4...2.18.83..4.96",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4....7986..5....4.98.3..52....1.98.....732.....24.6....94..3.68.6....4..1789....3",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..1.72.5...74...9..9....4.7....4...36..5.3..88...6....5.4....8..6...45...3.29.7..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...2.73..2..69...8..8..497.......62.7...3...4.12.......679..4..8...41..7..47.8...",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "41.237.6.8269514..5..64..1.7....2.4.3.4.7.1.5.6.5....3.3..65..4..1789356.8.423.91",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..23..16..8....5..6.9.528.3.17..9.34.34.7.98.92.4..71.2.591.3.8..8....9..93..46..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".2.178..3....9.82......29..1..93.4.8...6.5...8.5.14..7..85......94.2....2..869.1.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".8...42....9..65...6.58.94..1..73......4.1......26..3..76.48.5...56..8....39...6.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..5.9...89..7.6.5...3.2...16.9..4....5.....2....9..6.43...8.9...9.1.7..37...3.5..",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".69..7...7.8.2369..5.8.6.7.9.7231.866..784..928.9654.7.2.6.9.1..9347.8.5...3..94.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "184...9.....49.68.69...53.796..4187.....8.....4835..693.96...28.76.29.....5...796",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".2..6...4..9.1..8.876..32.5....3.1.9...1.6...7.3.2....3.87..591.9..5.8..1...8..2.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6.2.5...8.9.....6...7..3..4.6.9..4...85...12...4..2.9.4..7..3...7.....5.5...1.7.2",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....5.2....4..957....731...6.93.2....12.65....2.41.6...315....146..9....9.7.....",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "3.14.85.692..6.1.465...7.8.2..54....547289361....16..2.9.6...487.5.3..194.29.16.5",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "182.9.6....64......49...758.5.68.342..8...5..264.53.1.827...46......62....5.4.973",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "9....5.3....7.4...5.6.3..1.6..2591..1..4.8..2..2173..4.8..2.7.6...9.7....3.5....9",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..2....93.3.8......5..9.71.6..25.8.............9.73..6.23.1..8......7.4.76....9..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...5..29.....49..5...87...48....5.72.3.....4.57.6....83...18...9..36.....81..7...",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "62.4..8.31...72.96..91..7.5378.54.625.1...3.929.63.5789.3..62..85.74...17.6..3.84",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2....4.137....8...13.5..846..4675.82.2.....7.56.8324..378..6.54...4....749.7....8",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".5.3...1..1.6.9..878.4..9....395..8...8...1...7..614....7..6.928..7.3.4..6...8.7.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".2.9..7..7....3..6.3...721...2.....4.59...62.1.....8...683...4.9..5....2..3..9.5.",
+      "oracleEr": 1.7,
+      "oracleTechnique": "Direct Pointing",
+      "ourScore": 1.7,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".72.1..3..8.4.....4..8.7...2......9.9.1...3.7.5......6...3.1..2.....6.8..9..8.41.",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2.6,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..379..62..8..61..562143.89....7284.254...397.7193....92.867413..74..6..41..259..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "95..1...8..4..9.7.73.65894.2..8.64.7.........6.75.4..3.78265.94.2.7..6..4...8..12",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "1......8.....1.2648.2..4.9...6.7381..7.....5..8349.6...5.7..1.6248.6.....1......8",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "1.24...5.65........8.9.1....7.1...2...38.97...2...7.9....7.5.6........38.1...89.4",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..9.8.5...5...4.3.8....917.47.........89.56.........83.317....9.6.5...1...7.9.4..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "42...9...97.1235.835.8.7.96.13..4.8.69..8..34.8.9..16.83.7.6.211.7492.53...3...79",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..1....62..96.8..7.6.1.7..39153...786..8.2..528...56415..2.1.8.3..5.97..14....5..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "3.12.649..9...43......3..15....82....83...25....64....82..9......41...2..564.78.9",
+      "oracleEr": 4.2,
+      "oracleTechnique": "XY-Wing",
+      "ourScore": 4.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".5.....322....78.5....12.94...26...3.3.....2.7...43...51.72....8.31....994.....5.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2.......3......628..46......82.65...15..7..86...82.15......39..417......6.......1",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4231658971....3.255984...3.65...1......579......6...54.1...456873.9....2845216973",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "264.3.....51728..98..6..2.35...96.2...8...7...3.84...57.6..9..14..27398.....6.472",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..1.9..5.24971..63......1..3..8....78..973..49....2..6..3......48..61925.9..2.6..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "89.2..6..362.....8....9....64.7.....2.15.89.3.....9.17....6....1.....876..6..1.59",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..37...2.5..6....9......6..47..628.3...1.7...6.249..17..9......8....3..6.5...17..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".9.683.25.1...47.....71.9648.54.26.12.1.5.8.39.31.82.7634.79.....93...8.12.546.7.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..9514..615....9.437.9.2........91.72.74.16.34.83........1.3.797.3....619..6473..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "8.4....9.63.721...27..8..3.....1.356.........361.4.....9..3..78...295.43.4....9.2",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..1...78.....7.92..5..236......468...8.....5...981......263..1..43.8.....76...2..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".832.....95.....1...6.94.3.1..6.2...............1.8..4.7.43.9...4.....52.....648.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..5.274969.6...2.5...6..1731..7365..234.8.967..7492..1529..8...7.3...6.886127.3..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "356.....2....7.31.1.4..3985...4..23721.....64435..6...7913..6.8.42.5....5.....429",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2..9.71....1..5...6.9.....316.7...383..8.6..584...2.677.....3.2...1..7....32.4..1",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..5.6..48..2..4......5..92.64.839...............427.39.26..3......9..8..97..5.1..",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4....2..3..8.46.2..76....8476..9.................3..6154....29..8.95.1..3..7....6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".5...82.9..839.6159....24831...2.56..8253694..96.1...83472....6819.437..6.59...3.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "76..4..31.24..1..71..6..4.5....92.4641.....5969.31....3.6..7..42..4..69.94..2..73",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".6....92..5493.6.81...6.3.......98.7.8.....3.4.63.......3.5...28.1.9756..25....9.",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "56..2.7........8.1.836..2.....9...2.9..235..6.5...7.....6..291.4.7........5.1..37",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6...3.8..98.6...1..14.5......9..6...2.......9...3..5......4.35..7...8.91..2.6...7",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".8..14392....2.1.8129.85..694..6.8.1.761.824.8.3.4..654..85.6272.8.7....63729..8.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..294.8769.8.2...4..76..9.24..8..3...2.7.4.9...9..2..87.4..62..6...7.1.3291.837..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".2.9.8...9.5..26....67..9....28.67.91.......86.83.91....7..53....42..5.1...6.4.7.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..1..6..25..32.....2.5...1..53...2.6.4.....9.1.6...35..6...9.7.....37..58..1..9..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2....7.8....92.5.7..3.....971.6.8....8.....5....3.5.188.....6..5.1.36....4.2....5",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".6.8.9..3.951326.43...4...1...2..947179463285284..7...9...1...87.869531.6..7.8.5.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...2.1..75.7..39.2....97.316.13.5...7.51.96.4...6.81.382.51....4.69..3.51..7.6...",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....6.95..1.5....8758..9..66....7.3..25...17..7.9....43..6..5415....4.8..62.8....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....7..5...246..78......26.....15.3.1.5...9.6.3.78.....23......69..417...5..2....",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "62..9....3...4..1..71....6..4.56......52.14......38.7..1....94..6..2...8....1..57",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".2.96143...63.281.4.3.756292....7...7.9.2.1.8...1....219475.2.6.672.85...52614.9.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....64..3.4..5269..1.29..7.85.37..4.1.5.8.9.4..26.38.5..79.8..1486..9.3..91.....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2...7..1448..5..2..3..2......2694.5...6...8...1.3826......4..8..5..3..6192..6...5",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4...3.592.....9..763..........2..35...86.74...26..4..........631..9.....267.4...1",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..281..4.....5213..1.6....5.2....8....31.47....4....5.2....1.8..3857.....7..985..",
+      "oracleEr": 4.2,
+      "oracleTechnique": "XY-Wing",
+      "ourScore": 4.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..75.8..9.8..2156.156.79.3..12....9849.615.2367....41..2.95.374.6524..8.7..1.32..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..9..7..12.658.793..8963...9..7....51.3...4.76....4..9...3795..497.523.63..4..9..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".6.345..2..7..8..5......48..3621..7.1.......9.8..6324..74......6..7..8..8..654.3.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".......7.1..5.94....8.1.3.58.....7.1...483...4.5.....35.2.7.8....76.5..2.4.......",
+      "oracleEr": 2.3,
+      "oracleTechnique": "Naked Single",
+      "ourScore": 2.3,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....4....5.6......2..63.57......8.4..684.513..2.3......74.59..1......4.2....1....",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "379.1.6.4.2....935.8..69271.6.7..1..7189.6423..4..2.6.95687..4.147....9.8.2.9.517",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".51..2734.9..53..6438.6.....1...682....2.8....861...4.....1.3721..82..5.5276..41.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5.4..623....4..8...28...1.6...819.2....2.3....8.657...8.5...71...2..1....173..4.2",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "9...2..83.7...1...8..6....7...27.8..2.7...4.6..1.46...1....5..8...4...2.43..6...9",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6..2..7..92....6...8.3.9.....6.78.....86.19.....54.3.....8.3.1...5....93..2..4..5",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "596.2....34.6.7.858....5.6.7.8.396.493.762.182.158.7.3.7.2....618.4.6.72....7.341",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....63858....5196.3..8.7..218..4.5..56...47..4.5..612..2.5..6.1874....95638.....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".92.....1...4.896.6....34.5.43...1..81.....26..6...83.9.82....3.673.9...2.....61.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "58...91.....6...85.37...2..1....3....6.941.2....7....4..3...76.27...6.....92...53",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..2.4..9.1.....37.3..2.......3.6...1.9.3.8.4.6...2.7.......2..8.15.....7.6..1.9..",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "98.5.76.35.1.86..93641.9...2..43....1469.2385....51..4...7.35484..29.7.17.58.4.32",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6.82.3..5..2.194......4.7.6..6..25482..4.6..19845..2..8.9.5......732.6..5..9.78.4",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5.4..3.1..9.4.8...7.2......6..1275..8..9.4..1..5386..9......1.8...8.1.3..4.7..9.6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7...16..9..2....4....9.8.7.4.67...1.........6...89.2.8.2.4....4....5..8..79...1.",
+      "oracleEr": 4,
+      "oracleTechnique": "Skyscraper 011",
+      "ourScore": 4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7....9.....8.7.3.9..1...4.6.62.9.....7.5.8.2.....2.19.8.4...5..5.9.3.2.....8....1",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "1.587..36.6..4.27..943.....6732..9.148.713.525.2..8743.....719..57.9..2.94..328.7",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "16...7.5.4...16...7.594..21..7..149...16547...847..2..21..635.7...19...2.4.8...69",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...4....75.73....2....79.851..8..97..83.6.24..62..4..841.53....3....15.42....7...",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...8..364.4.59............9.28.1...64.5...2.16...3.74.7............79.2.913..2...",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2.46.9........5..8...7..4.5.36.9....9.7...5.3....3.67.7.3..4...4..9........8.13.7",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....7129.259.48.7.7.2.86..95.8732..7.2.4.9.3..1692.54..37.9.6.6.73.159.5984.....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5..9..7..4...72.1667.4...89....18.7.75.6.3.21.2.75....14...5.9823.89...7..6..7..3",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....83592..1......9.64.82....3..94.12.....83.39..6....86.13.9......4..64739.....",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7.6.......9.4..354....32..8..19...6.........1...34..9..52....324..7.5.......9.8.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "3.1.....88..5..7...2.6...9.....7415...5...9...1329.....3...9.7...8..2..92.....6.1",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "21...465..4873.2..57.1628..12.3....83.4.2.7.59....8.21..1683.42..2.5917..962...83",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4.....81..27.369.4..187...231...8.2.5..3.9..1.8.7...931...836..7.391.24..98.....5",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".96.4....8..95.73.3.71........69..7.4.1...3.2.8..31........92.7.73.28..1....6.98.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....9.15.73...4.......25.7.9...56..2..4...8..3..28...4.2.53.......9...28.49.6....",
+      "oracleEr": 4,
+      "oracleTechnique": "Skyscraper 011",
+      "ourScore": 4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".9..51..683.296.1..51874923..9...231.1.....4.572...6..76541238..2.689.579..73..6.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".81.62.3.....3.16.62.47...8....2.7.329.3.7.857.5.8....3...48.51.42.5.....5.79.32.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..137.65..7.....1.59...134..4.7.......59.48.......2.3..825...93.5.....6..39.261..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..568.......5...28.76...4...1.3.4...2...7...9...2.5.4...4...73.38...1.......231..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".1.....69.5.7.......98..751.651.....8.......5.....548.674..15.......6.1.18.....3.",
+      "oracleEr": 4.2,
+      "oracleTechnique": "XY-Wing",
+      "ourScore": 4.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".72539.4.3..417.8.9..8..5.7.9.6.3.25.189.476.62.1.5.9.2.9..1..8.3.248..6.8.79631.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "691524.7.8.5.7......78.129.18.......9.6...8.7.......23.596.87......4.6.9.6.937154",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "53..27..9..71......2..46.3...3.1..9.8.4...1.3.1..7.5...7.48..5......59..3..79..61",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...2....342.....79..7.6.1.....71.4..1..6.9..8..3.58.....4.8.9..37.....126....5...",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...3..6..465...3..3...46.......3821....5.4....5361.......27...6..9...741..7..9...",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7.831926.695.743....36........8456.3856...7944.2967........61....158.476.647215.9",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".4.1..38.....3.6..3.1.4...267...15.94386.92719.57...465...1.9.7..4.6.....93..2.6.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5..4.3........1...1.38..4..27.649.5.95.....14.8.715.69..7..25.6...9........1.6..2",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4....1.9.2....8..4..9..26...5..76...7.......5...12..4...42..5..6..3....9.1.5....8",
+      "oracleEr": 4,
+      "oracleTechnique": "Skyscraper 011",
+      "ourScore": 4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".19...76..36....2...269..3.1...29.....41.83.....76...8.4..136...7....14..61...28.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4.163..2586..9..4323...4..9..39...87.8274369.97...83..1..3...7832..7..1475..812.6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".2...31.5.5.4287..7.36......6.38.4.73..7.6..82.8.45.3......93.4..1234.7.4.28...9.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....1..7..2..9358.41.6..92....1..7..5.1...6.8..2..6....65..1.37.4983..6..8..6....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..7.5.....1..8.5.35.6..32.....4....1.29...85.4....7.....59..3.79.8.7..1.....1.6..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6..8..1.3.8...5.2....49....2.....35.5.3...8.7.67.....4....13....9.7...3.7.1..6..2",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
       "ourScore": 2.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..2...53..5.8....1....29......4..9.26.9...7.38.3..6......69....7....1.5..38...1..",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "41.9.3.5865..1..2997854.1..1..2..573.6.....8.387..5..4..9.5134754..7..1273.8.4.95",
+      "puzzle": "8.295346..9.24...5....872...8...2.4362743915834.7...2...382....2...94.3..693758.2",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".7182..35..3.158....54....25..1.7..3.1.5.2.4.4..3.6..81....83....265.9..89..3165.",
+      "puzzle": "495...276.8.56...416....5...58..342....2.4....246..39...2....135...32.4.376...952",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "8.65.9...25.6.3...7.31.....4..9...1.93.....46.1...5..9.....49.3...2.6.84...3.16.2",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".82..49...3.96........7..4.31...9.....6...4.....5...17.5..8........91.2...42..18.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "14.37.9.5.3..16.72..8.523.4..78..5.6.23.4.19.8.6..12..6.129.7..25.76..8.3.4.85.29",
+      "puzzle": "73...1..6148.......952..38..2...5...4.6.9.7.5...4...6..81..753.......6485..3...97",
       "oracleEr": 1.2,
       "oracleTechnique": "Hidden Single",
       "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "...85...19.23..45.518.4..7.6.3.1...21.4...5.62...9.1.7.4..6.285.26..97.47...28...",
-      "oracleEr": 1.2,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".1.867....9.1.2.8...8..56..83....21.7.......5.41....67..34..1...6.5.1.7....326.5.",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "........1794.6..5..13.9.6..9...1.2..8.15.69.3..6.2...5..7.8.53..3..4.7894........",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "...4..15......2...7...6..8..8..219.737..8..212.197..6..2..5...8...2......36..9...",
-      "oracleEr": 1.5,
-      "oracleTechnique": "Hidden Single",
-      "ourScore": 1.5,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....21.6...9.4....2...89..4..1...4589..7.4..3432...6..3..17...6....5.7...7.49....",
-      "oracleEr": 2.3,
-      "oracleTechnique": "Naked Single",
-      "ourScore": 2.3,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....7...3..2..9518.8.5.....3..45..9...........7..86..4.....5.4.4281..3..9...4....",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".5....4...81...629.2.8.4....34.571.............236.59....7.9.4.793...26...8....1.",
-      "oracleEr": 2,
-      "oracleTechnique": "Direct Hidden Pair",
-      "ourScore": 2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".5..7...44...827...1.......78...45..5..8.9..2..27...36.......1...546...83...1..4.",
-      "oracleEr": 2.3,
-      "oracleTechnique": "Naked Single",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....7...82....4....1.6..97.....318.5..85.72..5.629.....51..6.2....3....46...2....",
-      "oracleEr": 1.7,
-      "oracleTechnique": "Direct Pointing",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".....3....452....3...84...9.714....2..63.27..5....843.2...39...8....691....1.....",
-      "oracleEr": 1.7,
-      "oracleTechnique": "Direct Pointing",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "28...3...........7..76.45......7..15.7.9.1.6.69..8......65.93..8...........3...54",
-      "oracleEr": 1.7,
-      "oracleTechnique": "Direct Pointing",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1...95.2.3..8....5...2.19.89.5.1..8...........1..4.7.37.19.4...8....2..6.5.18...9",
-      "oracleEr": 1.7,
-      "oracleTechnique": "Direct Pointing",
-      "ourScore": 1.7,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "......7..4....9....2..563..8.234.97.9.......3.67.924.8..197..3....8....1..4......",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 2.6,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": ".49..1.6...86.....6....9..1..7..2..6.2.....8.3..1..4..1..8....9.....65...5.7..24.",
-      "oracleEr": 3,
-      "oracleTechnique": "Naked Pair",
-      "ourScore": 2.6,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....9.15....4....3.21..6..7.8.2.4...9..5.3..8...9.7.1.2..6..43.6....9....97.4....",
+      "puzzle": ".......4.189.4..656.....3.....53.....139.867.....64.....6.....224..1.953.3.......",
       "oracleEr": 2.8,
       "oracleTechnique": "Claiming",
       "ourScore": 2.8,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "97.2..1..62.....9....1........64.5.1.6.....7.4.5.17........8....5.....47..4..2.53",
-      "oracleEr": 2.6,
-      "oracleTechnique": "Pointing",
-      "ourScore": 2.5,
+      "puzzle": "..54..7..1.......9...27...55.76...3...1...6...3...84.77...62...3.......4..2..93..",
+      "oracleEr": 4.1,
+      "oracleTechnique": "2-String Kite 012",
+      "ourScore": 4.1,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..7...5.4...3......8..47.2...6.8...1..36.54..4...2.9...1.95..7......2...3.9...6..",
+      "puzzle": "8...576.99.512.8..1.....7.5...56829353.294.67296371...4.7.....6..9.835.23.264...1",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....7691..96145..1.6...7.2....329.49..4.8..32.497....8.2...3.6..15834..4732.....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..7.9.8.4.....4..1413...629...5.67..3...1...5..18.2...729...3566..2.....1.5.6.4..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".84.6.7..7.6....3......8...3.72..4..4...5...1..2..49.6...9......3....1.7..8.3.54.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".13.4....5..2...4......39.14..7..62...7...3...26..5..78.26......7...4..6....8.47.",
+      "oracleEr": 2.8,
+      "oracleTechnique": "Claiming",
+      "ourScore": 2.8,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4.1..5...95273.61486.42..9..792..43.5...7...1.86..425..9..42.75215.87349...5..8.6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5621..47.......9611946...5..76.....4.1.7.8.9.8.....71..5...2639928.......37..9182",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...67......1...496.36.4..7872....8..1..435..7..3....5165..2.78.817...2......68...",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7...4...914....32.......1.7....1693.8..4.7..5.1695....9.1.......65....984...6...1",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6....3..8.1...6.2338........6.5.1..2..3...7..7..4.9.5........4924.6...3.9..7....1",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2.54.3.68.6.7.52..8.196..73.1..5..8748.1.9.3565..7..2.12..473.6..46.8.1.73.2.18.4",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".6.183...8.25473.....2..847.7..3..5.1.3...6.4.4..7..3.431..2.....97584.3...314.2.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".71..6..9.5.......2.9.84...7.486.5....84.96....6.157.4...63.4.5.......3.3..7..26.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..48..9.1.2.....4..6..14...9..65.3......2......8.47..9...48..7..3.....6.6.1..54..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7.23.458...915..4.8.562.3.9.9...56.26.89.24.12.14...9.1.4.839.5.7..418...832.91.4",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "3.....4..962.18537..5..312.....5.84.1..3.4..2.54.8.....961..3..83754.219..1.....4",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "........12....4.8...5.983..3.78.....8.1...2.9.....78.5..845.9...6.9....31........",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....47.86..9..65....1...42.51..........9.2..........74.64...8....53..1..39.86....",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".9.31..5....6..1741..4.2..36892435.7.7.165.9.5.38792468..5.6..9732..1....5..24.3.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "8.256.1.7.1.2....6.9..1.8...71.23.69..5...4..38.64.71...8.7..5.9....6.7.2.7.583.1",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "73....62..2.......4.8.2.537.5...92.8...5.7...9.61...7.574.1.9.6.......4..81....53",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7.3..15.......9.86.52........1..6..2..5.3..7..6..4........15.98.7.......39..5.2.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".8...9....6....1..2..831....18.2..64...956...65..1.79....597..6..1....4....1...7.",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..387..6.5..9624.3.82..31..79.2.8316.3..1..5.1263.5.48..81..52.3.1629..4.7..846..",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".6728...3.....76....25.3..768...94.247.8.5.162.17...595..1.87....39.....7...5213.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "23..16.84......3.66.49.8.....6..1...34.....27...8..6.....6.52.81.8......46.18..39",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "5.1....8....217..4.9......7.3.1..5..2.4...6.8..5..6.1.3......6.1..769....5....8.1",
+      "oracleEr": 4.2,
+      "oracleTechnique": "XY-Wing",
+      "ourScore": 4.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "8.6..1.3....3...4.5.3...7....1.28.......3.......96.3....2...4.7.8...9....7.5..8.2",
       "oracleEr": 2.6,
       "oracleTechnique": "Pointing",
       "ourScore": 2.6,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "3..7.6...8.2.547.......1.38.......51..14.28..68.......29.6.......794.2.5...1.5..7",
-      "oracleEr": 2.5,
-      "oracleTechnique": "Direct Hidden Triplet",
-      "ourScore": 2.5,
+      "puzzle": "13.54..7.46...2...92.8.3465.53.6.84.68.4.5.37.41.9.52.5721.4.93...2...54.9..57.81",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".....843.....51..79..23.16..1.....8...4...3...9.....5..39.45..26..39.....278.....",
+      "puzzle": "95.3.1.8..6892.7.1........5812..93..64.....12..32..4967........3.4.8657..8.4.7.23",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....839..37.1.562.62.7....3...96.4...........4.13...6....4.12.623.5.97..749.....",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".267......4.3..7.87...42...97.......8.2...5.1.......79...28...36.5..3.1......145.",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "2.9....15......2.7.5.....4.1..9.67..7.......8..65.7..1.3.....2.9.7......68....1.9",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6.1.48.3..8.2.69..2..139.8...23.76.59136.24787.68.43...3.481..2..79.5.4..2.76.1.9",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "1.3...764..265..1..9.7.3..5.4.36.1...7.5.8.4...6.47.5.4..9.1.8..2..764..318...9.6",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".21..8..9.....6.....4..93.52.3.845.74.......21.572.9.47.28..1.....1.....5..6..79.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....72398.2....4...5...1...6..8.7....94...86....3.6..2...2...4...8....3.24165....",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..9.75436....9.....1.36...........7.7.8...3.5.5...........32.1.....8....26395.7..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...8..3.1.392.7..6..691.72.79852.463...796...261.48957.23.751..9..6.253.8.4..9...",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".8...1.79.1..7.38.73..89.2545.8...9....1.2....9...6.3892.71..54.71.5..6.54.9...1.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..2.8.13991.....85....1..7.....537..47.....23..679.....8..4....24.....17631.7.5..",
+      "oracleEr": 1.5,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.5,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".....1875.4..7......12...6.695.......7.....5.......392.2...81......4..3.1643.....",
+      "oracleEr": 2.5,
+      "oracleTechnique": "Direct Hidden Triplet",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7...5.4....79..1.16....5.9....1...3..23.67..8...2....3.7....95.1..83....2.9...3.",
+      "oracleEr": 1.2,
+      "oracleTechnique": "Hidden Single",
+      "ourScore": 1.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....691...1..8....6..57.8.4.7....529.........894....3.9.3.18..5....2..4...573....",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4.9....5..7.3.5..1...6.....9.285.4.....4.3.....1.963.2.....8...1..2.7.3..2....7.6",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".5.....92.48..7..3..918.....91.4....2.......6....2.74.....186..8..3..27.96.....8.",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "56....8.9.8765......37.....75..6....6..3.2..5....8..17.....49......2675.2.5....68",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....6.39.97......8.1...26..3....7..6.5.9.8.4.1..5....3..14...6.2......79.69.7....",
+      "oracleEr": 2.3,
+      "oracleTechnique": "Naked Single",
+      "ourScore": 2.3,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".1.832..592............1.3.6.54......4..5..1......73.4.8.1............432..384.6.",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".674.....5....3...394....65.5....7.3.4.....2.7.9....4.41....896...2....7.....923.",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "9..74.3.......2.9....6.5..22.1.7..8.7.3...2.4.4..1.7.53..1.7....8.5.......5.29..7",
+      "oracleEr": 2,
+      "oracleTechnique": "Direct Hidden Pair",
+      "ourScore": 2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7...4..3.493..7....5.7.9.6...7...3..36...28..9...6...9.7.1.4....2..537.5..6...9.",
       "oracleEr": 2.6,
       "oracleTechnique": "Pointing",
       "ourScore": 2.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "...78925.....6...9.....463.6......7.5.4.1.8.2.9......6.821.....7...3.....61948...",
-      "oracleEr": 2.5,
-      "oracleTechnique": "Direct Hidden Triplet",
+      "puzzle": "6..4.....5....3..9...6.18.3.26.....8.4..3..1.9.....62.4.29.5...1..3....4.....8..2",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2.6,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "9......8.....3.25.2...56..9..48.1....2.3.9.4....6.53..3..16...4.46.8.....1......7",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2.6,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....3......2..8.9...5....4872.3.6..53..2.4..94..8.7.6216....9...7.9..1......7....",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2.6,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "6..2..3.8....94.2.....8..144..72.5.............3.48..292..1.....3.85....5.8..9..7",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2.6,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7...5.1....8...6.3.....9..41....8.79...316...83.9....15..2.....3.6...4....1.8...6",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2.6,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7..3.62....2....1..2..58.95...2....19.....46....1...33.46..7..2....3....86.4..5.",
+      "oracleEr": 3,
+      "oracleTechnique": "Naked Pair",
       "ourScore": 2.5,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "2.....43.7.8.42.....16......6..3.5.9.........8.9.7..4......38.....51.3.6.83.....7",
-      "oracleEr": 3,
-      "oracleTechnique": "Naked Pair",
-      "ourScore": 3.4,
+      "puzzle": "3.9....6.5..3.....28...54..14...3......7.1......6...24..32...46.....8..1.2....9.3",
+      "oracleEr": 2.6,
+      "oracleTechnique": "Pointing",
+      "ourScore": 2.6,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "...7...5......86...62.4.1....9.5.46..16...78..48.9.2....3.7.81...54......8...2...",
-      "oracleEr": 3,
-      "oracleTechnique": "Naked Pair",
-      "ourScore": 3,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "............1.672...58.4..6.3...8..75.8...1.46..2...5.1..6.75...673.2............",
-      "oracleEr": 3,
-      "oracleTechnique": "Naked Pair",
-      "ourScore": 3.4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "7.4..9...8..1..2.3.1..3.84....41....47.....12....96....87.2..3.1.5..3..6...9..5.8",
-      "oracleEr": 3.2,
-      "oracleTechnique": "X-Wing",
-      "ourScore": 3.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3.2..16...1..8......9.....1...2.89..9..1.6..5..67.3...4.....3......6..7...54..2.6",
-      "oracleEr": 3.4,
-      "oracleTechnique": "Hidden Pair",
-      "ourScore": 3,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "....53.8....1.....1..86.74..7..9..1.9..7.1..4.6..4..7..35.14..2.....5....4.23....",
-      "oracleEr": 3.2,
-      "oracleTechnique": "X-Wing",
-      "ourScore": 3.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "5.........98.6.74....9.4.2.8..52...4..7...8..9...38..6.3.1.9....19.5.38.........5",
-      "oracleEr": 3.2,
-      "oracleTechnique": "X-Wing",
-      "ourScore": 3.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..58....6693..2........65.......395...1.2.7...845.......23........2..8614....73..",
+      "puzzle": "..5.......4.....981..3.7...7..2.6.43.6.7.8.1.83.1.9..6...5.3..467.....8.......9..",
       "oracleEr": 3.4,
       "oracleTechnique": "Hidden Pair",
       "ourScore": 3.4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".1.6...3.8..74..1.....2...69.2.8..7.4.......9.3..9.6.27...1.....2..65..1.8...4.2.",
+      "puzzle": "3....21...8.9.137.....8...99....3..5..3...7..2..7....67...5.....248.7.9...62....7",
+      "oracleEr": 3.4,
+      "oracleTechnique": "Hidden Pair",
+      "ourScore": 3.4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..98...16.....649...3.47....4....5..3...5...2..5....8....27.1...273.....83...47..",
+      "oracleEr": 3,
+      "oracleTechnique": "Naked Pair",
+      "ourScore": 3,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "4...687....5297......5..19.7......8..8.4.5.6..6......7.38..9......8246....231...8",
+      "oracleEr": 3,
+      "oracleTechnique": "Naked Pair",
+      "ourScore": 3,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...6..8..6......5..52..1.96.1.4..7.5487...6195.6..7.3.86.2..54..7......3..5..9...",
+      "oracleEr": 3.4,
+      "oracleTechnique": "Hidden Pair",
+      "ourScore": 3.4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "....3.52..1..4.6..5..2..718.6...79...7.....8...84...7.845..2..7..7.5..6..93.7....",
+      "oracleEr": 3,
+      "oracleTechnique": "Naked Pair",
+      "ourScore": 3,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "7..2....8..3.681...2..1.65....8....5..6.7.8..1....2....98.4..3...792.5..3....1..6",
+      "oracleEr": 3.2,
+      "oracleTechnique": "X-Wing",
+      "ourScore": 3.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".7.......4.158.9..8..2....33....4..1..96.37..6..8....91....2..4..3.496.7.......1.",
+      "oracleEr": 3,
+      "oracleTechnique": "Naked Pair",
+      "ourScore": 3.4,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..3....5..17.3849.....52.....5.....8.61...52.4.....6.....79.....8942.37..7....1..",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "5...9....79.8...4.18.3.6.....9..1.5....473....4.9..2.....5.7.32.5...2.87....8...4",
+      "puzzle": "7.......9.....32...1.59..87..7.1.9...8..4..6...4.5.7..65..87.3...81.....2.......5",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "45968.3...36....5..87.3.....6...24......1......54...8.....2.56..2....97...3.46812",
+      "puzzle": "9.4.2.......8....6.8.57.42...7..86...2.....9...82..7...49.56.1.6....2.......1.8.9",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": ".84.6..7.2......39...8.94....1..26.....4.1.....85..7....26.4...37......6.4..2.38.",
+      "puzzle": "..2..39..7..6....33...5.1.......4.32..6...4..83.9.......9.7...62....9..1..74..3..",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "43.5.....8.5.....7.....41..62...9....7..3..1....6...32..62.....1.....9.3.....1.68",
+      "puzzle": "5..7..3..2..3.69...68...7.....46..9.7.......3.9..31.....5...62...28.3..9..7..5..4",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..2..94......17.36....862..2.....34.45.....92.37.....5..195....62.74......51..8..",
+      "puzzle": "....1.29....9..8..83..2..6...6...1.4..14.86..5.8...7...8..4..12..4..9....97.8....",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "7....1....816...9...65...8.8.....9.4...726...6.5.....1.6...78...1...342....9....6",
+      "puzzle": "...54.....7.3....63.1....8..96.3.5..45..6..18..3.5.67..6....4.21....3.5.....94...",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "3.9..6....48.......6.8...57..6.89..12.......69..61.8..61...2.4.......73....3..1.2",
+      "puzzle": ".84....1.31......9.5...6.......976.14..1.5..81.968.......8...2.2......63.4....97.",
       "oracleEr": 4,
       "oracleTechnique": "Skyscraper 011",
       "ourScore": 4,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..48....6....65.1....4...5...2...64.748...135.65...2...9...1....7.58....5....68..",
-      "oracleEr": 4.2,
-      "oracleTechnique": "XY-Wing",
-      "ourScore": 4.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "1.976.......5.1.8......21.38....53.2.2.....1.7.19....83.62......5.1.9.......567.4",
+      "puzzle": "...18..3.8....3..12...7.6....87....4..6...3..3....17....5.1...74..8....9.1..95...",
       "oracleEr": 4.3,
       "oracleTechnique": "Grouped 2 Strong links 101",
       "ourScore": 4.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "...9.5..........49.8..341251.74...6...........9...84.137185..9.65..........1.6...",
+      "puzzle": "..9...8.25.68.3...7....2...2.173..8....154....6..981.3...6....7...3.19.89.4...3..",
+      "oracleEr": 4.3,
+      "oracleTechnique": "Grouped 2 Strong links 101",
+      "ourScore": 4.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "..5.7......35..2.77.86...3...14.9.5...4.8.1...9.1.64...5...28.64.2..53......9.5..",
       "oracleEr": 4.2,
       "oracleTechnique": "XY-Wing",
       "ourScore": 4.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "8..5.2.3....1..45.....6.1..9..6....33.17.48.52....5..9..8.5.....53..6....7.2.3..4",
+      "puzzle": ".....2..662.47.5...7.8......8....251...238...269....3......6.4...5.24.981..9.....",
+      "oracleEr": 4.2,
+      "oracleTechnique": "XY-Wing",
+      "ourScore": 4.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": "...6.1....3.47...27......3..74...8.3..8...5..1.5...72..9......82...18.7....9.6...",
+      "oracleEr": 4.2,
+      "oracleTechnique": "XY-Wing",
+      "ourScore": 4.2,
+      "ourOutcome": "solved"
+    },
+    {
+      "puzzle": ".48........5471.2.71..6.....8..5.7..1..6.8..5..3.4..9.....1..57.5.7894........38.",
       "oracleEr": 4.1,
       "oracleTechnique": "2 Strong links 001",
       "ourScore": 4.1,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "......4..78..29651.6.7....9.2.6....7....9....4....7.1.2....8.3.65137..92..8......",
+      "puzzle": ".4.3.9.2...9.1....6.2.4.......6...853.......957...1.......2.4.8....7.9...2.4.6.3.",
       "oracleEr": 4.2,
       "oracleTechnique": "XY-Wing",
       "ourScore": 4.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "...1.....7.4..5...95....41..67.2....3.8...5.1....1.73..32....48...8..3.7.....6...",
-      "oracleEr": 4.3,
-      "oracleTechnique": "Grouped 2 Strong links 101",
-      "ourScore": 4.2,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "..4...3....2.79..419.....2.....41...7.89.36.2...86.....6.....578..59.1....5...4..",
-      "oracleEr": 4.4,
-      "oracleTechnique": "XYZ-Wing",
-      "ourScore": 4.4,
-      "ourOutcome": "solved"
-    },
-    {
-      "puzzle": "3..2...41....7....8.64..59.18......6....8....5......24.65..93.8....1....91...3..2",
+      "puzzle": "....1.6.5.549.3.7.3..7.....1....976...........753....4.....2..9.3.8.725.2.8.5....",
       "oracleEr": 4.2,
       "oracleTechnique": "XY-Wing",
       "ourScore": 4.2,
       "ourOutcome": "solved"
     },
     {
-      "puzzle": "..9..3.5.14.8....9..8.9.....3.25...6...7.6...4...31.8.....2.6..9....8.43.8.1..2..",
+      "puzzle": "...4..3...6.395.17....2....658..9....71...85....8..769....8....19.562.7...6..3...",
+      "oracleEr": 5.5,
+      "oracleTechnique": "WXYZ-Wing 126",
+      "ourScore": null,
+      "ourOutcome": "stuck"
+    },
+    {
+      "puzzle": "6....137..4.....9.1.7.8......62..45.....3.....59..47......7.5.4.3.....6..759....1",
       "oracleEr": 7.1,
       "oracleTechnique": "Forcing Chain",
       "ourScore": null,
       "ourOutcome": "stuck"
     },
     {
-      "puzzle": "2..46..5.........89..527....9....5.2..4.7.6..8.2....1....951..33.........1..86..5",
-      "oracleEr": 6.6,
-      "oracleTechnique": "UVWXYZ-Wing 1314",
+      "puzzle": "4..3..1..3......65.....73....6..8.4..9.4.6.3..4.9..7....81.....17......2..3..5..7",
+      "oracleEr": 5.7,
+      "oracleTechnique": "Grouped 3 Strong links 2001",
       "ourScore": null,
       "ourOutcome": "stuck"
     },
     {
-      "puzzle": "3..6.5..7...2.73....1.......87.3....6.3...8.1....4.79.......6....51.2...7..4.3..8",
-      "oracleEr": 7.1,
-      "oracleTechnique": "Forcing Chain",
+      "puzzle": ".349....89..8....55...4.3...5.21.................65.2...7.9...46....1..38....725.",
+      "oracleEr": 5.5,
+      "oracleTechnique": "WXYZ-Wing 126",
       "ourScore": null,
       "ourOutcome": "stuck"
     },
     {
-      "puzzle": "78..32.....46.......6.9.78..2......5.97.2.81.1......9..75.6.1.......32.....78..49",
-      "oracleEr": 4.5,
-      "oracleTechnique": "Unique Rectangle type 3",
-      "ourScore": null,
-      "ourOutcome": "stuck"
-    },
-    {
-      "puzzle": ".4.123.....3..7...9.....2....8536.9...........6.2798....9.....3...8..1.....352.7.",
-      "oracleEr": 6.6,
-      "oracleTechnique": "UVWXYZ-Wing 1314",
+      "puzzle": "4.....2.3.....916...6..2....9.1.6.4.....4.....8.9.7.1....2..3...725.....6.1.....5",
+      "oracleEr": 6.3,
+      "oracleTechnique": "VWXYZ-Wing 1411",
       "ourScore": null,
       "ourOutcome": "stuck"
     }

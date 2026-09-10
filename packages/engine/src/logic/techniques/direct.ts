@@ -107,6 +107,20 @@ function isNewlyUnlocked(single: Step, eliminations: readonly Elimination[]): bo
   return UNITS[unitIndex].cells.some((cell) => pairs.has(`${String(cell)}:${String(placement.digit)}`));
 }
 
+/**
+ * La maison où le single a été trouvé permet-elle de créditer un coup direct ?
+ *
+ * Voir le registre de mesures ci-dessous : boîte, ou l'une des maisons que le
+ * motif de base nomme lui-même.
+ */
+function isCreditedHouse(single: Step, step: Step): boolean {
+  // `.at()` plutôt que `[0]` : le moteur compile avec `noUncheckedIndexedAccess`
+  // désactivé, donc l'indexation promet un élément qu'un pas sans unité n'a pas.
+  const unitIndex = single.units.at(0);
+  if (unitIndex === undefined) return false;
+  return UNITS[unitIndex].kind === 'box' || step.units.includes(unitIndex);
+}
+
 interface DirectMapping {
   readonly from: TechniqueId;
   readonly to: TechniqueId;
@@ -158,9 +172,39 @@ function asDirect(name: string, base: TechniqueEntry, mappings: readonly DirectM
         Trois hypothèses voisines ont été mesurées et rejetées : restreindre les
         Direct à leur propre unité (92,9 %), les supprimer entièrement (84,3 %),
         et n'accepter que le single nu (84,3 % également, avec 42 surévaluations).
+
+        ─── Où le single doit être trouvé ─────────────────────────────────────
+
+        Restreindre encore : le single doit apparaître **dans une boîte, ou dans
+        l'une des maisons que nomme le motif de base**. Trouvé ailleurs — une
+        troisième maison, touchée par ricochet — l'oracle ne crédite pas de coup
+        direct et retombe sur le motif ordinaire.
+
+        Mesuré sur les 334 grilles de référence, en rejouant huit variantes :
+
+          règle actuelle (une place a disparu de l'unité)   94,6 %   2 sur / 15 sous
+          restreinte aux unités du motif                    91,7 %  25 sur /  1 sous
+          restreinte au single en boîte                     95,2 %  10 sur /  5 sous
+          **boîte, ou unité du motif**                      96,5 %   5 sur /  6 sous
+          case posée dans une unité du motif                92,7 %  19 sur /  4 sous
+          boîte ET case dans le motif                       92,0 %  25 sur /  0 sous
+
+        Ce n'est pas seulement la meilleure : elle **rééquilibre l'erreur**, de
+        2 contre 15 à 5 contre 6. C'est la signature qu'on retire un biais
+        systématique et qu'il ne reste que du bruit — ici les quelques chemins
+        qui bifurquent réellement, sans rapport avec les variantes Direct.
+
+        ─── Une garde mesurée inerte, gardée quand même ───────────────────────
+
+        `isNewlyUnlocked` ne change **rien** sur ce corpus : la retirer donne le
+        même 302/313. Elle reste parce qu'elle protège d'un cas réel — un single
+        déjà présent avant les éliminations, reclassé à tort en Direct — même si
+        aucune des 334 grilles ne le présente. Mais qu'on ne s'y trompe pas :
+        ce n'est pas elle qui porte le résultat.
       */
       const single = hiddenSingle.find(view);
       if (single === null || !isNewlyUnlocked(single, step.eliminations)) continue;
+      if (!isCreditedHouse(single, step)) continue;
 
       const placement = single.placements[0];
       yield {
