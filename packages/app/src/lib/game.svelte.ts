@@ -25,12 +25,15 @@ import { Stopwatch } from './stopwatch.svelte.js';
 import { toSnapshot } from './storage.js';
 import type { GameSnapshot, RestoredGame } from './storage.js';
 import type { GameRecord } from './stats.js';
+import { restrictToNotes, toggleMark } from './marks.js';
+import type { Mark } from './marks.js';
 
-/** Un coup annulé : on restaure la valeur ET les notes précédentes. */
+/** Un coup annulé : on restaure la valeur, les notes ET leurs marques. */
 interface Move {
   readonly cell: number;
   readonly previousValue: number;
   readonly previousNotes: number;
+  readonly previousNoteColors: number;
 }
 
 /**
@@ -49,9 +52,23 @@ export class Game {
   solution = $state<number[]>(new Array<number>(CELL_COUNT).fill(EMPTY));
   values = $state<number[]>(new Array<number>(CELL_COUNT).fill(EMPTY));
   notes = $state<number[]>(new Array<number>(CELL_COUNT).fill(0));
+  /**
+   * Marques portées par les candidats : deux bits par chiffre, une case par
+   * entrée. Voir `marks.ts` pour la raison d'un second tableau plutôt que d'un
+   * empilement dans `notes`.
+   */
+  noteColors = $state<number[]>(new Array<number>(CELL_COUNT).fill(0));
 
   selected = $state<number>(indexOf(4, 4));
   noteMode = $state<boolean>(false);
+  /**
+   * Marque appliquée par la saisie, ou 0 pour poser une note ordinaire.
+   *
+   * C'est un sous-mode du mode notes : marquer un candidat suppose d'écrire des
+   * candidats. Choisir une marque active donc le mode notes, ce qui évite
+   * l'état absurde « je marque des candidats mais je pose des valeurs ».
+   */
+  markMode = $state<Mark>(0);
   seed = $state<string | number>(0);
   clues = $state<number>(0);
 
@@ -166,6 +183,7 @@ export class Game {
     this.solution = [...result.solution];
     this.values = [...result.puzzle];
     this.notes = new Array<number>(CELL_COUNT).fill(0);
+    this.noteColors = new Array<number>(CELL_COUNT).fill(0);
     this.history = [];
     this.clearHint();
     this.seed = result.seed;
@@ -239,6 +257,7 @@ export class Game {
       hintsApplied: this.hintsApplied,
       mistakes: this.mistakes,
       noteMode: this.noteMode,
+      noteColors: this.noteColors,
     });
   }
 
@@ -255,7 +274,24 @@ export class Game {
     this.solution = [...saved.solution];
     this.values = [...saved.values];
     this.notes = [...saved.notes];
-    this.history = saved.history.map((move) => ({ ...move }));
+    /*
+      Défensif, et pas décoratif : une sauvegarde d'avant l'incrément 8 n'a pas
+      de marques, et une sauvegarde bricolée pourrait en porter sur des chiffres
+      qui ne sont plus candidats. On rétablit l'invariant plutôt que de le
+      supposer.
+    */
+    this.noteColors = saved.noteColors.map((colors, cell) =>
+      restrictToNotes(colors, saved.notes[cell] ?? 0),
+    );
+    /*
+      Le défaut n'est pas décoratif : un coup enregistré avant l'incrément 8 ne
+      porte pas de marques, et `Move` les exige. Zéro est le bon défaut — avant
+      l'incrément 8, aucun candidat n'en portait.
+    */
+    this.history = saved.history.map((move) => ({
+      ...move,
+      previousNoteColors: move.previousNoteColors ?? 0,
+    }));
     this.selected = saved.selected;
     this.seed = saved.seed;
     this.clues = saved.clues;
@@ -331,6 +367,7 @@ export class Game {
       cell,
       previousValue: this.values[cell],
       previousNotes: this.notes[cell],
+      previousNoteColors: this.noteColors[cell],
     });
   }
 
@@ -339,12 +376,28 @@ export class Game {
     if (this.isGiven(cell)) return;
     this.clearHint();
 
+    if (this.markMode !== 0) {
+      if (this.values[cell] !== EMPTY) return;
+      this.#record(cell);
+      /*
+        Marquer un candidat qu'on n'avait pas écrit l'écrit : c'est un geste qui
+        a un sens — « celui-là, je le surveille » — et le refuser mènerait à une
+        impasse silencieuse où le bouton ne fait rien.
+      */
+      this.notes[cell] = withDigit(this.notes[cell], digit);
+      this.noteColors[cell] = toggleMark(this.noteColors[cell], digit, this.markMode);
+      return;
+    }
+
     if (this.noteMode) {
       if (this.values[cell] !== EMPTY) return;
       this.#record(cell);
-      this.notes[cell] = hasDigit(this.notes[cell], digit)
+      const removing = hasDigit(this.notes[cell], digit);
+      this.notes[cell] = removing
         ? withoutDigit(this.notes[cell], digit)
         : withDigit(this.notes[cell], digit);
+      // L'invariant : un chiffre qui n'est plus candidat ne garde pas sa marque.
+      if (removing) this.noteColors[cell] = restrictToNotes(this.noteColors[cell], this.notes[cell]);
       return;
     }
 
@@ -353,6 +406,7 @@ export class Game {
     this.values[cell] = alreadyThere ? EMPTY : digit;
     if (!alreadyThere) {
       this.notes[cell] = 0;
+      this.noteColors[cell] = 0;
       this.#clearNotesOfPeers(cell, digit);
       // Comptée à la saisie, une seule fois. Corriger la case ensuite n'efface
       // pas le fait qu'elle a été posée.
@@ -378,7 +432,9 @@ export class Game {
         otherRow === row ||
         otherCol === col ||
         (Math.floor(otherRow / 3) * 3 === boxRow && Math.floor(otherCol / 3) * 3 === boxCol);
-      if (sameUnit) this.notes[other] = withoutDigit(this.notes[other], digit);
+      if (!sameUnit) continue;
+      this.notes[other] = withoutDigit(this.notes[other], digit);
+      this.noteColors[other] = restrictToNotes(this.noteColors[other], this.notes[other]);
     }
   }
 
@@ -390,6 +446,7 @@ export class Game {
     this.#record(cell);
     this.values[cell] = EMPTY;
     this.notes[cell] = 0;
+    this.noteColors[cell] = 0;
   }
 
   /*
@@ -404,12 +461,31 @@ export class Game {
     this.clearHint();
     this.values[move.cell] = move.previousValue;
     this.notes[move.cell] = move.previousNotes;
+    this.noteColors[move.cell] = move.previousNoteColors;
     this.selected = move.cell;
     this.#settle();
   }
 
   toggleNoteMode(): void {
     this.noteMode = !this.noteMode;
+    if (!this.noteMode) this.markMode = 0;
+  }
+
+  /**
+   * Choisit la marque à poser, ou revient aux notes ordinaires.
+   *
+   * Reposer la marque déjà active la désactive : c'est le même geste que le
+   * bouton « Notes », et cela évite d'avoir à chercher comment en sortir.
+   */
+  setMarkMode(mark: Mark): void {
+    this.markMode = this.markMode === mark ? 0 : mark;
+    // Marquer, c'est écrire des candidats : le mode notes suit.
+    if (this.markMode !== 0) this.noteMode = true;
+  }
+
+  /** Marques portées par les candidats d'une case. */
+  marksOf(cell: number): number {
+    return this.noteColors[cell];
   }
 
   notesOf(cell: number): number[] {
@@ -491,6 +567,7 @@ export class Game {
       this.#record(placement.cell);
       this.values[placement.cell] = placement.digit;
       this.notes[placement.cell] = 0;
+      this.noteColors[placement.cell] = 0;
       this.#clearNotesOfPeers(placement.cell, placement.digit);
       this.selected = placement.cell;
     }
@@ -498,6 +575,10 @@ export class Game {
       if (this.notes[elimination.cell] === 0) continue;
       this.#record(elimination.cell);
       this.notes[elimination.cell] = withoutDigit(this.notes[elimination.cell], elimination.digit);
+      this.noteColors[elimination.cell] = restrictToNotes(
+        this.noteColors[elimination.cell],
+        this.notes[elimination.cell],
+      );
     }
     this.hintsApplied++;
     this.clearHint();

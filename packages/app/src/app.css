@@ -65,6 +65,17 @@
   --note-accent-soft: #dcefec;
 
   /*
+    Les trois marques de candidats. La couleur n'est qu'un rappel : chaque marque
+    porte aussi une lettre (A, B, C), un tracé distinct, et son nom dans le
+    libellé lu à voix haute. Aucun triplet de teintes n'est sûr pour toutes les
+    formes de daltonisme — c'est précisément pourquoi les autres porteurs sont
+    obligatoires et non décoratifs.
+  */
+  --mark-a: #1f4e8c;
+  --mark-b: #a3540f;
+  --mark-c: #14655a;
+
+  /*
     Trois intensités pour les trois paliers d'indice : la zone où chercher, le
     motif qui porte le raisonnement, puis la conclusion. Chacune est doublée
     d'un liseré, jamais portée par la seule couleur.
@@ -112,6 +123,11 @@
     --note-accent: #3fa695;
     --note-accent-soft: #23383a;
 
+    /* Mêmes rôles, remontés en luminosité pour tenir le contraste sur fond sombre. */
+    --mark-a: #7fb0f0;
+    --mark-b: #eda45c;
+    --mark-c: #4fc3b1;
+
     --zone-bg: #2a2721;
     --hint-bg: #3d3421;
     --hint-border: #d4a548;
@@ -154,6 +170,11 @@
 
   --note-accent: #3fa695;
   --note-accent-soft: #23383a;
+
+  /* Mêmes rôles, remontés en luminosité pour tenir le contraste sur fond sombre. */
+  --mark-a: #7fb0f0;
+  --mark-b: #eda45c;
+  --mark-c: #4fc3b1;
 
   --zone-bg: #2a2721;
   --hint-bg: #3d3421;

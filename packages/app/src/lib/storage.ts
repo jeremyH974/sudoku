@@ -47,6 +47,12 @@ export interface SavedMove {
   readonly cell: number;
   readonly previousValue: number;
   readonly previousNotes: number;
+  /**
+   * Marques des candidats avant le coup. Optionnel à la relecture : un coup
+   * enregistré avant l'incrément 8 n'en a pas, et le refuser jetterait tout
+   * l'historique d'annulation d'une partie parfaitement valide.
+   */
+  readonly previousNoteColors?: number;
 }
 
 export interface GameSnapshot {
@@ -78,6 +84,13 @@ export interface GameSnapshot {
   readonly mistakes?: number;
   /** Le mode notes fait partie de la position du joueur, pas de son réglage. */
   readonly noteMode?: boolean;
+  /*
+    Champ ajouté à l'incrément 8, sous la même règle : optionnel, avec un défaut
+    explicite. Deux bits par chiffre, une entrée par case — voir `marks.ts`.
+    `SAVE_VERSION` ne bouge donc pas, et personne ne perd sa partie en cours à la
+    mise à jour.
+  */
+  readonly noteColors?: readonly number[];
 }
 
 interface StoredGame extends GameSnapshot {
@@ -103,6 +116,7 @@ export function toSnapshot(input: {
   hintsApplied: number;
   mistakes: number;
   noteMode: boolean;
+  noteColors: readonly number[];
 }): GameSnapshot {
   return {
     puzzle: encodeGrid(Uint8Array.from(input.puzzle)),
@@ -123,6 +137,7 @@ export function toSnapshot(input: {
     hintsApplied: input.hintsApplied,
     mistakes: input.mistakes,
     noteMode: input.noteMode,
+    noteColors: [...input.noteColors],
   };
 }
 
@@ -131,6 +146,7 @@ export interface RestoredGame {
   readonly solution: Uint8Array;
   readonly values: Uint8Array;
   readonly notes: number[];
+  readonly noteColors: number[];
   readonly history: SavedMove[];
   readonly selected: number;
   readonly level: Level | null;
@@ -151,7 +167,9 @@ const isMove = (value: unknown): value is SavedMove => {
   return (
     typeof move['cell'] === 'number' &&
     typeof move['previousValue'] === 'number' &&
-    typeof move['previousNotes'] === 'number'
+    typeof move['previousNotes'] === 'number' &&
+    // Volontairement absent des conditions : voir `SavedMove.previousNoteColors`.
+    (move['previousNoteColors'] === undefined || typeof move['previousNoteColors'] === 'number')
   );
 };
 
@@ -188,11 +206,22 @@ export function loadGame(): RestoredGame | null {
     const notes = parsed.notes.filter((n): n is number => typeof n === 'number');
     if (notes.length !== 81) return null;
 
+    /*
+      Les marques dégradent, elles ne bloquent pas : une sauvegarde d'avant
+      l'incrément 8 n'en a pas, et un tableau de mauvaise longueur vaut mieux
+      perdu que de faire échouer la reprise d'une partie par ailleurs saine.
+    */
+    const storedColors = Array.isArray(parsed.noteColors)
+      ? parsed.noteColors.filter((n): n is number => typeof n === 'number')
+      : [];
+    const noteColors = storedColors.length === 81 ? storedColors : new Array<number>(81).fill(0);
+
     return {
       puzzle: decodeGrid(parsed.puzzle),
       solution: decodeGrid(parsed.solution),
       values: decodeGrid(parsed.values),
       notes,
+      noteColors,
       history: parsed.history.filter(isMove),
       selected: typeof parsed.selected === 'number' ? parsed.selected : 0,
       level: parsed.level ?? null,

@@ -53,7 +53,9 @@ function makeSnapshot(seed = 'sauvegarde'): GameSnapshot {
     solution: [...solution],
     values: [...values],
     notes: Array.from({ length: 81 }, (_, i) => (i % 7 === 0 ? 0b101 : 0)),
-    history: [{ cell: 3, previousValue: 0, previousNotes: 0b11 }],
+    // Deux bits par chiffre : ici, le 1 marqué « A » et le 3 marqué « B ».
+    noteColors: Array.from({ length: 81 }, (_, i) => (i % 7 === 0 ? 0b10_0001 : 0)),
+    history: [{ cell: 3, previousValue: 0, previousNotes: 0b11, previousNoteColors: 0b01 }],
     selected: 42,
     rating: rate(puzzle),
     seed,
@@ -82,7 +84,12 @@ describe('aller-retour de sauvegarde', () => {
     expect(restored!.selected).toBe(42);
     expect(restored!.clues).toBe(34);
     expect(restored!.history).toHaveLength(1);
-    expect(restored!.history[0]).toEqual({ cell: 3, previousValue: 0, previousNotes: 0b11 });
+    expect(restored!.history[0]).toEqual({
+      cell: 3,
+      previousValue: 0,
+      previousNotes: 0b11,
+      previousNoteColors: 0b01,
+    });
   });
 
   it('conserve les saisies du joueur, distinctes de la grille de départ', () => {
@@ -101,6 +108,39 @@ describe('aller-retour de sauvegarde', () => {
     expect(restored.notes[0]).toBe(0b101);
     expect(restored.notes[1]).toBe(0);
     expect(restored.notes[7]).toBe(0b101);
+  });
+
+  it('conserve les marques des candidats', () => {
+    const snapshot = makeSnapshot();
+    saveGame(snapshot);
+    const restored = loadGame()!;
+    expect(restored.noteColors).toHaveLength(81);
+    expect(restored.noteColors[0]).toBe(0b10_0001);
+    expect(restored.noteColors[1]).toBe(0);
+  });
+
+  it('relit une sauvegarde écrite avant que les marques existent', () => {
+    /*
+      Le cœur de la doctrine « on migre par ajout » : la sauvegarde d'un joueur
+      qui met l'application à jour n'a pas de marques, et elle doit se rouvrir
+      intacte. Un bump de `SAVE_VERSION` l'aurait purement et simplement jetée —
+      c'est-à-dire effacé sa partie en cours au moment de la mise à jour.
+    */
+    const { noteColors, history, ...ancienne } = makeSnapshot();
+    void noteColors;
+    saveGame({
+      ...ancienne,
+      history: history.map(({ previousNoteColors, ...move }) => {
+        void previousNoteColors;
+        return move;
+      }),
+    });
+
+    const restored = loadGame();
+    expect(restored).not.toBeNull();
+    expect(restored!.noteColors).toHaveLength(81);
+    expect(restored!.noteColors.every((c) => c === 0)).toBe(true);
+    expect(restored!.history).toHaveLength(1);
   });
 
   it('rend null quand rien n’a été sauvegardé', () => {

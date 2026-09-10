@@ -74,6 +74,30 @@ describe('accessibilité de la grille', () => {
     expect(focusable).toHaveLength(1);
   });
 
+  it('nomme les marques des candidats, pas seulement leur couleur', () => {
+    /*
+      La règle que ce test protège : « la couleur n'est jamais le seul porteur
+      d'information ». Le nom accessible est le porteur qui ne se dégrade jamais.
+      Si un jour quelqu'un simplifie le rendu des marques en une classe CSS, ce
+      test tombe.
+    */
+    const game = makeGame('a11y-marques');
+    const empty = game.puzzle.findIndex((v) => v === 0);
+    game.select(empty);
+    game.toggleNoteMode();
+    game.setMarkMode(1);
+    game.enter(4);
+    game.setMarkMode(3);
+    game.enter(6);
+
+    view = render(SudokuBoard, { game });
+    const label = view.container.querySelectorAll('[role="gridcell"]')[empty]!.getAttribute(
+      'aria-label',
+    );
+    expect(label).toContain('4 marqué A');
+    expect(label).toContain('6 marqué C');
+  });
+
   it('n’expose aucune case à la tabulation en vue passive', () => {
     view = render(SudokuBoard, { game: makeGame('a11y-passive'), interactive: false });
     expect(view.container.querySelectorAll('[tabindex="0"]')).toHaveLength(0);

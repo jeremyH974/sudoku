@@ -7,6 +7,7 @@
   import PrintStudio from './print/PrintStudio.svelte';
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
   import { TEXT_SIZE_OPTIONS, textSize } from './lib/textSize.svelte.js';
+  import { MARKS } from './lib/marks.js';
   import { loadGame, requestPersistence, saveGame } from './lib/storage.js';
   import UpdateBanner from './lib/UpdateBanner.svelte';
   import ProgressPanel from './lib/ProgressPanel.svelte';
@@ -282,7 +283,7 @@
   satisfait les règles de repères d'axe, qui exigent que tout contenu appartienne
   à un repère nommé.
 -->
-<div class="page">
+<div class="page" class:with-marks={tab === 'jeu' && game.noteMode}>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
 
   <header>
@@ -379,6 +380,19 @@
           {#if game.daily !== null}
             <span class="badge">Défi du {game.daily}</span>
           {/if}
+          {#if game.noteMode}
+            <!--
+              Le mode se lit **en toutes lettres**, pas seulement à la couleur de
+              la bordure du plateau : une bordure teintée n'est pas un porteur
+              d'information, et le mode marque décide de ce que fera la prochaine
+              touche.
+            -->
+            <span class="badge mode">
+              Mode note{game.markMode !== 0
+                ? ` — marque ${MARKS[game.markMode - 1]!.label}`
+                : ''}
+            </span>
+          {/if}
           {#if game.mistakes > 0}
             <!--
               Constaté, jamais reproché : il n'y a aucune limite d'erreurs dans
@@ -465,6 +479,31 @@
             Annuler<kbd>Ctrl+Z</kbd>
           </button>
         </div>
+
+        <!--
+          Les marques n'apparaissent qu'en mode notes, et ce n'est pas une
+          économie de place : marquer un candidat suppose d'écrire des candidats.
+          Le lien se voit ainsi au lieu de s'expliquer, et le bandeau ne coûte
+          rien à qui ne s'en sert pas — ce qui compte, puisqu'il vit dans la
+          barre du pouce sur téléphone.
+        -->
+        {#if game.noteMode}
+          <div class="marks" role="group" aria-label="Marquer un candidat">
+            {#each MARKS as mark (mark.id)}
+              <button
+                type="button"
+                class="mark-key"
+                class:active={game.markMode === mark.id}
+                data-mark={mark.id}
+                aria-pressed={game.markMode === mark.id}
+                onclick={() => game.setMarkMode(mark.id)}
+              >
+                <span class="mark-letter">{mark.label}</span>
+                <kbd>{mark.label}</kbd>
+              </button>
+            {/each}
+          </div>
+        {/if}
         </div>
 
         <button type="button" class="hint-button" onclick={onHint} disabled={game.isComplete}>
@@ -556,6 +595,13 @@
     puisque `env()` vaut zéro là où il n'existe pas.
   */
   .page {
+    /*
+      Hauteur à réserver sous la barre du pouce. Deux valeurs, parce que le
+      bandeau des marques apparaît avec le mode notes : mesuré 174 px sans lui,
+      226 px avec. Une réserve fixe cacherait le bas de la page dans l'un des
+      deux cas.
+    */
+    --thumb-bar-reserve: 10.9rem;
     max-width: 68rem;
     margin: 0 auto;
     padding: 2rem max(1rem, env(safe-area-inset-right)) 4rem
@@ -567,6 +613,10 @@
     focus. Sa hauteur respecte la règle des 44 px : un lien qu'on ne peut pas
     viser au doigt ne sert personne.
   */
+  .page.with-marks {
+    --thumb-bar-reserve: 14.2rem;
+  }
+
   .skip-link {
     position: absolute;
     left: -9999px;
@@ -904,6 +954,56 @@
     font-size: 0.7rem;
   }
 
+  .marks {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .mark-key {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  /*
+    Chaque touche porte sa lettre **et** sa couleur, et la touche active gagne un
+    liseré épais. Trois signes pour une information, parce que la couleur seule
+    n'en est pas un.
+  */
+  .mark-key[data-mark='1'] .mark-letter {
+    color: var(--mark-a);
+  }
+
+  .mark-key[data-mark='2'] .mark-letter {
+    color: var(--mark-b);
+  }
+
+  .mark-key[data-mark='3'] .mark-letter {
+    color: var(--mark-c);
+  }
+
+  .mark-letter {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .mark-key.active {
+    border-color: var(--note-accent);
+    border-width: 2px;
+    background: var(--note-accent-soft);
+    color: var(--text);
+  }
+
   .actions {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1111,7 +1211,7 @@
   */
   @media (max-width: 53.5rem) and (max-height: 50rem) {
     .page {
-      padding-bottom: calc(10.6rem + 1rem);
+      padding-bottom: calc(var(--thumb-bar-reserve) + 1rem);
     }
 
     .thumb-bar {

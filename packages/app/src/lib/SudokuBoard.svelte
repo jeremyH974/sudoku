@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { EMPTY, SIZE, UNITS, digitsOf } from '@sudoku/engine';
+  import { EMPTY, SIZE, UNITS, digitsOf, hasDigit } from '@sudoku/engine';
   import type { Game } from './game.svelte.js';
+  import { MARKS, markOf, markedDigits } from './marks.js';
 
   interface Props {
     game: Game;
@@ -88,6 +89,17 @@
     return game.notesOf(cell);
   }
 
+  /** Masque des notes, sans allouer. Voir le commentaire du rendu ci-dessous. */
+  function noteMaskOf(cell: number): number {
+    if (overrideCandidates !== null) return overrideCandidates[cell] ?? 0;
+    return game.notes[cell] ?? 0;
+  }
+
+  /** Marques des candidats. La vue d'analyse n'en a pas : elle n'est pas jouée. */
+  function marksOf(cell: number): number {
+    return overrideCandidates !== null ? 0 : game.marksOf(cell);
+  }
+
   /** Libellé lu par les lecteurs d'écran. */
   function describe(cell: number): string {
     const value = values[cell];
@@ -95,6 +107,15 @@
     if (value === EMPTY) {
       const notes = notesOf(cell);
       parts.push(notes.length > 0 ? `notes ${notes.join(' ')}` : 'vide');
+      /*
+        Les marques sont **nommées**, pas seulement colorées. C'est le porteur
+        d'information qui ne se dégrade jamais : ni à huit pixels, ni en noir et
+        blanc, ni pour un daltonien, ni au lecteur d'écran. La couleur n'en est
+        qu'un rappel visuel.
+      */
+      for (const { digit, label } of markedDigits(marksOf(cell))) {
+        parts.push(`${String(digit)} marqué ${label}`);
+      }
     } else {
       parts.push(String(value));
       if (game.isGiven(cell)) parts.push('indice de départ');
@@ -144,6 +165,14 @@
     if (key.toLowerCase() === 'n') {
       event.preventDefault();
       game.toggleNoteMode();
+      return;
+    }
+
+    // A, B, C : la même bascule que « N », pour chacune des trois marques.
+    const mark = MARKS.find((entry) => entry.label.toLowerCase() === key.toLowerCase());
+    if (mark !== undefined) {
+      event.preventDefault();
+      game.setMarkMode(mark.id);
     }
   }
 </script>
@@ -192,10 +221,22 @@
         >
           {#if value !== EMPTY}
             <span class="value">{value}</span>
-          {:else if notesOf(cell).length > 0}
+          {:else if noteMaskOf(cell) !== 0}
+            <!--
+              Le masque et les marques sont calculés **une fois** par case.
+              L'écriture précédente appelait `notesOf(cell)` dix fois par case
+              vide, et chaque appel allouait un tableau : environ six cents
+              tableaux jetés à chaque rendu de grille, pour une information tenue
+              dans un entier.
+            -->
+            {@const mask = noteMaskOf(cell)}
+            {@const colors = marksOf(cell)}
             <span class="notes" aria-hidden="true">
               {#each { length: SIZE } as _, i (i)}
-                <span class="note">{notesOf(cell).includes(i + 1) ? i + 1 : ''}</span>
+                {@const digit = i + 1}
+                <span class="note" data-mark={markOf(colors, digit) || null}>
+                  {hasDigit(mask, digit) ? digit : ''}
+                </span>
               {/each}
             </span>
           {/if}
@@ -378,6 +419,43 @@
   .note {
     display: grid;
     place-items: center;
+  }
+
+  /*
+    Les trois marques. Chacune porte **deux** signes en plus de sa couleur : la
+    graisse, et un tracé qui lui est propre — soulignement plein, cadre,
+    soulignement pointillé. C'est ce qui la rend lisible en noir et blanc, à
+    l'impression, et pour un daltonien. Sa lettre, elle, vit dans le libellé lu à
+    voix haute et dans la légende ; à sept pixels, aucune lettre ne tiendrait
+    dans la case.
+  */
+  .note[data-mark] {
+    font-weight: 700;
+  }
+
+  .note[data-mark='1'] {
+    color: var(--mark-a);
+    box-shadow: inset 0 -0.14em 0 -0.05em var(--mark-a);
+  }
+
+  .note[data-mark='2'] {
+    color: var(--mark-b);
+    outline: 0.09em solid var(--mark-b);
+    outline-offset: -0.05em;
+    border-radius: 2px;
+  }
+
+  .note[data-mark='3'] {
+    color: var(--mark-c);
+    background-image: linear-gradient(
+      to right,
+      var(--mark-c) 0 40%,
+      transparent 40% 60%,
+      var(--mark-c) 60% 100%
+    );
+    background-size: 100% 0.12em;
+    background-position: bottom;
+    background-repeat: no-repeat;
   }
 
   /*
