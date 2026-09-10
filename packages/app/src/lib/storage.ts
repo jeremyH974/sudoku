@@ -40,10 +40,35 @@ const KEY = 'sudoku.game';
  *     seulement une information qu'on sait remplacer ;
  *   - changer le sens, le type ou l'encodage d'un champ existant l'est, et
  *     impose le bump.
+ *
+ * ─── La règle a tenu une fois de plus, sous pression ────────────────────────
+ *
+ * L'incrément 9 a fait porter à un coup annulable **toutes** les cases qu'un
+ * geste touche — jusqu'à vingt et une — là où il n'en portait qu'une. Le README
+ * annonçait que ce changement « imposerait vraiment une montée de version ».
+ * C'était faux, et la raison mérite d'être écrite parce que c'est elle qu'on
+ * relira la prochaine fois : la case sur laquelle le joueur a agi **reste la
+ * tête du coup**, avec exactement le sens qu'elle avait, et les autres arrivent
+ * dans un champ ajouté. On ajoute, on ne réinterprète pas.
+ *
+ * Si la forme était devenue `{ cells: [...] }`, l'ancien validateur aurait
+ * rejeté chaque entrée et vidé l'historique en silence. Garder la tête intacte
+ * est donc la décision porteuse, pas un détail de style.
  */
 export const SAVE_VERSION = 1;
 
-export interface SavedMove {
+/**
+ * Au-delà, les gestes les plus anciens sont oubliés.
+ *
+ * L'historique n'avait aucune borne et il est sérialisé à chaque sauvegarde :
+ * une partie longue faisait grossir l'écriture indéfiniment. Deux cents gestes
+ * représentent une quarantaine de kilo-octets — largement au-delà de ce qu'un
+ * joueur remonte, et borné.
+ */
+export const MAX_HISTORY = 200;
+
+/** L'état d'une case avant le geste : valeur, notes, marques. */
+export interface SavedCellState {
   readonly cell: number;
   readonly previousValue: number;
   readonly previousNotes: number;
@@ -53,6 +78,20 @@ export interface SavedMove {
    * l'historique d'annulation d'une partie parfaitement valide.
    */
   readonly previousNoteColors?: number;
+}
+
+/**
+ * Un **geste** du joueur : la case sur laquelle il a agi, en tête, et les autres.
+ *
+ * Poser un chiffre efface des notes chez jusqu'à vingt voisines. Les vingt et
+ * une cases voyagent donc ensemble : sinon l'annulation rend la valeur et laisse
+ * le raisonnement détruit — ce qu'elle faisait jusqu'à l'incrément 9.
+ *
+ * `others` est absent quand le geste n'a touché qu'une case, ce qui est le cas
+ * courant pour un joueur qui n'écrit pas de notes.
+ */
+export interface SavedMove extends SavedCellState {
+  readonly others?: readonly SavedCellState[];
 }
 
 export interface GameSnapshot {
@@ -98,13 +137,30 @@ interface StoredGame extends GameSnapshot {
   readonly savedAt: string;
 }
 
+/** Ce que `Game` tient en mémoire : un geste est une liste d'états de cases. */
+export interface MoveLike {
+  readonly cells: readonly SavedCellState[];
+}
+
+/**
+ * Sépare la tête du reste.
+ *
+ * `exactOptionalPropertyTypes` interdit d'écrire `others: undefined` : il faut
+ * construire les deux formes séparément, et c'est tant mieux — une sauvegarde
+ * de joueur sans notes ne porte alors aucun champ superflu.
+ */
+const toSavedMove = (move: MoveLike): SavedMove => {
+  const [head, ...others] = move.cells;
+  return others.length === 0 ? { ...head } : { ...head, others };
+};
+
 /** Construit un instantané sérialisable à partir des tableaux de la partie. */
 export function toSnapshot(input: {
   puzzle: readonly number[];
   solution: readonly number[];
   values: readonly number[];
   notes: readonly number[];
-  history: readonly SavedMove[];
+  history: readonly MoveLike[];
   selected: number;
   rating: Rating | null;
   seed: string | number;
@@ -123,7 +179,7 @@ export function toSnapshot(input: {
     solution: encodeGrid(Uint8Array.from(input.solution)),
     values: encodeGrid(Uint8Array.from(input.values)),
     notes: [...input.notes],
-    history: input.history.map((move) => ({ ...move })),
+    history: input.history.map(toSavedMove),
     selected: input.selected,
     level: input.rating?.level ?? null,
     score: input.rating?.score ?? 0,
@@ -161,16 +217,23 @@ export interface RestoredGame {
   readonly noteMode: boolean;
 }
 
-const isMove = (value: unknown): value is SavedMove => {
+const isCellState = (value: unknown): value is SavedCellState => {
   if (typeof value !== 'object' || value === null) return false;
-  const move = value as Record<string, unknown>;
+  const state = value as Record<string, unknown>;
   return (
-    typeof move['cell'] === 'number' &&
-    typeof move['previousValue'] === 'number' &&
-    typeof move['previousNotes'] === 'number' &&
-    // Volontairement absent des conditions : voir `SavedMove.previousNoteColors`.
-    (move['previousNoteColors'] === undefined || typeof move['previousNoteColors'] === 'number')
+    typeof state['cell'] === 'number' &&
+    typeof state['previousValue'] === 'number' &&
+    typeof state['previousNotes'] === 'number' &&
+    // Volontairement absent des conditions : voir `SavedCellState.previousNoteColors`.
+    (state['previousNoteColors'] === undefined || typeof state['previousNoteColors'] === 'number')
   );
+};
+
+const isMove = (value: unknown): value is SavedMove => {
+  if (!isCellState(value)) return false;
+  const others = (value as unknown as Record<string, unknown>)['others'];
+  // Absent d'une sauvegarde d'avant l'incrément 9 : un geste à une seule case.
+  return others === undefined || (Array.isArray(others) && others.every(isCellState));
 };
 
 /**
@@ -222,7 +285,11 @@ export function loadGame(): RestoredGame | null {
       values: decodeGrid(parsed.values),
       notes,
       noteColors,
-      history: parsed.history.filter(isMove),
+      /*
+        Bornée aussi à la relecture : la borne est appliquée à l'écriture, mais
+        un fichier bricolé à la main n'a pas à pouvoir la contourner.
+      */
+      history: parsed.history.filter(isMove).slice(-MAX_HISTORY),
       selected: typeof parsed.selected === 'number' ? parsed.selected : 0,
       level: parsed.level ?? null,
       seed: parsed.seed ?? 0,

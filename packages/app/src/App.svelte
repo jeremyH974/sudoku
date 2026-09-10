@@ -82,8 +82,14 @@
 
   function onHint(): void {
     if (game.hintTier === 3) {
-      game.applyHint();
-      announcement = 'Coup appliqué.';
+      /*
+        Un indice purement éliminatoire n'écrit rien sur une grille sans notes.
+        Le dire vaut mieux que d'annoncer « coup appliqué » quand rien n'a bougé
+        — et c'est pour cela que `applyHint` rend un booléen.
+      */
+      announcement = game.applyHint()
+        ? 'Coup appliqué.'
+        : 'Rien à appliquer : ce coup écarte des candidats que la grille ne porte pas encore.';
       return;
     }
     game.requestHint();

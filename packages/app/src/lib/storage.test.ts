@@ -55,7 +55,20 @@ function makeSnapshot(seed = 'sauvegarde'): GameSnapshot {
     notes: Array.from({ length: 81 }, (_, i) => (i % 7 === 0 ? 0b101 : 0)),
     // Deux bits par chiffre : ici, le 1 marqué « A » et le 3 marqué « B ».
     noteColors: Array.from({ length: 81 }, (_, i) => (i % 7 === 0 ? 0b10_0001 : 0)),
-    history: [{ cell: 3, previousValue: 0, previousNotes: 0b11, previousNoteColors: 0b01 }],
+    /*
+      Un geste à trois cases : celle sur laquelle le joueur a agi, et deux
+      voisines dont la note a été effacée. C'est le cas que l'ancienne forme ne
+      savait pas porter.
+    */
+    history: [
+      {
+        cells: [
+          { cell: 3, previousValue: 0, previousNotes: 0b11, previousNoteColors: 0b01 },
+          { cell: 12, previousValue: 0, previousNotes: 0b1001, previousNoteColors: 0 },
+          { cell: 21, previousValue: 0, previousNotes: 0b110, previousNoteColors: 0b1000 },
+        ],
+      },
+    ],
     selected: 42,
     rating: rate(puzzle),
     seed,
@@ -89,6 +102,10 @@ describe('aller-retour de sauvegarde', () => {
       previousValue: 0,
       previousNotes: 0b11,
       previousNoteColors: 0b01,
+      others: [
+        { cell: 12, previousValue: 0, previousNotes: 0b1001, previousNoteColors: 0 },
+        { cell: 21, previousValue: 0, previousNotes: 0b110, previousNoteColors: 0b1000 },
+      ],
     });
   });
 
@@ -130,8 +147,11 @@ describe('aller-retour de sauvegarde', () => {
     void noteColors;
     saveGame({
       ...ancienne,
-      history: history.map(({ previousNoteColors, ...move }) => {
+      // Un coup d'avant l'incrément 8 **et** d'avant l'incrément 9 : une seule
+      // case, sans marques et sans `others`.
+      history: history.map(({ previousNoteColors, others, ...move }) => {
         void previousNoteColors;
+        void others;
         return move;
       }),
     });

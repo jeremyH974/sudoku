@@ -31,19 +31,36 @@ import { engine } from './engineClient.js';
 import { localDayKey } from './day.js';
 import type { DayKey } from './day.js';
 import { Stopwatch } from './stopwatch.svelte.js';
-import { toSnapshot } from './storage.js';
+import { MAX_HISTORY, toSnapshot } from './storage.js';
 import type { GameSnapshot, RestoredGame } from './storage.js';
 import type { GameRecord } from './stats.js';
 import type { Exercise } from './learn.js';
 import { restrictToNotes, toggleMark } from './marks.js';
 import type { Mark } from './marks.js';
 
-/** Un coup annulé : on restaure la valeur, les notes ET leurs marques. */
-interface Move {
+/** L'état d'une case avant le geste : valeur, notes, marques. */
+interface CellState {
   readonly cell: number;
   readonly previousValue: number;
   readonly previousNotes: number;
   readonly previousNoteColors: number;
+}
+
+/**
+ * Un **geste** du joueur, et non une écriture de case.
+ *
+ * C'est l'unité d'annulation, et ce n'était pas le cas jusqu'à l'incrément 9 :
+ * poser un chiffre efface des notes chez jusqu'à vingt voisines, et seule la
+ * case jouée était enregistrée. Ctrl+Z rendait donc la valeur en laissant le
+ * raisonnement détruit — les marques A/B/C comprises, perdues deux fois puisque
+ * le candidat partait avec.
+ *
+ * La case sur laquelle le joueur a agi est **en tête** : c'est elle que
+ * l'annulation resélectionne, et c'est elle que la sauvegarde garde en clair
+ * pour rester relisible par une version antérieure.
+ */
+interface Move {
+  readonly cells: readonly CellState[];
 }
 
 /**
@@ -363,8 +380,10 @@ export class Game {
       l'incrément 8, aucun candidat n'en portait.
     */
     this.history = saved.history.map((move) => ({
-      ...move,
-      previousNoteColors: move.previousNoteColors ?? 0,
+      cells: [move, ...(move.others ?? [])].map((state) => ({
+        ...state,
+        previousNoteColors: state.previousNoteColors ?? 0,
+      })),
     }));
     this.selected = saved.selected;
     this.seed = saved.seed;
@@ -437,8 +456,52 @@ export class Game {
     this.selected = indexOf((row + deltaRow + SIZE) % SIZE, (col + deltaCol + SIZE) % SIZE);
   }
 
-  #record(cell: number): void {
-    this.history.push({
+  /** Cases déjà capturées par le geste en cours, `null` hors geste. */
+  #pending: Map<number, CellState> | null = null;
+
+  /**
+   * Exécute un geste comme **une seule** entrée d'annulation.
+   *
+   * Rend `true` si au moins une case a été touchée : un geste qui n'écrit rien
+   * ne laisse aucune trace dans l'historique, et l'appelant l'apprend par le
+   * retour — ce dont `applyHint` a besoin pour ne pas compter un indice qui n'a
+   * rien appliqué.
+   *
+   * La `Map` fait deux choses, toutes deux porteuses. Elle rend `#touch`
+   * **idempotent** : un indice peut toucher la même case par un placement, par
+   * le nettoyage d'une voisine et par une élimination, et seul l'état d'avant
+   * le geste entier doit être conservé. Et elle garde l'**ordre d'insertion**,
+   * ce qui place la case jouée en tête sans avoir à la désigner.
+   */
+  #asOneMove(body: () => void): boolean {
+    const pending = new Map<number, CellState>();
+    this.#pending = pending;
+    try {
+      body();
+    } finally {
+      this.#pending = null;
+    }
+
+    const cells = [...pending.values()];
+    if (cells.length === 0) return false;
+    this.history.push({ cells });
+    if (this.history.length > MAX_HISTORY) this.history.shift();
+    return true;
+  }
+
+  /**
+   * Capture l'état d'une case **avant** de l'écrire. Sans effet si déjà capturée.
+   *
+   * Hors geste, cet appel ne fait rien — silencieusement. Une écriture qui
+   * oublierait `#asOneMove` perdrait donc son annulation sans que rien ne le
+   * signale. Aucun type ne l'empêche ; ce qui l'empêche est le test de
+   * propriété « un geste refusé ne change rien, un geste accepté est
+   * exactement annulable », qui tombe au premier oubli.
+   */
+  #touch(cell: number): void {
+    const pending = this.#pending;
+    if (pending === null || pending.has(cell)) return;
+    pending.set(cell, {
       cell,
       previousValue: this.values[cell],
       previousNotes: this.notes[cell],
@@ -451,42 +514,47 @@ export class Game {
     if (this.isGiven(cell)) return;
     this.clearHint();
 
-    if (this.markMode !== 0) {
-      if (this.values[cell] !== EMPTY) return;
-      this.#record(cell);
-      /*
-        Marquer un candidat qu'on n'avait pas écrit l'écrit : c'est un geste qui
-        a un sens — « celui-là, je le surveille » — et le refuser mènerait à une
-        impasse silencieuse où le bouton ne fait rien.
-      */
-      this.notes[cell] = withDigit(this.notes[cell], digit);
-      this.noteColors[cell] = toggleMark(this.noteColors[cell], digit, this.markMode);
-      return;
-    }
+    this.#asOneMove(() => {
+      if (this.markMode !== 0) {
+        if (this.values[cell] !== EMPTY) return;
+        this.#touch(cell);
+        /*
+          Marquer un candidat qu'on n'avait pas écrit l'écrit : c'est un geste qui
+          a un sens — « celui-là, je le surveille » — et le refuser mènerait à une
+          impasse silencieuse où le bouton ne fait rien.
+        */
+        this.notes[cell] = withDigit(this.notes[cell], digit);
+        this.noteColors[cell] = toggleMark(this.noteColors[cell], digit, this.markMode);
+        return;
+      }
 
-    if (this.noteMode) {
-      if (this.values[cell] !== EMPTY) return;
-      this.#record(cell);
-      const removing = hasDigit(this.notes[cell], digit);
-      this.notes[cell] = removing
-        ? withoutDigit(this.notes[cell], digit)
-        : withDigit(this.notes[cell], digit);
-      // L'invariant : un chiffre qui n'est plus candidat ne garde pas sa marque.
-      if (removing) this.noteColors[cell] = restrictToNotes(this.noteColors[cell], this.notes[cell]);
-      return;
-    }
+      if (this.noteMode) {
+        if (this.values[cell] !== EMPTY) return;
+        this.#touch(cell);
+        const removing = hasDigit(this.notes[cell], digit);
+        this.notes[cell] = removing
+          ? withoutDigit(this.notes[cell], digit)
+          : withDigit(this.notes[cell], digit);
+        // L'invariant : un chiffre qui n'est plus candidat ne garde pas sa marque.
+        if (removing) {
+          this.noteColors[cell] = restrictToNotes(this.noteColors[cell], this.notes[cell]);
+        }
+        return;
+      }
 
-    this.#record(cell);
-    const alreadyThere = this.values[cell] === digit;
-    this.values[cell] = alreadyThere ? EMPTY : digit;
-    if (!alreadyThere) {
-      this.notes[cell] = 0;
-      this.noteColors[cell] = 0;
-      this.#clearNotesOfPeers(cell, digit);
-      // Comptée à la saisie, une seule fois. Corriger la case ensuite n'efface
-      // pas le fait qu'elle a été posée.
-      if (digit !== this.solution[cell]) this.mistakes++;
-    }
+      this.#touch(cell);
+      const alreadyThere = this.values[cell] === digit;
+      this.values[cell] = alreadyThere ? EMPTY : digit;
+      if (!alreadyThere) {
+        this.notes[cell] = 0;
+        this.noteColors[cell] = 0;
+        this.#clearNotesOfPeers(cell, digit);
+        // Comptée à la saisie, une seule fois. Corriger la case ensuite n'efface
+        // pas le fait qu'elle a été posée.
+        if (digit !== this.solution[cell]) this.mistakes++;
+      }
+    });
+
     this.#settle();
   }
 
@@ -508,6 +576,15 @@ export class Game {
         otherCol === col ||
         (Math.floor(otherRow / 3) * 3 === boxRow && Math.floor(otherCol / 3) * 3 === boxCol);
       if (!sameUnit) continue;
+      /*
+        Ne toucher que ce qui change vraiment. Sans cette garde, poser un chiffre
+        capturait les vingt voisines dans le geste — même celles qui n'avaient
+        pas ce candidat — et gonflait chaque coup sauvegardé à vingt et une
+        cases. Un joueur qui n'écrit pas de notes produit ainsi des gestes à une
+        seule case, comme avant.
+      */
+      if (!hasDigit(this.notes[other], digit)) continue;
+      this.#touch(other);
       this.notes[other] = withoutDigit(this.notes[other], digit);
       this.noteColors[other] = restrictToNotes(this.noteColors[other], this.notes[other]);
     }
@@ -518,10 +595,12 @@ export class Game {
     if (this.isGiven(cell)) return;
     if (this.values[cell] === EMPTY && this.notes[cell] === 0) return;
     this.clearHint();
-    this.#record(cell);
-    this.values[cell] = EMPTY;
-    this.notes[cell] = 0;
-    this.noteColors[cell] = 0;
+    this.#asOneMove(() => {
+      this.#touch(cell);
+      this.values[cell] = EMPTY;
+      this.notes[cell] = 0;
+      this.noteColors[cell] = 0;
+    });
   }
 
   /*
@@ -534,10 +613,14 @@ export class Game {
     const move = this.history.pop();
     if (move === undefined) return;
     this.clearHint();
-    this.values[move.cell] = move.previousValue;
-    this.notes[move.cell] = move.previousNotes;
-    this.noteColors[move.cell] = move.previousNoteColors;
-    this.selected = move.cell;
+    for (const state of move.cells) {
+      this.values[state.cell] = state.previousValue;
+      this.notes[state.cell] = state.previousNotes;
+      this.noteColors[state.cell] = state.previousNoteColors;
+    }
+    // La tête est la case sur laquelle le joueur avait agi : c'est là qu'il
+    // s'attend à retrouver le curseur.
+    this.selected = move.cells[0].cell;
     this.#settle();
   }
 
@@ -589,10 +672,6 @@ export class Game {
       return;
     }
 
-    // Un indice consulté est compté ici, pas au changement de palier : monter
-    // d'un palier, c'est approfondir le même indice, pas en demander un autre.
-    this.hintsShown++;
-
     this.hintNotice = null;
 
     if (this.conflicts.size > 0) {
@@ -634,6 +713,16 @@ export class Game {
 
     this.hint = step;
     this.hintTier = 1;
+    /*
+      Compté ici, et pas à l'entrée de la méthode : un indice refusé — conflit
+      sur la grille, valeur fausse, aucune technique connue — n'a rien montré.
+      Compté trop tôt, « Indice » devenait un compteur de clics, et une grille en
+      conflit enregistrait dix indices consultés pour dix appuis inutiles.
+
+      Toujours une fois par indice et non par palier : le garde en tête de
+      méthode ressort quand un indice est déjà affiché.
+    */
+    this.hintsShown++;
   }
 
   clearHint(): void {
@@ -643,31 +732,52 @@ export class Game {
   }
 
   /** Applique la conclusion de l'indice affiché. */
-  applyHint(): void {
+  /**
+   * Applique le coup de l'indice affiché. Rend `true` s'il a écrit quelque chose.
+   *
+   * Le retour n'est pas une commodité : sur une grille sans notes, un indice
+   * purement éliminatoire ne touche rien, et `hintsApplied` montait quand même.
+   * Or c'est, selon `stats.ts`, « le seul qui juge une complétion » — il décide
+   * de « terminée sans indice » dans deux agrégats. Il ne peut compter que ce
+   * qui a réellement eu lieu.
+   */
+  applyHint(): boolean {
     const step = this.hint;
-    if (step === null) return;
+    if (step === null) return false;
 
-    for (const placement of step.placements) {
-      if (this.values[placement.cell] !== EMPTY) continue;
-      this.#record(placement.cell);
-      this.values[placement.cell] = placement.digit;
-      this.notes[placement.cell] = 0;
-      this.noteColors[placement.cell] = 0;
-      this.#clearNotesOfPeers(placement.cell, placement.digit);
-      this.selected = placement.cell;
-    }
-    for (const elimination of step.eliminations) {
-      if (this.notes[elimination.cell] === 0) continue;
-      this.#record(elimination.cell);
-      this.notes[elimination.cell] = withoutDigit(this.notes[elimination.cell], elimination.digit);
-      this.noteColors[elimination.cell] = restrictToNotes(
-        this.noteColors[elimination.cell],
-        this.notes[elimination.cell],
-      );
-    }
-    this.hintsApplied++;
+    // Un seul geste pour un seul clic : un indice qui élimine dans trois cases
+    // réclamait trois Ctrl+Z pour être défait.
+    const applied = this.#asOneMove(() => {
+      for (const placement of step.placements) {
+        if (this.values[placement.cell] !== EMPTY) continue;
+        this.#touch(placement.cell);
+        this.values[placement.cell] = placement.digit;
+        this.notes[placement.cell] = 0;
+        this.noteColors[placement.cell] = 0;
+        this.#clearNotesOfPeers(placement.cell, placement.digit);
+        this.selected = placement.cell;
+      }
+      for (const elimination of step.eliminations) {
+        // Le chiffre, pas la vacuité de la case : tester `notes === 0` laissait
+        // passer une case dont les notes ne portaient pas ce candidat, et
+        // poussait un geste vide dans l'historique.
+        if (!hasDigit(this.notes[elimination.cell], elimination.digit)) continue;
+        this.#touch(elimination.cell);
+        this.notes[elimination.cell] = withoutDigit(
+          this.notes[elimination.cell],
+          elimination.digit,
+        );
+        this.noteColors[elimination.cell] = restrictToNotes(
+          this.noteColors[elimination.cell],
+          this.notes[elimination.cell],
+        );
+      }
+    });
+
+    if (applied) this.hintsApplied++;
     this.clearHint();
     this.#settle();
+    return applied;
   }
 
   toString(): string {
