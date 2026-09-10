@@ -91,7 +91,7 @@
 </svelte:head>
 
 <div class="studio">
-  <aside class="settings no-print">
+  <aside class="settings">
     <h2>Cahier à imprimer</h2>
 
     <label>
@@ -170,7 +170,7 @@
 
   <div class="preview">
     {#if puzzles.length === 0}
-      <p class="empty no-print">
+      <p class="empty">
         Réglez le cahier puis lancez la génération : l’aperçu des pages s’affichera ici, tel qu’il
         sortira de l’imprimante.
       </p>
@@ -220,13 +220,13 @@
     flex-direction: row;
     gap: 0.5rem;
     align-items: center;
-    min-height: 2.25rem;
+    min-height: 2.75rem;
   }
 
   input[type='text'],
   input[type='number'],
   select {
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     padding: 0.35rem 0.5rem;
     border: 1px solid var(--border);
     border-radius: 6px;

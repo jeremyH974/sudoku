@@ -82,7 +82,13 @@
       <div class="transport" role="group" aria-label="Navigation dans le chemin de résolution">
         <button type="button" onclick={() => (index = 0)} disabled={index === 0}>⏮</button>
         <button type="button" onclick={() => go(-1)} disabled={index === 0}>Précédent</button>
-        <span class="counter" aria-live="polite">
+        <!--
+          Pas de `aria-live` ici. Balayer soixante étapes au curseur déclencherait
+          soixante annonces, qui se bousculeraient sans qu'aucune soit lue en
+          entier — une région bavarde dessert davantage qu'un compteur muet. Le
+          détail de l'étape, lui, est annoncé une fois, plus bas.
+        -->
+        <span class="counter">
           Étape {Math.min(index + 1, frames.length)} sur {frames.length}
         </span>
         <button type="button" onclick={() => go(1)} disabled={index >= frames.length - 1}>
@@ -106,17 +112,17 @@
 
     <div class="details">
       {#if step === null}
-        <h3>Grille résolue</h3>
+        <h2>Grille résolue</h2>
         <p>
           Le raisonnement a suffi du début à la fin : aucune supposition n’a été nécessaire.
         </p>
       {:else}
-        <h3>
+        <h2>
           {step.label}
           <span class="score" title="Difficulté sur l’échelle Sudoku Explainer">
             {step.difficulty.toFixed(1)}
           </span>
-        </h3>
+        </h2>
         <p class="explanation">{step.explanation}</p>
 
         <ul class="conclusion">
@@ -142,7 +148,7 @@
         <span><i class="swatch target"></i> conclusion</span>
       </div>
 
-      <h4>Techniques employées</h4>
+      <h3>Techniques employées</h3>
       <ul class="breakdown">
         {#each breakdown as entry (entry.label)}
           <li>
@@ -189,7 +195,7 @@
   }
 
   .transport button {
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     padding: 0.4rem 0.7rem;
     border: 1px solid var(--border);
     border-radius: 7px;
@@ -215,8 +221,14 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /*
+    Un curseur natif fait une vingtaine de pixels de haut : impossible à saisir
+    au doigt. La hauteur est portée à 44 px sur la zone sensible ; la barre, elle,
+    reste fine — c'est le curseur qu'on vise, pas le trait.
+  */
   input[type='range'] {
     width: 100%;
+    min-height: 2.75rem;
     accent-color: var(--accent);
   }
 
@@ -225,7 +237,7 @@
     min-width: 17rem;
   }
 
-  h3 {
+  h2 {
     display: flex;
     gap: 0.6rem;
     align-items: baseline;
@@ -299,7 +311,7 @@
     border: 2px solid var(--hint-target-border);
   }
 
-  h4 {
+  h3 {
     margin: 0 0 0.5rem;
     font-size: 0.9rem;
   }

@@ -72,7 +72,7 @@
   }
 
   button {
-    min-height: 2.25rem;
+    min-height: 2.75rem;
     padding: 0.35rem 0.8rem;
     border-radius: 7px;
     font: inherit;

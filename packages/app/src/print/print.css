@@ -8,6 +8,13 @@
   `display: none` retire les éléments du flux, ce qui recalcule toute la mise en
   page et fait dériver les sauts de page. `visibility: hidden` conserve la
   structure et se contente de ne rien peindre.
+
+  Corollaire, et c'est délibéré : **il n'y a pas de classe `.no-print`.** Il en a
+  existé une, appliquée à cinq endroits et définie nulle part — donc sans effet,
+  et de toute façon inutile puisque tout ce qui n'est pas dans `.sheets` est déjà
+  masqué. Elle a été retirée à l'incrément 8. Deux mécanismes pour un même
+  travail valent moins qu'un seul : si un élément doit disparaître à
+  l'impression, il suffit qu'il soit hors de `.sheets`.
 */
 
 @media print {

@@ -272,8 +272,19 @@
   start();
 </script>
 
-<main>
-  <header class="no-print">
+<!--
+  L'en-tête et la navigation sont des frères de `<main>`, pas ses enfants.
+
+  Tant qu'ils vivaient dedans, un lien d'évitement n'aurait rien évité : il
+  aurait sauté vers un repère qui contient précisément ce qu'on veut sauter. Ce
+  seul déplacement d'indentation règle le lien, donne un abri au `<nav>` et
+  satisfait les règles de repères d'axe, qui exigent que tout contenu appartienne
+  à un repère nommé.
+-->
+<div class="page">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <header>
     <div class="title">
       <h1>Sudoku</h1>
       <p class="tagline">Rien à installer. Aucune publicité, aucun compte, aucun suivi.</p>
@@ -296,9 +307,9 @@
     </div>
   </header>
 
-  <div class="no-print"><UpdateBanner /></div>
+  <UpdateBanner />
 
-  <nav class="tabs no-print" aria-label="Sections">
+  <nav class="tabs" aria-label="Sections">
     {#each TABS as entry (entry.id)}
       <button
         type="button"
@@ -311,6 +322,12 @@
     {/each}
   </nav>
 
+  <!--
+    `tabindex="-1"` rend la cible du lien d'évitement focalisable : sans lui, le
+    focus resterait sur le lien et la tabulation suivante repartirait de la
+    navigation, ce qui annulerait tout l'intérêt du raccourci.
+  -->
+  <main id="contenu" tabindex="-1">
   {#if tab === 'jeu'}
     <div class="layout">
       <div class="board-column">
@@ -379,7 +396,9 @@
               class="pad-key"
               class:exhausted={remaining(digit) === 0}
               onclick={() => game.enter(digit)}
-              aria-label={`Placer le ${String(digit)}, ${String(remaining(digit))} restants`}
+              aria-label={`${game.noteMode ? 'Noter' : 'Placer'} le ${String(digit)}, ${String(
+                remaining(digit),
+              )} restants`}
             >
               <span>{digit}</span>
               <span class="pad-count" aria-hidden="true">{remaining(digit)}</span>
@@ -483,13 +502,38 @@
   {/if}
 
   <p class="sr-only" role="status" aria-live="polite">{announcement}</p>
-</main>
+  </main>
+</div>
 
 <style>
-  main {
+  .page {
     max-width: 68rem;
     margin: 0 auto;
-    padding: clamp(1rem, 3vw, 2.5rem) 1rem 4rem;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /*
+    Premier élément focalisable de la page, invisible tant qu'il n'a pas le
+    focus. Sa hauteur respecte la règle des 44 px : un lien qu'on ne peut pas
+    viser au doigt ne sert personne.
+  */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--accent-text);
+    text-decoration: none;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
   }
 
   header {
@@ -514,8 +558,14 @@
     display: flex;
     gap: 0.35rem;
     align-items: center;
-    /* Cible tactile confortable, y compris quand le libellé disparaît. */
-    min-height: 2.25rem;
+    /*
+      44 px sur les deux dimensions, y compris quand le libellé disparaît sur
+      téléphone : sans le `min-width`, il restait un bouton de 32 px de large,
+      et l'audit de l'incrément 8 l'a mesuré.
+    */
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    justify-content: center;
     padding: 0.3rem 0.6rem;
     border: none;
     border-radius: 7px;
@@ -566,12 +616,21 @@
 
   .tabs {
     display: flex;
+    /*
+      Sans `wrap`, quatre onglets tenaient déjà tout juste sur un téléphone et
+      le cinquième débordait franchement. Deux rangées valent mieux qu'une barre
+      qui sort de l'écran.
+    */
+    flex-wrap: wrap;
     gap: 0.25rem;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid var(--border);
   }
 
   .tabs button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
     padding: 0.6rem 1rem;
     border: none;
     border-bottom: 2px solid transparent;
@@ -690,8 +749,14 @@
 
   .pad-key {
     position: relative;
-    /* 44 px est le minimum recommandé pour une cible tactile. Beaucoup
-       d'applications descendent à 30 px : on ne le fait pas. */
+    /*
+      44 px est le minimum recommandé pour une cible tactile, et cette touche-ci
+      l'a toujours respecté. Ce commentaire affirmait autrefois que toute
+      l'interface le respectait : c'était faux — le sélecteur de thème, les
+      onglets, les listes déroulantes et le curseur d'analyse étaient entre 20 et
+      40 px. L'audit de l'incrément 8 les a mesurés et corrigés ; la règle vaut
+      désormais partout, et le dire ici n'est plus un vœu.
+    */
     min-height: 3.25rem;
     padding: 0.4rem;
     border: 1px solid var(--border);
@@ -812,7 +877,7 @@
   }
 
   select {
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     padding: 0.35rem 0.5rem;
     border: 1px solid var(--border);
     border-radius: 6px;

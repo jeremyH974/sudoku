@@ -30,7 +30,13 @@
 <section class="sheet" style={`padding: ${padding};`}>
   {#if sheet.kind === 'summary'}
     <div class="summary">
-      <h1>{booklet.title}</h1>
+      <!--
+        `h2` et non `h1` : la feuille de garde vit dans la même page que
+        l'application, dont le titre est déjà le `h1`. Deux `h1` dans un document
+        privent un lecteur d'écran de son repère principal. À l'impression, la
+        distinction ne se voit pas — la taille est fixée en millimètres.
+      -->
+      <h2>{booklet.title}</h2>
       <p class="count">{booklet.puzzleCount} grilles</p>
 
       <table class="toc">
@@ -117,7 +123,7 @@
     text-align: center;
   }
 
-  h1 {
+  .summary h2 {
     margin: 0 0 0.4rem;
     font-size: 9mm;
     letter-spacing: -0.01em;
