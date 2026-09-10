@@ -15,13 +15,13 @@ const EASY = '53..7....6..195....98....6.8...6...34..8.3..17...2...6.6....28....
 const EASY_SOLUTION =
   '534678912672195348198342567859761423426853791713924856961537284287419635345286179';
 
-/** 17 indices : le minimum prouve pour une solution unique (McGuire et al., 2012). */
+/** 17 indices : le minimum prouvé pour une solution unique (McGuire et al., 2012). */
 const SEVENTEEN_CLUES =
   '000000010400000000020000000000050407008000300001090000300400200050100000000806000';
 
 /**
- * Grilles reputees parmi les plus dures pour un solveur a backtracking.
- * Solutions verifiees par ce meme solveur puis figees ici comme references.
+ * Grilles réputées parmi les plus dures pour un solveur à backtracking.
+ * Solutions vérifiées par ce même solveur puis figées ici comme références.
  */
 const AI_ESCARGOT = '1....7.9..3..2...8..96..5....53..9...1..8...26....4...3......1..4......7..7...3..';
 const AI_ESCARGOT_SOLUTION =
@@ -30,10 +30,10 @@ const PLATINUM_BLONDE = '.......12........3..23..4....18....5.6..7.8.......9....
 const GOLDEN_NUGGET = '.......39.....1..5..3.5.8....8.9...6.7...2...1..4.......9.8..5..2....6..4..7.....';
 
 /**
- * Motif fatal : quatre cases en 2 lignes x 2 colonnes, reparties sur exactement
- * deux boites, ne contenant que les chiffres 6 et 7 croises. Les vider rend les
+ * Motif fatal : quatre cases en 2 lignes x 2 colonnes, réparties sur exactement
+ * deux boîtes, ne contenant que les chiffres 6 et 7 croisés. Les vider rend les
  * deux dispositions interchangeables — la solution n'est plus unique.
- * C'est le cas que la verification d'unicite doit imperativement attraper.
+ * C'est le cas que la vérification d'unicité doit impérativement attraper.
  */
 const AMBIGUOUS = '534..8912672195348198342567859..1423426853791713924856961537284287419635345286179';
 
@@ -96,7 +96,7 @@ describe('grilles insolubles', () => {
   });
 
   it('ne rend rien pour une grille coherente mais sans issue', () => {
-    // Les 8 premieres cases de la ligne 1 forcent un 9 en r1c9, deja pris en colonne.
+    // Les 8 premières cases de la ligne 1 forcent un 9 en r1c9, déjà pris en colonne.
     const grid = parseGrid('12345678.' + '........9' + '.'.repeat(63));
     expect(findSolution(grid)).toBeNull();
   });
@@ -112,7 +112,7 @@ describe('unicite', () => {
 
   it('reconnait un motif fatal a deux solutions', () => {
     expect(hasUniqueSolution(parseGrid(AMBIGUOUS))).toBe(false);
-    // Plafond large et espace epuise : il y en a exactement deux, pas "au moins".
+    // Plafond large et espace épuisé : il y en a exactement deux, pas "au moins".
     const result = solve(parseGrid(AMBIGUOUS), { maxSolutions: 10 });
     expect(result.count).toBe(2);
     expect(result.exhausted).toBe(true);
@@ -125,7 +125,7 @@ describe('unicite', () => {
   it('s arrete des la seconde solution au lieu de tout compter', () => {
     const result = solve(createEmptyGrid(), { maxSolutions: 2 });
     expect(result.count).toBe(2);
-    // Une grille vide admet 6,67 x 10^21 solutions : si on n'avait pas coupe,
+    // Une grille vide admet 6,67 x 10^21 solutions : si on n'avait pas coupé,
     // ce test ne se terminerait jamais.
     expect(result.exhausted).toBe(false);
   });
@@ -161,7 +161,7 @@ describe('invariants', () => {
     fc.assert(
       fc.property(fc.integer(), fc.integer({ min: 20, max: 60 }), (seed, holes) => {
         const rng = createRng(seed);
-        // On creuse une solution valide : la grille reste forcement soluble.
+        // On creuse une solution valide : la grille reste forcément soluble.
         const puzzle = parseGrid(EASY_SOLUTION);
         const cells = rng.shuffle(Array.from({ length: CELL_COUNT }, (_, i) => i));
         for (let i = 0; i < holes; i++) puzzle[cells[i]] = EMPTY;

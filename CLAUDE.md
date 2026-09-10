@@ -5,9 +5,10 @@
 - **Commentaires, documentation et interface : français**, correctement accentué.
 - **Identifiants, noms de fichiers, messages de commit : anglais.**
 
-> Dette connue : une partie des commentaires écrits lors de l'incrément 1 est sans accents
-> (contrainte technique de l'outillage d'écriture au moment de leur rédaction). À normaliser en
-> une passe dédiée. Tout nouveau commentaire doit être accentué.
+Cette règle est tenue partout depuis l'incrément 5, qui a normalisé les 10 fichiers du moteur
+restés sans accents. Le contrôle qui accompagnait cette passe est réutilisable : après une
+retouche de commentaires, `git diff` ne doit montrer **aucune** ligne modifiée qui ne commence
+pas par `//`, `*` ou `/*`.
 
 ## Le moteur est sacré
 

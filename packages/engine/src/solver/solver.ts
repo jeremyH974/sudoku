@@ -14,48 +14,48 @@ import type { Digit, Grid } from '../grid/index.js';
 import type { Rng } from '../rng/index.js';
 
 /**
- * Solveur brut : propagation de contraintes + backtracking guide par MRV.
+ * Solveur brut : propagation de contraintes + backtracking guidé par MRV.
  *
- * Son role n'est PAS de mesurer la difficulte — un solveur machine trouve les
- * grilles d'autant plus faciles qu'elles sont contraintes, c'est-a-dire
- * l'inverse du ressenti humain. Il sert a deux choses :
- *   - verifier l'unicite de la solution (le garde-fou de toute grille publiee) ;
- *   - servir d'oracle de verite aux tests du solveur logique.
+ * Son rôle n'est PAS de mesurer la difficulté — un solveur machine trouve les
+ * grilles d'autant plus faciles qu'elles sont contraintes, c'est-à-dire
+ * l'inverse du ressenti humain. Il sert à deux choses :
+ *   - vérifier l'unicité de la solution (le garde-fou de toute grille publiée) ;
+ *   - servir d'oracle de vérité aux tests du solveur logique.
  *
- * La difficulte humaine est calculee ailleurs, par le solveur logique.
+ * La difficulté humaine est calculée ailleurs, par le solveur logique.
  */
 
 /** Candidats restants par cellule, sous forme de masque de 9 bits. */
 type Candidates = Uint16Array;
 
 export interface SolveOptions {
-  /** Nombre de solutions a collecter avant de s'arreter. 1 par defaut. */
+  /** Nombre de solutions à collecter avant de s'arrêter. 1 par défaut. */
   readonly maxSolutions?: number;
   /**
-   * Randomise l'ordre d'essai des chiffres. Indispensable au generateur :
-   * sans lui, toutes les grilles completes produites seraient identiques.
+   * Randomise l'ordre d'essai des chiffres. Indispensable au générateur :
+   * sans lui, toutes les grilles complètes produites seraient identiques.
    */
   readonly rng?: Rng;
 }
 
 export interface SolveResult {
   readonly solutions: readonly Grid[];
-  /** Nombre de solutions trouvees, plafonne par `maxSolutions`. */
+  /** Nombre de solutions trouvées, plafonné par `maxSolutions`. */
   readonly count: number;
   /**
-   * `true` si l'espace de recherche a ete parcouru entierement — donc si
-   * `count` est le nombre total de solutions et non un decompte tronque.
+   * `true` si l'espace de recherche a été parcouru entièrement — donc si
+   * `count` est le nombre total de solutions et non un décompte tronqué.
    */
   readonly exhausted: boolean;
-  /** Nombre d'hypotheses posees. Proxy du cout machine, utile aux benchs. */
+  /** Nombre d'hypothèses posées. Proxy du coût machine, utile aux benchs. */
   readonly guesses: number;
 }
 
 const bitOf = (digit: Digit): number => 1 << (digit - 1);
 
 /**
- * Retire `digit` des candidats de `cell` et propage les consequences.
- * Renvoie `false` des qu'une contradiction apparait.
+ * Retire `digit` des candidats de `cell` et propage les conséquences.
+ * Renvoie `false` des qu'une contradiction apparaît.
  */
 function eliminate(cands: Candidates, cell: number, digit: Digit): boolean {
   const bit = bitOf(digit);
@@ -64,7 +64,7 @@ function eliminate(cands: Candidates, cell: number, digit: Digit): boolean {
   const remaining = (cands[cell] &= ~bit);
   if (remaining === 0) return false;
 
-  // (1) La cellule n'a plus qu'un candidat : il est interdit a tous ses pairs.
+  // (1) La cellule n'a plus qu'un candidat : il est interdit à tous ses pairs.
   if ((remaining & (remaining - 1)) === 0) {
     const only = 32 - Math.clz32(remaining);
     const peers = PEERS[cell];
@@ -73,8 +73,8 @@ function eliminate(cands: Candidates, cell: number, digit: Digit): boolean {
     }
   }
 
-  // (2) Le chiffre retire n'a peut-etre plus qu'une place dans l'une des
-  //     unites de la cellule : c'est alors un single cache, a poser tout de suite.
+  // (2) Le chiffre retire n'a peut-être plus qu'une place dans l'une des
+  //     unités de la cellule : c'est alors un single caché, à poser tout de suite.
   const unitIndexes = UNITS_OF_CELL[cell];
   for (let u = 0; u < unitIndexes.length; u++) {
     const cells = UNITS[unitIndexes[u]].cells;
@@ -95,7 +95,7 @@ function eliminate(cands: Candidates, cell: number, digit: Digit): boolean {
   return true;
 }
 
-/** Fixe `digit` en `cell` en eliminant tous les autres candidats de la cellule. */
+/** Fixe `digit` en `cell` en éliminant tous les autres candidats de la cellule. */
 function assign(cands: Candidates, cell: number, digit: Digit): boolean {
   const bit = bitOf(digit);
   if ((cands[cell] & bit) === 0) return false;
@@ -110,8 +110,8 @@ function assign(cands: Candidates, cell: number, digit: Digit): boolean {
 }
 
 /**
- * Prepare les candidats a partir d'une grille. `null` si les indices donnes
- * sont deja contradictoires entre eux.
+ * Prépare les candidats à partir d'une grille. `null` si les indices donnés
+ * sont déjà contradictoires entre eux.
  */
 function initCandidates(puzzle: Grid): Candidates | null {
   const cands = new Uint16Array(CELL_COUNT).fill(ALL_DIGITS);
@@ -135,10 +135,10 @@ interface SearchContext {
   guesses: number;
 }
 
-/** Renvoie `true` quand il faut arreter : le quota de solutions est atteint. */
+/** Renvoie `true` quand il faut arrêter : le quota de solutions est atteint. */
 function search(cands: Candidates, ctx: SearchContext): boolean {
   // MRV : on branche sur la cellule la plus contrainte. Deux candidats est le
-  // minimum possible pour une cellule non resolue, inutile de chercher mieux.
+  // minimum possible pour une cellule non résolue, inutile de chercher mieux.
   let target = -1;
   let fewest = SIZE + 1;
   for (let cell = 0; cell < CELL_COUNT; cell++) {
@@ -188,22 +188,22 @@ export function solve(puzzle: Grid, options: SolveOptions = {}): SolveResult {
   };
 }
 
-/** Premiere solution trouvee, ou `null` si la grille n'en admet aucune. */
+/** Première solution trouvée, ou `null` si la grille n'en admet aucune. */
 export function findSolution(puzzle: Grid, options: Omit<SolveOptions, 'maxSolutions'> = {}): Grid | null {
   const result = solve(puzzle, { ...options, maxSolutions: 1 });
   return result.solutions[0] ?? null;
 }
 
 /**
- * Nombre de solutions, plafonne a `cap`. Le plafond n'est pas une optimisation
- * accessoire : verifier l'unicite demande seulement de savoir s'il en existe
- * une seconde, et compter au-dela est du calcul jete.
+ * Nombre de solutions, plafonné à `cap`. Le plafond n'est pas une optimisation
+ * accessoire : vérifier l'unicité demande seulement de savoir s'il en existe
+ * une seconde, et compter au-dela est du calcul jeté.
  */
 export function countSolutions(puzzle: Grid, cap = 2): number {
   return solve(puzzle, { maxSolutions: cap }).count;
 }
 
-/** Le garde-fou : aucune grille ne doit etre publiee sans passer par la. */
+/** Le garde-fou : aucune grille ne doit être publiée sans passer par la. */
 export function hasUniqueSolution(puzzle: Grid): boolean {
   return countSolutions(puzzle, 2) === 1;
 }

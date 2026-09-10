@@ -7,15 +7,15 @@ import { digHoles, generatePuzzle, generateSolvedGrid } from '../src/generate/in
 /**
  * Mesures de performance, hors suite de tests (lancer `pnpm measure`).
  *
- * Objectif : trancher une question laissee ouverte par le plan — ou part
- * reellement le temps ? L'hypothese est que la solution complete est quasi
- * gratuite et que tout le cout est dans les verifications d'unicite du
- * creusement. C'est ce qui determine s'il faut un Worker, un pool pre-genere,
+ * Objectif : trancher une question laissée ouverte par le plan — ou part
+ * réellement le temps ? L'hypothèse est que la solution complète est quasi
+ * gratuite et que tout le coût est dans les vérifications d'unicité du
+ * creusement. C'est ce qui détermine s'il faut un Worker, un pool pré-généré,
  * et un jour du WASM.
  *
- * Vitest 5 a retire l'API `bench` ; on mesure donc a la main, ce qui suffit
- * amplement ici. Le bench formel avec seuils de regression viendra avec la
- * generation calibree.
+ * Vitest 5 a retire l'API `bench` ; on mesure donc à la main, ce qui suffit
+ * amplement ici. Le bench formel avec seuils de régression viendra avec la
+ * génération calibrée.
  */
 
 const measure = (label: string, runs: number, fn: (i: number) => void): number => {

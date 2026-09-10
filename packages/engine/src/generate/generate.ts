@@ -5,43 +5,43 @@ import { createRng } from '../rng/index.js';
 import type { Rng } from '../rng/index.js';
 
 /**
- * Generation de grilles.
+ * Génération de grilles.
  *
- * Deux etapes, dans cet ordre :
- *   1. produire une solution complete valide, tiree au hasard ;
+ * Deux étapes, dans cet ordre :
+ *   1. produire une solution complète valide, tirée au hasard ;
  *   2. y creuser des trous tant que la solution reste unique.
  *
- * Point important, souvent mal compris : la diversite des grilles vient de
- * l'etape 2, pas de l'etape 1. On lit parfois qu'il suffirait de partir d'une
- * seule grille "germe" et de lui appliquer les transformations qui preservent
- * la validite (permuter bandes, piles, chiffres, transposer) pour obtenir des
+ * Point important, souvent mal compris : la diversité des grilles vient de
+ * l'étape 2, pas de l'étape 1. On lit parfois qu'il suffirait de partir d'une
+ * seule grille "germe" et de lui appliquer les transformations qui préservent
+ * la validité (permuter bandes, piles, chiffres, transposer) pour obtenir des
  * milliers de milliards de grilles. C'est vrai en nombre absolu, mais trompeur :
  * toutes ces grilles sont isomorphes entre elles — une seule classe
- * d'equivalence parmi les 5 472 730 538 existantes (Russell & Jarvis, 2005).
- * On tire donc une solution complete par backtracking randomise a chaque fois ;
- * cela coute quelques millisecondes, ce qui est negligeable devant l'etape 2.
+ * d'équivalence parmi les 5 472 730 538 existantes (Russell & Jarvis, 2005).
+ * On tire donc une solution complète par backtracking randomise à chaque fois ;
+ * cela coûte quelques millisecondes, ce qui est négligeable devant l'étape 2.
  *
- * A ce stade, la difficulte n'est PAS calibree : `clues` decrit la quantite
- * d'indices, pas l'effort de resolution. Les deux sont tres faiblement lies
- * (correlation ~0,27 avec la difficulte percue). La notation viendra du
+ * A ce stade, la difficulté n'est PAS calibrée : `clues` décrit la quantité
+ * d'indices, pas l'effort de résolution. Les deux sont très faiblement liés
+ * (corrélation ~0,27 avec la difficulté perçue). La notation viendra du
  * solveur logique.
  */
 
 /**
- * Disposition des cases vides. Purement esthetique : la symetrie n'a aucun
- * effet sur la difficulte logique. Elle rend seulement les grilles plus
- * agreables a l'oeil, en particulier a l'impression.
+ * Disposition des cases vides. Purement esthétique : la symétrie n'a aucun
+ * effet sur la difficulté logique. Elle rend seulement les grilles plus
+ * agréables à l'œil, en particulier à l'impression.
  */
 export type Symmetry = 'none' | 'rotational180' | 'diagonal';
 
 export interface GenerateOptions {
-  /** Rejouer le meme seed redonne exactement la meme grille. */
+  /** Rejouer le même seed redonne exactement la même grille. */
   readonly seed?: string | number;
-  /** Defaut : `rotational180`, la disposition la plus courante en presse. */
+  /** Défaut : `rotational180`, la disposition la plus courante en presse. */
   readonly symmetry?: Symmetry;
   /**
-   * Plancher d'indices. Le generateur creuse au maximum sans jamais casser
-   * l'unicite, mais s'arrete des qu'il atteint ce plancher. Sert a produire
+   * Plancher d'indices. Le générateur creuse au maximum sans jamais casser
+   * l'unicité, mais s'arrête des qu'il atteint ce plancher. Sert à produire
    * des grilles volontairement plus fournies.
    */
   readonly minClues?: number;
@@ -50,16 +50,16 @@ export interface GenerateOptions {
 export interface GeneratedPuzzle {
   readonly puzzle: Grid;
   readonly solution: Grid;
-  /** Nombre de cases remplies au depart. N'est PAS une mesure de difficulte. */
+  /** Nombre de cases remplies au départ. N'est PAS une mesure de difficulté. */
   readonly clues: number;
   readonly seed: string | number;
   readonly symmetry: Symmetry;
 }
 
-/** Une solution complete valide, tiree uniformement au hasard. */
+/** Une solution complète valide, tirée uniformément au hasard. */
 export function generateSolvedGrid(rng: Rng): Grid {
   const solution = findSolution(createEmptyGrid(), { rng });
-  /* c8 ignore next 3 -- une grille vide admet toujours une solution ; garde-fou defensif */
+  /* c8 ignore next 3 -- une grille vide admet toujours une solution ; garde-fou défensif */
   if (solution === null) {
     throw new Error('Aucune solution pour une grille vide : le solveur est en cause.');
   }
@@ -67,8 +67,8 @@ export function generateSolvedGrid(rng: Rng): Grid {
 }
 
 /**
- * Cellules a vider ensemble pour respecter la symetrie demandee.
- * Les groupes sont deduplique : sur l'axe de symetrie, une cellule est seule.
+ * Cellules à vider ensemble pour respecter la symétrie demandée.
+ * Les groupes sont dédupliqué : sur l'axe de symétrie, une cellule est seule.
  */
 export function symmetryGroups(symmetry: Symmetry): number[][] {
   const partnerOf = (cell: number): number => {
@@ -98,12 +98,12 @@ export function symmetryGroups(symmetry: Symmetry): number[][] {
 }
 
 /**
- * Creuse une solution complete en preservant l'unicite.
+ * Creuse une solution complète en préservant l'unicité.
  *
- * On tente les groupes dans un ordre aleatoire et on remet en place tout
- * retrait qui rendrait la grille ambigue. Le resultat n'est pas minimal au sens
- * strict — le rendre minimal demanderait de reexaminer les groupes rejetes —
- * mais il est garanti unique, ce qui est la seule propriete qui compte ici.
+ * On tente les groupes dans un ordre aléatoire et on remet en place tout
+ * retrait qui rendrait la grille ambiguë. Le résultat n'est pas minimal au sens
+ * strict — le rendre minimal demanderait de réexaminer les groupes rejetés —
+ * mais il est garanti unique, ce qui est la seule propriété qui compte ici.
  */
 export function digHoles(
   solution: Grid,
@@ -135,11 +135,11 @@ export function digHoles(
 }
 
 /**
- * Genere une grille jouable a solution unique.
+ * Génère une grille jouable à solution unique.
  *
- * Sans `seed`, un seed aleatoire est tire et renvoye dans le resultat : une
- * grille est donc toujours reproductible a posteriori, ce dont dependent le
- * partage par URL courte et le defi quotidien.
+ * Sans `seed`, un seed aléatoire est tire et renvoyé dans le résultat : une
+ * grille est donc toujours reproductible a posteriori, ce dont dépendent le
+ * partage par URL courte et le défi quotidien.
  */
 export function generatePuzzle(options: GenerateOptions = {}): GeneratedPuzzle {
   const seed = options.seed ?? Math.floor(Math.random() * 0xffff_ffff);

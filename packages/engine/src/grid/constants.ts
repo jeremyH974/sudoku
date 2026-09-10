@@ -1,21 +1,21 @@
 /**
- * Tables precalculees de la geometrie d'une grille 9x9.
+ * Tables précalculées de la géométrie d'une grille 9x9.
  *
- * Tout le moteur passe par ces tables plutot que de recalculer ligne/colonne/
- * boite a la volee : c'est le chemin chaud du solveur, appele des millions de
- * fois par grille generee.
+ * Tout le moteur passe par ces tables plutôt que de recalculer ligne/colonne/
+ * boîte à la volée : c'est le chemin chaud du solveur, appelé des millions de
+ * fois par grille générée.
  *
- * Note d'extensibilite (variantes) : les hypotheses "9x9 classique" sont
- * concentrees ICI et dans `UNITS`. Une variante a geometrie differente
- * (Jigsaw, 6x6, 16x16) se ramene a fournir un autre jeu d'unites — le reste du
- * moteur ne connait que `UNITS`, `PEERS` et `UNITS_OF_CELL`.
+ * Note d'extensibilité (variantes) : les hypothèses "9x9 classique" sont
+ * concentrées ICI et dans `UNITS`. Une variante a géométrie différente
+ * (Jigsaw, 6x6, 16x16) se ramène à fournir un autre jeu d'unités — le reste du
+ * moteur ne connaît que `UNITS`, `PEERS` et `UNITS_OF_CELL`.
  */
 
 export const SIZE = 9;
 export const CELL_COUNT = 81;
-/** 9 lignes + 9 colonnes + 9 boites. */
+/** 9 lignes + 9 colonnes + 9 boîtes. */
 export const UNIT_COUNT = 27;
-/** Chaque cellule voit 8 cellules de sa ligne, 8 de sa colonne, 4 du reste de sa boite. */
+/** Chaque cellule voit 8 cellules de sa ligne, 8 de sa colonne, 4 du reste de sa boîte. */
 export const PEER_COUNT = 20;
 
 export const ROW_OF: Uint8Array = new Uint8Array(CELL_COUNT);
@@ -32,13 +32,13 @@ for (let cell = 0; cell < CELL_COUNT; cell++) {
 
 export const indexOf = (row: number, col: number): number => row * SIZE + col;
 
-/** Nature d'une unite, utile pour nommer une technique dans un indice. */
+/** Nature d'une unité, utile pour nommer une technique dans un indice. */
 export type UnitKind = 'row' | 'column' | 'box';
 
 export interface UnitInfo {
   readonly index: number;
   readonly kind: UnitKind;
-  /** Numero de la ligne / colonne / boite, de 0 a 8. */
+  /** Numéro de la ligne / colonne / boîte, de 0 à 8. */
   readonly position: number;
   readonly cells: readonly number[];
 }
@@ -73,10 +73,10 @@ const buildUnits = (): readonly UnitInfo[] => {
   return units;
 };
 
-/** Les 27 unites, dans l'ordre : lignes 0-8, colonnes 9-17, boites 18-26. */
+/** Les 27 unités, dans l'ordre : lignes 0-8, colonnes 9-17, boîtes 18-26. */
 export const UNITS: readonly UnitInfo[] = buildUnits();
 
-/** Pour chaque cellule, les index des 3 unites auxquelles elle appartient. */
+/** Pour chaque cellule, les index des 3 unités auxquelles elle appartient. */
 export const UNITS_OF_CELL: readonly (readonly number[])[] = (() => {
   const table: number[][] = Array.from({ length: CELL_COUNT }, () => []);
   for (const unit of UNITS) {
@@ -113,6 +113,6 @@ export const PEERS_FLAT: Uint8Array = (() => {
   return flat;
 })();
 
-/** `true` si les deux cellules partagent au moins une unite. */
+/** `true` si les deux cellules partagent au moins une unité. */
 export const arePeers = (a: number, b: number): boolean =>
   a !== b && (ROW_OF[a] === ROW_OF[b] || COL_OF[a] === COL_OF[b] || BOX_OF[a] === BOX_OF[b]);

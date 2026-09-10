@@ -1,19 +1,19 @@
 /**
- * Ensembles de chiffres representes par un masque de 9 bits.
+ * Ensembles de chiffres représentés par un masque de 9 bits.
  *
  * Le bit 0 porte le chiffre 1, ... le bit 8 porte le chiffre 9. Toute la
  * manipulation de candidats passe par ce type : c'est ce qui rend les
  * techniques logiques (paires nues, X-Wing...) exprimables en quelques
- * operations entieres au lieu de parcours de tableaux.
+ * opérations entières au lieu de parcours de tableaux.
  */
 
-/** Masque de 9 bits. Alias documentaire : TS n'a pas d'entier borne. */
+/** Masque de 9 bits. Alias documentaire : TS n'a pas d'entier borné. */
 export type DigitMask = number;
 
-/** Chiffre de 1 a 9. */
+/** Chiffre de 1 à 9. */
 export type Digit = number;
 
-/** Les neuf chiffres presents : 0b1_1111_1111. */
+/** Les neuf chiffres présents : 0b1_1111_1111. */
 export const ALL_DIGITS: DigitMask = 0x1ff;
 export const NO_DIGITS: DigitMask = 0;
 
@@ -53,7 +53,7 @@ export const lowestDigit = (mask: DigitMask): Digit =>
 
 /**
  * Chiffre unique d'un masque singleton. Renvoie 0 si le masque n'en contient
- * pas exactement un — a l'appelant de verifier via `isSingle` quand ca compte.
+ * pas exactement un — à l'appelant de vérifier via `isSingle` quand ca compte.
  */
 export const singleDigit = (mask: DigitMask): Digit => (isSingle(mask) ? lowestDigit(mask) : 0);
 
@@ -79,5 +79,5 @@ export const forEachDigit = (mask: DigitMask, fn: (digit: Digit) => void): void 
   }
 };
 
-/** Representation lisible, pour les messages de debug et les indices. */
+/** Représentation lisible, pour les messages de debug et les indices. */
 export const formatMask = (mask: DigitMask): string => digitsOf(mask).join('');

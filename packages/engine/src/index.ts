@@ -1,8 +1,8 @@
 /**
- * @sudoku/engine — moteur de generation, resolution et (a venir) notation.
+ * @sudoku/engine — moteur de génération, résolution et (a venir) notation.
  *
- * Aucune dependance, aucun acces au DOM ni au stockage. C'est ce qui permet de
- * le faire tourner indifferemment dans un navigateur, un Web Worker, Node, ou
+ * Aucune dépendance, aucun accès au DOM ni au stockage. C'est ce qui permet de
+ * le faire tourner indifféremment dans un navigateur, un Web Worker, Node, ou
  * un futur outil en ligne de commande.
  */
 export * from './rng/index.js';

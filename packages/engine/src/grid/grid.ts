@@ -2,12 +2,12 @@ import { BOX_OF, CELL_COUNT, COL_OF, PEERS, ROW_OF, SIZE, UNITS } from './consta
 import type { Digit } from './bitset.js';
 
 /**
- * Une grille : 81 cellules, 0 pour vide, 1 a 9 pour une valeur posee.
+ * Une grille : 81 cellules, 0 pour vide, 1 à 9 pour une valeur posée.
  *
- * On garde volontairement un `Uint8Array` nu plutot qu'un objet enveloppe :
- * c'est la structure que manipulent le solveur brut et le generateur des
+ * On garde volontairement un `Uint8Array` nu plutôt qu'un objet enveloppe :
+ * c'est la structure que manipulent le solveur brut et le générateur des
  * millions de fois, et toute indirection s'y paierait. Les constructeurs de ce
- * module sont le seul point d'entree — ils garantissent la taille.
+ * module sont le seul point d'entrée — ils garantissent la taille.
  */
 export type Grid = Uint8Array;
 
@@ -34,9 +34,9 @@ export const isFilled = (grid: Grid): boolean => {
 };
 
 /**
- * `true` si poser `digit` en `cell` ne heurte aucune valeur deja presente.
- * Ne dit rien de la solvabilite de la grille resultante — seulement de la
- * legalite immediate du coup.
+ * `true` si poser `digit` en `cell` ne heurte aucune valeur déjà présente.
+ * Ne dit rien de la solvabilité de la grille résultante — seulement de la
+ * légalité immédiate du coup.
  */
 export const isValidPlacement = (grid: Grid, cell: number, digit: Digit): boolean => {
   const peers = PEERS[cell];
@@ -47,10 +47,10 @@ export const isValidPlacement = (grid: Grid, cell: number, digit: Digit): boolea
 };
 
 /**
- * Cellules en conflit avec au moins une autre, triees.
- * C'est ce que l'UI surligne en rouge : on renvoie les DEUX cotes du conflit,
- * pas seulement le dernier coup joue — sinon l'utilisateur ne voit pas d'ou
- * vient le probleme.
+ * Cellules en conflit avec au moins une autre, triées.
+ * C'est ce que l'UI surligne en rouge : on renvoie les DEUX côtés du conflit,
+ * pas seulement le dernier coup joué — sinon l'utilisateur ne voit pas d'ou
+ * vient le problème.
  */
 export const findConflicts = (grid: Grid): number[] => {
   const conflicted = new Set<number>();
@@ -71,7 +71,7 @@ export const findConflicts = (grid: Grid): number[] => {
   return [...conflicted].sort((a, b) => a - b);
 };
 
-/** `true` si aucune valeur posee n'en heurte une autre (grille possiblement incomplete). */
+/** `true` si aucune valeur posée n'en heurte une autre (grille possiblement incomplète). */
 export const isConsistent = (grid: Grid): boolean => {
   for (const unit of UNITS) {
     let seen = 0;
@@ -86,16 +86,16 @@ export const isConsistent = (grid: Grid): boolean => {
   return true;
 };
 
-/** `true` si la grille est entierement remplie et sans conflit. */
+/** `true` si la grille est entièrement remplie et sans conflit. */
 export const isSolved = (grid: Grid): boolean => isFilled(grid) && isConsistent(grid);
 
 const EMPTY_CHARS = new Set(['.', '0', '*', '_']);
 /**
- * Caracteres de decoration toleres dans une grille collee depuis un site tiers.
+ * Caractères de décoration tolérés dans une grille collée depuis un site tiers.
  *
  * Le tiret est ici et non dans EMPTY_CHARS : il sert bien plus souvent de
  * bordure ASCII que de case vide, et on ne peut pas avoir les deux. Une grille
- * qui noterait ses cases vides avec des tirets doit donc etre normalisee en
+ * qui noterait ses cases vides avec des tirets doit donc être normalisée en
  * amont — cas rare, contre un encadrement ASCII qui est la norme.
  */
 const IGNORED_CHARS = new Set([' ', '\t', '\r', '\n', '|', '+', '/', '-']);
@@ -110,10 +110,10 @@ export class GridParseError extends Error {
 /**
  * Lit une grille depuis du texte.
  *
- * Tolerant a dessein : on accepte `.`, `0`, `-`, `*` et `_` pour une case vide,
- * et on ignore espaces, retours a la ligne et caracteres de bordure. C'est ce
- * qui permet de coller une grille recopiee depuis a peu pres n'importe quelle
- * source sans la nettoyer a la main.
+ * Tolérant à dessein : on accepte `.`, `0`, `-`, `*` et `_` pour une case vide,
+ * et on ignore espaces, retours à la ligne et caractères de bordure. C'est ce
+ * qui permet de coller une grille recopiée depuis à peu près n'importe quelle
+ * source sans la nettoyer à la main.
  */
 export const parseGrid = (text: string): Grid => {
   const grid = createEmptyGrid();
@@ -142,7 +142,7 @@ export const parseGrid = (text: string): Grid => {
   return grid;
 };
 
-/** Forme canonique sur une ligne : 81 caracteres, `.` pour vide. */
+/** Forme canonique sur une ligne : 81 caractères, `.` pour vide. */
 export const formatGrid = (grid: Grid): string => {
   let out = '';
   for (let i = 0; i < CELL_COUNT; i++) {
@@ -168,7 +168,7 @@ export const formatGridPretty = (grid: Grid): string => {
   return lines.join('\n');
 };
 
-/** Coordonnees lisibles d'une cellule, convention r1c1 de la communaute sudoku. */
+/** Coordonnées lisibles d'une cellule, convention r1c1 de la communauté sudoku. */
 export const formatCell = (cell: number): string =>
   `r${String(ROW_OF[cell] + 1)}c${String(COL_OF[cell] + 1)}`;
 

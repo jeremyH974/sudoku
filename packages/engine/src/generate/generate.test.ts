@@ -35,8 +35,8 @@ describe('generateSolvedGrid', () => {
 
   it('varie la premiere ligne, pas seulement l etiquetage des chiffres', () => {
     // Si l'on se contentait de permuter les chiffres d'une grille germe unique,
-    // la STRUCTURE resterait identique. On verifie donc que la disposition
-    // elle-meme change : on normalise l'etiquetage (la premiere ligne devient
+    // la STRUCTURE resterait identique. On vérifie donc que la disposition
+    // elle-même change : on normalise l'étiquetage (la première ligne devient
     // 123456789) et on compte les grilles encore distinctes.
     const normalised = new Set<string>();
     for (let seed = 0; seed < 15; seed++) {

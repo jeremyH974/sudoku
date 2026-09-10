@@ -80,8 +80,8 @@ describe('createRng', () => {
       const draws = 90_000;
       for (let i = 0; i < draws; i++) counts[rng.nextInt(9)]++;
       const expected = draws / 9;
-      // Tolerance large : on cherche un biais systemique, pas une preuve
-      // statistique fine. Un modulo naif dans nextInt ferait exploser ce seuil.
+      // Tolérance large : on cherche un biais systémique, pas une preuve
+      // statistique fine. Un modulo naïf dans nextInt ferait exploser ce seuil.
       for (const c of counts) expect(Math.abs(c - expected) / expected).toBeLessThan(0.05);
     });
   });
@@ -113,7 +113,7 @@ describe('createRng', () => {
       const reprise = createRng(state);
       const repris = Array.from({ length: 10 }, () => reprise.nextUint32());
 
-      // Rejouer depuis l'etat capture doit redonner la suite a l'identique.
+      // Rejouer depuis l'état capture doit redonner la suite à l'identique.
       expect(repris).toEqual(suite);
     });
   });
@@ -128,9 +128,9 @@ describe('createRng', () => {
     });
   });
 
-  // Verrou de reproductibilite. Ces valeurs ne doivent JAMAIS changer sans une
-  // decision explicite : elles garantissent qu'une grille regeneree depuis une
-  // URL courte ou une date reste identique d'une version a l'autre du moteur.
+  // Verrou de reproductibilité. Ces valeurs ne doivent JAMAIS changer sans une
+  // décision explicite : elles garantissent qu'une grille régénérée depuis une
+  // URL courte ou une date reste identique d'une version à l'autre du moteur.
   describe('stabilite inter-versions', () => {
     it('produit les valeurs de reference attendues pour un seed numerique', () => {
       expect(take(42, 5)).toMatchInlineSnapshot(`
