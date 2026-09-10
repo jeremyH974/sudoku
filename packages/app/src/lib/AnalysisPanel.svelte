@@ -175,14 +175,22 @@
   }
 
   .analysis {
-    display: flex;
-    flex-wrap: wrap;
-    gap: clamp(1.25rem, 4vw, 2.5rem);
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 27rem) minmax(17rem, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 48rem) {
+    .analysis {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
   }
 
   .viewer {
     display: flex;
+    min-width: 0;
     flex-direction: column;
     gap: 0.75rem;
   }

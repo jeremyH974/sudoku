@@ -189,10 +189,17 @@
 
 <style>
   .studio {
-    display: flex;
-    flex-wrap: wrap;
-    gap: clamp(1.25rem, 4vw, 2.5rem);
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 18rem minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 48rem) {
+    .studio {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
   }
 
   .settings {

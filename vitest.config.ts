@@ -12,10 +12,10 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
   racine contaminerait sinon tout, silencieusement, exactement comme la perte de
   `types: []` avait rendu le garde-fou du moteur inopérant sans que rien ne casse.
 
-  Les tests d'accessibilité, eux, ont besoin d'un DOM pour monter un composant et
-  le soumettre à axe. Ils portent le suffixe `.a11y.test.ts`, de sorte que le nom
-  du fichier dise dans quel monde il vit, tout en restant à côté du composant
-  qu'il vérifie.
+  Les tests qui ont besoin d'un DOM — monter un composant et le soumettre à axe,
+  ou vérifier qu'un réglage pose bien son attribut sur la racine — portent le
+  suffixe `.a11y.test.ts` ou `.dom.test.ts`, de sorte que le nom du fichier dise
+  dans quel monde il vit tout en restant à côté de ce qu'il vérifie.
 
   Ce que ce second projet ne peut pas vérifier, et qui doit rester dit ici comme
   dans le README : aucun DOM simulé ne calcule de mise en page. axe y voit les
@@ -42,9 +42,8 @@ export default defineConfig({
           environment: 'node',
           include: ['packages/*/src/**/*.test.ts'],
           // `foo.a11y.test.ts` satisfait aussi `*.test.ts` : sans cette
-          // exclusion, les tests d'accessibilité tourneraient deux fois, dont
-          // une sans DOM.
-          exclude: ['packages/app/src/**/*.a11y.test.ts'],
+          // exclusion, ces tests tourneraient deux fois, dont une sans DOM.
+          exclude: ['packages/app/src/**/*.{a11y,dom}.test.ts'],
         },
       },
       {
@@ -63,9 +62,9 @@ export default defineConfig({
           },
         },
         test: {
-          name: 'a11y',
+          name: 'dom',
           environment: 'jsdom',
-          include: ['packages/app/src/**/*.a11y.test.ts'],
+          include: ['packages/app/src/**/*.{a11y,dom}.test.ts'],
         },
       },
     ],

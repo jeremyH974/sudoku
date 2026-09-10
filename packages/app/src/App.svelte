@@ -6,6 +6,7 @@
   import AnalysisPanel from './lib/AnalysisPanel.svelte';
   import PrintStudio from './print/PrintStudio.svelte';
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
+  import { TEXT_SIZE_OPTIONS, textSize } from './lib/textSize.svelte.js';
   import { loadGame, requestPersistence, saveGame } from './lib/storage.js';
   import UpdateBanner from './lib/UpdateBanner.svelte';
   import ProgressPanel from './lib/ProgressPanel.svelte';
@@ -290,6 +291,31 @@
       <p class="tagline">Rien à installer. Aucune publicité, aucun compte, aucun suivi.</p>
     </div>
 
+    <div class="preferences">
+      <!--
+        Trois « A » de tailles croissantes : le libellé dit le réglage, la taille
+        du glyphe le montre. Aucune information n'est portée par la seule
+        couleur, et le bouton actif se distingue aussi par sa graisse et son
+        fond, pas seulement par sa teinte.
+      -->
+      <div class="text-size" role="group" aria-label="Taille du texte">
+        {#each TEXT_SIZE_OPTIONS as option, i (option.id)}
+          <button
+            type="button"
+            class="size-option"
+            class:active={textSize.size === option.id}
+            aria-pressed={textSize.size === option.id}
+            title={option.label}
+            onclick={() => textSize.set(option.id)}
+          >
+            <span aria-hidden="true" style={`font-size: ${String(0.8 + i * 0.25)}rem`}>
+              {option.short}
+            </span>
+            <span class="sr-only">{option.label}</span>
+          </button>
+        {/each}
+      </div>
+
     <div class="theme" role="group" aria-label="Thème de l’interface">
       {#each THEME_OPTIONS as option (option.id)}
         <button
@@ -304,6 +330,7 @@
           <span class="theme-label">{option.label}</span>
         </button>
       {/each}
+      </div>
     </div>
   </header>
 
@@ -388,6 +415,21 @@
       </div>
 
       <div class="controls">
+        <!--
+          Pavé et actions réunis sous un même parent, sans rien déplacer dans
+          l'ordre du document : c'est ce groupe qui, sur un écran court, quitte
+          le flux pour se poser sous le pouce.
+
+          Le calcul qui l'impose : sur 375×667, l'en-tête, les onglets, la grille
+          et la ligne d'état consomment 543 px pour 553 px visibles. Aucune
+          disposition ne fait tenir en plus un pavé de saisie, et rétrécir la
+          grille donnerait des cases de 17 px.
+
+          Il vit à l'intérieur de l'onglet « Jouer » : une barre fixe ne peut donc
+          jamais venir couvrir un champ du studio d'impression, clavier logiciel
+          ouvert.
+        -->
+        <div class="thumb-bar">
         <div class="pad" role="group" aria-label="Saisie des chiffres">
           {#each { length: SIZE } as _, i (i)}
             {@const digit = i + 1}
@@ -422,6 +464,7 @@
           <button type="button" class="action" disabled={!game.canUndo} onclick={() => game.undo()}>
             Annuler<kbd>Ctrl+Z</kbd>
           </button>
+        </div>
         </div>
 
         <button type="button" class="hint-button" onclick={onHint} disabled={game.isComplete}>
@@ -506,10 +549,17 @@
 </div>
 
 <style>
+  /*
+    `viewport-fit=cover` est demandé depuis l'incrément 6 sans que rien n'en
+    tienne compte : sur un téléphone à encoche, en paysage, le contenu passait
+    sous les coins arrondis. `max()` rend la règle inoffensive partout ailleurs,
+    puisque `env()` vaut zéro là où il n'existe pas.
+  */
   .page {
     max-width: 68rem;
     margin: 0 auto;
-    padding: 2rem 1rem 4rem;
+    padding: 2rem max(1rem, env(safe-area-inset-right)) 4rem
+      max(1rem, env(safe-area-inset-left));
   }
 
   /*
@@ -543,6 +593,43 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1.25rem;
+  }
+
+  .preferences {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .text-size {
+    display: flex;
+    gap: 0.15rem;
+    padding: 0.2rem;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface-sunken);
+  }
+
+  .size-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .size-option.active {
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 620;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
   }
 
   .theme {
@@ -602,9 +689,13 @@
     }
   }
 
+  /*
+    Taille fixe, en `rem`. Un titre fluide en `vw` cessait de suivre le réglage
+    de taille du texte entre 640 et 880 px, pour un bénéfice esthétique nul.
+  */
   h1 {
     margin: 0;
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-size: 2rem;
     letter-spacing: -0.02em;
   }
 
@@ -647,17 +738,37 @@
     font-weight: 600;
   }
 
+  /*
+    Deux colonnes énoncées, et non trouvées par hasard.
+
+    `flex-wrap` décidait de passer à une colonne à la largeur où le contenu
+    cessait de tenir : un point de rupture réel, mais implicite, donc impossible
+    à raisonner et impossible à tester. La grille CSS le nomme — 34 rem de
+    plateau, 2 rem d'écart, 15 rem de commandes, 2 rem de marges, soit 53,5 rem —
+    et `minmax(0, …)` donne aux pistes le droit de rétrécir sous la largeur
+    minimale de leur contenu, ce que `min-width: 0` faisait pour un élément
+    flexible et qui manquait ici.
+  */
   .layout {
-    display: flex;
-    flex-wrap: wrap;
-    gap: clamp(1.25rem, 4vw, 2.5rem);
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 34rem) minmax(15rem, 22rem);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 53.5rem) {
+    .layout {
+      grid-template-columns: minmax(0, 34rem);
+      justify-content: center;
+      gap: 1.25rem;
+    }
   }
 
   .board-column {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-width: 0;
     max-width: 34rem;
   }
 
@@ -734,11 +845,19 @@
 
   .controls {
     display: flex;
-    flex: 1 1 17rem;
     flex-direction: column;
     gap: 1.1rem;
-    min-width: 15rem;
-    max-width: 22rem;
+    min-width: 0;
+  }
+
+  /*
+    Pavé et actions. Dans le flux sur un écran large, sous le pouce sur un écran
+    court : voir le point de rupture plus bas.
+  */
+  .thumb-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
   }
 
   .pad {
@@ -970,5 +1089,97 @@
   :global(summary:focus-visible) {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
+  }
+
+  /*
+    ─── La barre du pouce ──────────────────────────────────────────────────────
+
+    Le critère est **la hauteur**, et c'est délibéré. Une tablette de 768×1024 a
+    de la place : elle garde la disposition empilée. Un téléphone en paysage,
+    844×390, n'en a pas : il reçoit la barre. Un critère de largeur seule se
+    tromperait sur les deux.
+
+    Le pavé passe en cinq colonnes plutôt que trois : sur 375 px, une touche
+    mesure alors 63 px de large sur 48 de haut, les deux au-dessus de 44 px,
+    contre trois rangées de 52 px qui occuperaient 44 % de l'écran. La dixième
+    case libre de la seconde rangée attend la touche de marque.
+
+    La hauteur réservée sous la page est déclarée plutôt que devinée : deux
+    rangées de touches, un écart, la rangée d'actions, les remplissages. Le
+    `1rem` supplémentaire absorbe l'imprécision au lieu de prétendre à une
+    mesure qu'on n'a pas.
+  */
+  @media (max-width: 53.5rem) and (max-height: 50rem) {
+    .page {
+      padding-bottom: calc(10.6rem + 1rem);
+    }
+
+    .thumb-bar {
+      position: fixed;
+      inset: auto 0 0;
+      z-index: 10;
+      gap: 0.4rem;
+      /* Les encoches et la barre d'accueil : `env()` vaut 0 là où il n'existe pas. */
+      padding: 0.5rem max(1rem, env(safe-area-inset-right))
+        max(0.5rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .thumb-bar > * {
+      width: 100%;
+      max-width: 34rem;
+      margin-inline: auto;
+    }
+
+    .pad {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.4rem;
+    }
+
+    .pad-key {
+      min-height: 3rem;
+      font-size: 1.15rem;
+    }
+
+    /*
+      L'en-tête rend à la grille les pixels qu'il prenait.
+
+      Mesuré avant/après sur 375×667 : en-tête et onglets occupaient 238 px, la
+      grille commençait à 314 px et il n'en restait que 179 px de visible
+      au-dessus de la barre. Après compression, elle commence à ~158 px et tient
+      presque entièrement à l'écran — il reste une dizaine de pixels à faire
+      défiler, ce qui est le prix honnête d'une grille carrée de 343 px sur un
+      écran de 667.
+
+      La signature disparaît ici, et seulement ici : « rien à installer, aucune
+      publicité » s'adresse à quelqu'un qui découvre le site, pas à quelqu'un qui
+      joue sur un écran de six pouces.
+    */
+    .page {
+      padding-top: 0.75rem;
+    }
+
+    header {
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+    }
+
+    .tagline {
+      display: none;
+    }
+
+    .tabs {
+      gap: 0.15rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tabs button {
+      padding: 0.6rem 0.55rem;
+      font-size: 0.85rem;
+    }
   }
 </style>

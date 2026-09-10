@@ -206,11 +206,29 @@
 </div>
 
 <style>
+  /*
+    La grille se mesure contre **son conteneur**, jamais contre la fenêtre.
+
+    `min(92vw, 34rem)` semblait équivalent. Il ne l'était pas : `main` porte un
+    remplissage latéral de 1 rem et le modèle de boîte est en `border-box`, donc
+    la largeur utile vaut `100vw − 2rem`. À 375 px, la grille mesurait 345 px
+    dans 343 px — deux pixels de débordement horizontal, et un rebond élastique
+    sur exactement les téléphones que ce lot vise.
+
+    `container-type: inline-size` fait de la grille son propre référentiel : les
+    chiffres se dimensionnent en `cqi`, une fraction de la grille, et non plus en
+    `vw`. Conséquence directe et recherchée : sur un écran large, `max-width` est
+    en `rem`, donc le réglage « gros caractères » agrandit la grille — et les
+    chiffres avec elle. C'est ce que l'ancrage promettait sans le tenir.
+  */
   .board {
     position: relative;
     display: grid;
     grid-template-rows: repeat(9, 1fr);
-    width: min(92vw, 34rem);
+    width: 100%;
+    max-width: 34rem;
+    margin-inline: auto;
+    container-type: inline-size;
     aspect-ratio: 1;
     border: 3px solid var(--grid-strong);
     border-radius: 5px;
@@ -220,7 +238,7 @@
   }
 
   .board.passive {
-    width: min(88vw, 27rem);
+    max-width: 27rem;
   }
 
   /*
@@ -255,14 +273,23 @@
     cursor: pointer;
     user-select: none;
     font-variant-numeric: tabular-nums;
-    font-size: clamp(1.1rem, 5.2vw, 1.9rem);
+    /*
+      Une fraction de la grille, multipliée par le réglage de taille. Le plafond
+      en `rem` évite qu'un chiffre déborde de sa case sur un très grand écran.
+
+      Deux boutons, un seul réglage : `html { font-size }` fait grandir la grille
+      elle-même là où l'écran le permet ; `--text-scale` fait grandir les
+      chiffres à l'intérieur d'une grille dont la largeur est déjà bornée par le
+      téléphone. Le premier seul ne pouvait rien pour un écran de 375 px, et
+      c'est précisément là que le public visé en a le plus besoin.
+    */
+    font-size: min(calc(6.2cqi * var(--text-scale, 1)), 2.4rem);
     color: var(--value-player);
     transition: background-color 90ms ease;
   }
 
   .board.passive .cell {
     cursor: default;
-    font-size: clamp(0.85rem, 3.6vw, 1.3rem);
   }
 
   .cell.given {
@@ -326,6 +353,12 @@
     z-index: 2;
   }
 
+  /*
+    Un candidat à 0,34 em d'un chiffre de 21 px fait **sept pixels** sur un
+    téléphone. C'est le vrai point douloureux du réglage « gros caractères », et
+    l'audit l'avait manqué. Le ratio monte, et la case sélectionnée — celle qu'on
+    est en train de travailler — les montre nettement plus grands encore.
+  */
   .notes {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -333,9 +366,13 @@
     width: 100%;
     height: 100%;
     padding: 6%;
-    font-size: 0.34em;
+    font-size: 0.4em;
     line-height: 1;
     color: var(--value-note);
+  }
+
+  .cell.selected .notes {
+    font-size: 0.52em;
   }
 
   .note {

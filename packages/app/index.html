@@ -28,6 +28,16 @@
           if (stored === 'light' || stored === 'dark') {
             document.documentElement.setAttribute('data-theme', stored);
           }
+          /*
+            Même raison pour la taille du texte : sans cette ligne la page
+            peindrait à 100 %, puis toute la mise en page sauterait d'un cran.
+            Un saut est plus désagréable qu'un flash de couleur, et il touche
+            précisément les personnes qui ont choisi ce réglage.
+          */
+          var size = localStorage.getItem('sudoku.text-size');
+          if (size === 'large' || size === 'xlarge') {
+            document.documentElement.setAttribute('data-text-size', size);
+          }
         } catch (e) {
           /* stockage indisponible : on suivra le système */
         }
