@@ -304,6 +304,76 @@ l'oublier.
 Les avertissements d'accessibilité du compilateur Svelte sont désormais **bloquants**. Ils étaient
 au nombre de zéro : c'est un cliquet gratuit, pas un chantier.
 
+## La deuxième dimension : ce que le chemin coûte, et sa largeur
+
+Le plan promettait trois dimensions de notation. Une seule existait — le score pic, calibré. Les
+deux autres avaient été différées deux fois, explicitement, « une fois le score pic calibré contre
+l'oracle ».
+
+### La définition écrite dans le plan était fausse
+
+Le plan définissait la tension comme « le nombre d'étapes où une seule technique débloque la
+suite ». Mesuré sur **1 928 étapes** : 8,8 entrées du registre s'appliquent en moyenne à chaque
+étape, et **0,3 %** n'en ont qu'une. Cette définition rendrait zéro pour presque toute grille.
+
+La raison est structurelle : poser un chiffre le retire des candidats de vingt voisines, donc un
+single caché réapparaît presque toujours quelque part. Ce n'est pas le jeu qui est tendu en
+général — c'est **l'instant où la grille exige sa technique la plus difficile**.
+
+### Ainsi mesurée, elle sépare deux grilles de même palier
+
+Sur 360 grilles du corpus quotidien réellement livré :
+
+| Niveau | min | médiane | max | grilles à **une seule issue** |
+|---|---|---|---|---|
+| Facile | 4 | 16 | 70 | 0 % |
+| Moyen | 6 | 15 | 40 | 0 % |
+| Difficile | 2 | 8 | 20 | 0 % |
+| Expert | 1 | 4 | 12 | 8 % |
+| Maître | 1 | 6 | 12 | 5 % |
+| **Diabolique** | 1 | **2** | 6 | **37 %** |
+
+Une Diabolique sur trois n'offre **qu'un seul coup jouable** au moment le plus dur. À « Expert »,
+de 1 à 12 issues — un facteur douze que le score pic, identique, ne dit pas. C'est la différence
+entre une grille franche et une grille brutale, et personne ne la mesure.
+
+Ce sont des **conclusions** qui sont comptées, jamais des motifs. Un single caché se voit à la
+fois dans sa boîte et dans sa ligne ; une paire nue et la paire cachée complémentaire écartent
+les mêmes candidats. Compter les motifs ferait dépendre la mesure du découpage de notre registre.
+
+### Le « score travail » n'est pas livré, et voici pourquoi
+
+Le plan annonçait une somme pondérée à la HoDoKu, sur une échelle de 450 à 2000. Le calcul serait
+gratuit. Mais **il n'existe aucun oracle pour le vérifier** — `serate` ne rend que le pic — et
+notre registre de vingt-quatre techniques n'est pas celui de HoDoKu. Publier « travail : 1 250 »
+serait annoncer un nombre que personne ne peut contredire, c'est-à-dire exactement le défaut que
+ce projet existe pour corriger.
+
+Ce qui est livré se compte : **combien de déductions demandent d'écrire les candidats**, c'est-à-
+dire les étapes à 2,6 et au-delà. Ce n'est pas une pondération déguisée — le registre étant essayé
+par difficulté croissante, une étape à 2,6 est littéralement un moment où aucun raisonnement
+« à l'œil » n'était disponible. Mesuré : Difficile 1 en médiane, Expert 3, Maître 4, Diabolique 4,
+sur des plages de 0 à 13. Le nombre **total** d'étapes, lui, ne sépare rien (49 à 63 partout).
+
+### Ce qui est affiché, et ce qui ne sera pas prétendu
+
+Le verdict porte les trois nombres et, sous un dépliant, **lequel est calibré et lesquels ne le
+sont pas**. C'était l'engagement du plan — « tout est affiché, pas caché derrière un label
+marketing » — et la ligne de partage est désormais à l'écran plutôt que dans un fichier.
+
+L'onglet Analyse liste, à chaque étape, les autres coups qui étaient jouables. Deux commentaires
+du moteur affirmaient depuis l'incrément 2 que le banc d'analyse le faisait déjà. Il ne le faisait
+pas.
+
+Ne sont **pas** prétendus : que la tension est une difficulté ; qu'une grille est « franche » ou
+« tendue » (un adjectif suppose un seuil que rien ne fixe) ; une durée en minutes ; que le chemin
+du solveur est celui du joueur. Ces comptages dépendent du registre, donc ils sont estampillés de
+la version du barème comme le score.
+
+Le coût est de 1,4 ms par grille, contre 1,35 ms pour la notation elle-même — et un test interdit
+au module d'être importé depuis `logic/` ou `generate/`, parce que `rate()` est appelée jusqu'à
+quatre cents fois par grille produite.
+
 ## Le studio d'impression
 
 Cahiers au format standard ou relié, corrigés groupés **à la fin** sur des pages séparées :
@@ -357,8 +427,9 @@ packages/
 │  ├─ grid/      Géométrie 9×9, masques de candidats, lecture/écriture
 │  ├─ solver/    Solveur brut : propagation de contraintes + backtracking MRV
 │  ├─ logic/     Solveur humain : 24 techniques, chemin de résolution, notation
-│  └─ generate/  Creusement à unicité garantie, puis recherche dirigée — par
-│                niveau, ou par **technique** visée
+│  ├─ generate/  Creusement à unicité garantie, puis recherche dirigée — par
+│  │             niveau, ou par **technique** visée
+│  └─ rating/    Deuxième dimension : effort du chemin, et sa largeur au plus dur
 ├─ cli/          Outillage hors production : oracle, corpus quotidien, corpus des leçons
 └─ app/          L'application Svelte 5
    ├─ src/lib/   Logique de partie, grille accessible, panneau d'analyse, Worker
@@ -452,16 +523,67 @@ Progression du taux d'accord exact sous 4,0, d'un incrément à l'autre :
 |---|---|---|
 | Incrément 3 | 91,4 % | Calibration initiale, ordre des techniques corrigé |
 | Incrément 6 | 93,3 % | Liens forts et wings (4,0 à 4,4) |
-| **Incrément 7** | **94,6 %** | Variantes « Direct » restreintes au single caché |
+| Incrément 7 | 94,6 % | Variantes « Direct » restreintes au single caché |
+| **Incrément 9** | **97,8 %** | Le single débloqué doit être trouvé dans une boîte ou dans une maison du motif |
 
-État courant, sur 329 grilles :
+### Le README s'était trompé de coupable
+
+Il désignait « les chemins qui bifurquent » comme la source dominante des écarts restants, au
+motif que 17 des 20 divergences n'employaient que des techniques déjà présentes. Vrai — mais
+« ce n'est pas une lacune du registre » avait été assimilé à « c'est une bifurcation », et les
+deux se séparent.
+
+Une vraie bifurcation est **symétrique en signe** : deux solveurs qui se séparent tôt atterrissent
+au-dessus aussi souvent qu'en dessous. On mesurait 15 sous-évaluations contre 2 sur-évaluations,
+et **13 des 17** avaient une variante « Direct » pour technique de pic — toutes des
+sous-évaluations. L'accord valait 73,5 % quand notre pic était une variante Direct, 97,5 % sinon.
+
+Le mécanisme se lit tout seul : une variante Direct **pose une valeur**. Se déclencher là où
+l'oracle ne le fait pas court-circuite une étape chère plus loin, donc abaisse le pic. Cela ne
+peut produire que des sous-évaluations. Le résidu honnête de vraie bifurcation était de **quatre
+grilles**, mixtes en signe.
+
+### La règle, et le doute qu'elle méritait
+
+Une variante « Direct » n'est reconnue que si le single caché débloqué est trouvé **dans une
+boîte, ou dans l'une des maisons que nomme le motif de base**. Huit règles ont été essayées en
+remplaçant le registre depuis l'extérieur du dépôt — sans Java, sans rien modifier.
+
+Six grilles de gain sur 313, c'est assez peu pour que le surapprentissage soit une hypothèse
+sérieuse. Un **corpus neuf** a donc été produit sous une autre graine, et les deux règles rejouées
+dessus :
+
+| Sur 317 grilles neuves | Accord | sur-éval | sous-éval |
+|---|---|---|---|
+| Ancienne règle | 301/317 — 95,0 % | 1 | 15 |
+| **Nouvelle règle** | **310/317 — 97,8 %** | 2 | 5 |
+
+Le gain se reproduit hors échantillon, et l'erreur se **rééquilibre** — de 1 contre 15 à 2 contre
+5. C'est la signature attendue quand on retire un biais systématique et qu'il ne reste que du
+bruit.
+
+### Ce que le changement de barème a coûté
+
+74 créneaux quotidiens sur 1 644 (4,5 %) ont changé de palier et ont été régénérés ; les 1 570
+autres n'ont pas bougé, et 59 jours n'ont vu que leurs **scores attendus** rafraîchis — les
+étiquettes, jamais les grilles, exactement comme ce corpus s'y était engagé. Les deux générateurs
+vérifient désormais ce qu'ils trouvent au lieu de se fier à sa présence : ils se réparent seuls au
+prochain changement.
+
+Une leçon a perdu son exercice : **aucune grille ne peut être produite où la paire revendiquée
+directe soit la technique la plus difficile** — 4 000 tentatives, les deux symétries, trois
+minutes chacune. Ce n'est pas une perte mais un **accord** : sur les 335 grilles du corpus,
+l'oracle ne rapporte lui non plus aucune « Direct Claiming », là où il en rapporte quatre
+« Direct Pointing » et trente « Direct Hidden Pair ».
+
+État courant, sur 335 grilles :
 
 | Mesure | Valeur |
 |---|---|
-| Accord exact, toutes grilles | 309/329 — **93,9 %** |
-| Accord exact, score ≤ 4,0 | 296/313 — **94,6 %** |
-| Grilles refusées à tort | **1**, notée 4,5 — un Unique Rectangle, hors registre |
-| Surévaluations | **1 sur 329**, de 0,2 point |
+| Accord exact, toutes grilles | 321/330 — **97,3 %** |
+| Accord exact, score ≤ 4,0 | 310/317 — **97,8 %** |
+| Grilles refusées à tort | **0** |
+| Surévaluations | **2 sur 330**, de 0,4 point |
 
 Le corpus ciblé change avec la notation, si bien que deux campagnes ne portent pas exactement sur
 les mêmes grilles. Comparaison faite **grille par grille sur les 291 communes** aux deux, pour
@@ -512,7 +634,9 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   technique sur un corpus de grilles réelles, pas seulement ceux que le registre retient.
 - **Aucune grille n'est résolue en devinant** : si le raisonnement ne suffit pas, le solveur
   s'arrête au lieu d'appeler le solveur brut.
-- **Aucune limite d'erreurs**, annulation illimitée qui restaure aussi les notes.
+- **Aucune limite d'erreurs**, et une annulation qui rend un geste entier — la valeur, les notes
+  et les marques effacées chez les vingt voisines. Bornée à 200 gestes, ce qui est dit plutôt que
+  laissé croire.
 - **La couleur n'est jamais le seul porteur d'information.**
 - **Chaque grille du corpus quotidien est renotée à chaque exécution des tests** : 1 644 grilles
   décodées, résolues et comparées au niveau annoncé. Un futur changement de barème fera échouer ce
@@ -590,22 +714,35 @@ pnpm build && pnpm --filter @sudoku/app exec vite preview
 
 Ce qui reste ouvert, par ordre de valeur :
 
-- **Les chemins qui bifurquent.** Le registre ne manque plus de technique sous 4,5, mais notre
-  chemin de résolution et celui de l'oracle divergent parfois dès les premières étapes, et le
-  score pic s'en ressent. C'est désormais la source dominante des écarts restants.
-- **Unique Rectangle** (4,5 et au-delà) : la seule grille encore refusée à tort en réclame une.
-  Famille distincte, fondée sur l'unicité de la solution plutôt que sur l'élimination directe.
-- **Le rating Glicko2** : point de couture, pas fonctionnalité. Chaque partie enregistrée porte
-  déjà niveau, score, durée, indices, technique enseignée et version du barème.
+- **Les chemins qui bifurquent.** Quatre grilles sur 317, mixtes en signe. Ce n'était **pas** la
+  source dominante des écarts — l'incrément 9 l'a mesuré et le README disait le contraire. Ce qui
+  reste est peut-être irréductible sans lire les sources de l'oracle, ce que nous nous interdisons.
+- **Unique Rectangle** (4,5 et au-delà). Plus aucune grille du corpus n'est refusée à tort, donc la
+  motivation immédiate a disparu ; la famille reste absente, et elle est fondée sur l'unicité de la
+  solution plutôt que sur l'élimination directe.
+- **La paire revendiquée directe n'a pas d'exercice**, et n'en aura peut-être jamais : la produire
+  demanderait une grille que ni notre générateur ni l'oracle ne rencontrent.
 - **Le paysage sur téléphone** : la grille à gauche, le pavé à droite. C'est une troisième
   disposition ; la barre basse s'y dégrade en « il faut un peu défiler », pas en « cassé ».
-- **L'annulation multi-cases** : poser une valeur efface des notes chez jusqu'à vingt voisines
-  sans les enregistrer, donc annuler ne les restaure pas. Le corriger change la forme d'un coup
-  sauvegardé — le seul changement qui imposerait vraiment une montée de version de sauvegarde.
-  À faire seul, délibérément.
 - **La validation au lecteur d'écran de `role="grid"`**, que `CLAUDE.md` exige avant de le
   considérer comme acquis. axe ne peut pas la fournir, et une CI verte ne doit pas être prise
   pour elle.
+
+### Le rating Glicko2 est écarté, et ce n'est plus un report
+
+Il figurait en tête de cette liste depuis l'incrément 0. L'examiner sérieusement a montré qu'il se
+heurte à **quatre** règles du projet, pas une :
+
+- il n'existe **aucun résultat observable** — pas de bouton « abandonner », donc ni victoire ni
+  défaite. Il faudrait en **inventer** un à partir de la durée ou des indices ;
+- il exige un compteur persisté, quand `stats.ts` interdit tout compteur et recalcule tout depuis
+  l'historique — « deux sources de vérité finissent toujours par se contredire » ;
+- il agrège tous niveaux confondus, quand `progress.ts` s'y refuse explicitement : « agrégée, une
+  médiane ne mesurerait pas l'habileté du joueur mais ce qu'il a choisi de jouer » ;
+- l'élagage à 500 parties rendrait le calcul instable dans le temps.
+
+Le construire supposerait donc d'inventer un dénominateur. C'est le contraire de ce que fait ce
+projet, et il vaut mieux l'écrire que de le laisser en tête d'une liste d'intentions.
 
 Écarté sur preuve, pas par oubli : **W-Wing** n'apparaît nulle part dans l'oracle. L'implémenter
 nous ferait diverger sans aucune référence à laquelle comparer.

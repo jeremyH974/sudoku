@@ -72,6 +72,13 @@ le fait chuter et casse la suite.
 Régénérer après un changement délibéré : `pnpm calibrate`, puis vérifier que le taux ne baisse
 pas avant de valider.
 
+> ⚠ **Une règle trouvée en balayant des variantes doit être validée hors échantillon.** À
+> l'incrément 9, huit règles ont été essayées sur les 313 grilles de référence, et la meilleure
+> gagnait six grilles — assez peu pour que le surapprentissage soit une hypothèse sérieuse. Un
+> corpus neuf sous une autre graine a tranché : 95,0 % contre 97,8 %, les deux règles rejouées sur
+> les **mêmes** grilles neuves. Sans cette étape, on ne saurait pas si la règle est vraie ou
+> seulement bien ajustée.
+
 ## Accessibilité
 
 Non négociable, et traitée dès l'écriture, jamais en rattrapage :
@@ -108,10 +115,10 @@ Le niveau affiché vient donc du solveur logique, et de lui seul. Trois conséqu
 - une grille que le registre ne sait pas résoudre ne reçoit **aucun** niveau ;
 - quand la génération n'atteint pas le palier demandé, l'application le **dit** et propose la
   grille la plus proche, au lieu de l'étiqueter au jugé ;
-- la notation est calibrée contre l'oracle (**94,6 % d'accord exact sous 4,0**, incrément 7),
-  mais **pas parfaite** : il manque encore l'Unique Rectangle et les variantes groupées au-delà
-  de 4,3, et une poignée d'écarts viennent de chemins de résolution qui bifurquent. L'interface
-  ne doit pas laisser croire à une exactitude totale.
+- la notation est calibrée contre l'oracle (**97,8 % d'accord exact sous 4,0**, incrément 9,
+  **validé hors échantillon**), mais **pas parfaite** : il manque encore l'Unique Rectangle et les
+  variantes groupées au-delà de 4,3, et quatre grilles sur 317 viennent de chemins qui bifurquent.
+  L'interface ne doit pas laisser croire à une exactitude totale.
 
 ## Honnêteté envers le joueur, volet statistique
 
@@ -126,6 +133,30 @@ Même règle, appliquée aux chiffres de l'onglet Progression :
   définissable ;
 - **aucun compteur n'est persisté** (série, nombre de défis). Tout se recalcule depuis
   l'historique : deux sources de vérité finissent toujours par se contredire.
+
+## Une dimension sans oracle se présente comme un compte
+
+Le score pic est **calibré** : on peut le confronter à Sudoku Explainer, grille par grille. Les
+deux autres dimensions — l'effort du chemin et sa largeur au moment le plus dur — n'ont aucun
+oracle : `serate` ne rend que le pic, et le barème de HoDoKu ne porte pas sur notre registre.
+
+La règle qui en découle, et qui ne se négocie pas :
+
+- ces mesures sont affichées comme des **comptages** de choses observables, jamais comme des
+  notes. « Au moment le plus dur, 2 coups étaient jouables » se vérifie ; « tension : 78/100 » ne
+  se vérifie pas ;
+- aucun adjectif attaché à une grille — « franche », « tendue » — : un adjectif suppose un seuil
+  que rien ne fixe ;
+- l'interface **dit** lequel des nombres affichés est calibré et lesquels ne le sont pas. C'est
+  l'engagement « tout est affiché » du plan, et il se tient à l'écran, pas dans un fichier ;
+- ces comptages dépendent du registre : ils portent la version du barème, comme le score.
+
+Le « score travail » à la HoDoKu a été **écarté pour cette raison**, pas par manque de temps : son
+calcul est gratuit, mais personne au monde ne pourrait le contredire.
+
+> ⚠ **Ne jamais faire entrer ces mesures dans `rate()`.** Celle-ci est la boucle chaude du
+> générateur — jusqu'à quatre cents appels par grille produite. Un test structurel interdit à
+> `logic/` et `generate/` d'importer `rating/` ; la dépendance ne va que dans l'autre sens.
 
 ## Enseigner sans mentir
 
@@ -151,6 +182,11 @@ exercice.**
 > était hors d'atteinte — zéro occurrence sur ~22 000 échanges — et la conclusion était fausse.
 > Plusieurs graines, l'abandon de la symétrie et la récolte au vol en produisent trois en
 > 55 secondes. Une mesure négative sur une configuration ne vaut que pour cette configuration.
+>
+> L'inverse vaut aussi. À l'incrément 9, la **paire revendiquée directe** est devenue introuvable
+> après un resserrement du barème : 4 000 tentatives, les deux symétries, rien. Avant de le
+> déplorer, il fallait regarder l'oracle — qui n'en rapporte lui non plus aucune sur 335 grilles.
+> Ne pas savoir en produire était un **accord**, pas une lacune.
 
 ## Vérification avant de conclure
 
