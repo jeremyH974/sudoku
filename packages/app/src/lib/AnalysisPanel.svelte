@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { conclusionKey, waysForward } from '@sudoku/engine';
   import { replayPath } from '@sudoku/engine';
   import type { Game } from './game.svelte.js';
   import SudokuBoard from './SudokuBoard.svelte';
@@ -20,6 +21,31 @@
 
   const current = $derived(frames[Math.min(index, Math.max(0, frames.length - 1))]);
   const step = $derived(current?.step ?? null);
+
+  /**
+   * Les autres coups jouables à cette étape.
+   *
+   * Deux commentaires du moteur affirmaient depuis l'incrément 2 que « le banc
+   * d'analyse s'en sert pour montrer les alternatives ». Ce n'était pas vrai :
+   * `findAll` n'était appelé que par les variantes « Direct ». Ça l'est
+   * maintenant.
+   *
+   * Calculé pour la **seule image affichée** — une trentaine de millisecondes
+   * pour tout le chemin, contre une pour une étape.
+   */
+  const alternatives = $derived.by(() => {
+    if (current === undefined || current.step === null) return [];
+    return waysForward({ values: current.values, candidates: current.candidates }) ?? [];
+  });
+
+  /**
+   * L'issue qui a été jouée, reconnue à **ce qu'elle change**.
+   *
+   * La même identité que celle qui sert à dédupliquer, et pas une approximation :
+   * une clé fondée sur la technique et le nombre de conclusions marquait quatre
+   * singles cachés comme joués là où un seul l'avait été.
+   */
+  const playedKey = $derived(step === null ? '' : conclusionKey(step));
 
   const markedCells = $derived(new Set(step?.highlights.map((h) => h.cell) ?? []));
   const targetCells = $derived(
@@ -140,6 +166,31 @@
             </li>
           {/if}
         </ul>
+      {/if}
+
+      {#if step !== null}
+        <div class="alternatives">
+          <h3>
+            {alternatives.length > 1
+              ? `${alternatives.length} coups différents étaient jouables ici`
+              : 'C’était le seul coup jouable ici'}
+          </h3>
+          <ul>
+            {#each alternatives as way (way.step.technique + way.step.explanation)}
+              {@const played = conclusionKey(way.step) === playedKey}
+              <li class:played>
+                <span class="badge">{way.step.difficulty.toFixed(1)}</span>
+                {way.step.label}
+                <!-- « jouée » en toutes lettres : la mise en gras seule ne dirait rien. -->
+                {#if played}<span class="tag">jouée</span>{/if}
+              </li>
+            {/each}
+          </ul>
+          <p class="muted">
+            Ce chemin est celui du solveur, qui joue toujours la déduction la moins chère. Le
+            vôtre sera différent, et ce n’est pas un défaut.
+          </p>
+        </div>
       {/if}
 
       <div class="legend" aria-hidden="true">
@@ -322,6 +373,32 @@
   h3 {
     margin: 0 0 0.5rem;
     font-size: 0.9rem;
+  }
+
+  .alternatives {
+    margin: 1rem 0;
+  }
+
+  .alternatives ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0.4rem 0 0.6rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+
+  .alternatives li.played {
+    font-weight: 620;
+  }
+
+  .tag {
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 0.72rem;
   }
 
   .breakdown {

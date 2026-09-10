@@ -6,7 +6,7 @@ import { replayPath } from '../logic/solve.js';
 import { checkStepSoundness } from '../logic/testing.js';
 import { findSolution } from '../solver/index.js';
 import { DEMANDING_FROM, analysePath } from './path.js';
-import { waysForward } from './tension.js';
+import { conclusionKey, waysForward } from './tension.js';
 
 /** Une grille résolue par le seul raisonnement, produite ici et pas recopiée. */
 function solvable(seed: string, minClues = 26): { puzzle: Uint8Array; rating: ReturnType<typeof rate> } {
@@ -38,13 +38,11 @@ describe('issues d’une position', () => {
           const ways = waysForward({ values: frame.values, candidates: frame.candidates });
           expect(ways).not.toBeNull();
 
-          const played = ways!.some(
-            (way) =>
-              way.step.technique === step.technique &&
-              way.step.placements.length === step.placements.length &&
-              way.step.eliminations.length === step.eliminations.length,
-          );
-          expect(played, `étape ${String(index)} absente de ses propres issues`).toBe(true);
+          const matching = ways!.filter((way) => conclusionKey(way.step) === conclusionKey(step));
+          // **Exactement une** : la déduplication garantit qu'une conclusion
+          // n'apparaît qu'une fois, et c'est ce qui permet à l'interface de
+          // marquer « jouée » sans se tromper de coup.
+          expect(matching, `étape ${String(index)} absente de ses propres issues`).toHaveLength(1);
         }
       }),
       { numRuns: 8 },

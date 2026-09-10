@@ -665,6 +665,45 @@
                 plus proche obtenue — nous préférons le dire plutôt que de mal l’étiqueter.
               </p>
             {/if}
+            {#if game.analysis !== null}
+              <!--
+                La deuxième dimension. Deux comptages, jamais des notes : le
+                `<details>` ci-dessous dit lequel des trois nombres est calibré
+                et lesquels ne le sont pas. C'est la ligne de partage, et elle
+                est à l'écran plutôt que dans un fichier.
+              -->
+              <p class="second-dimension">
+                {#if game.analysis.demandingSteps === 0}
+                  Aucune des {game.analysis.stepCount} déductions ne demande les candidats écrits :
+                  cette grille se résout à l’œil.
+                {:else}
+                  <strong>{game.analysis.demandingSteps}</strong>
+                  {game.analysis.demandingSteps > 1 ? 'déductions demandent' : 'déduction demande'}
+                  les candidats écrits, sur {game.analysis.stepCount}.
+                {/if}
+              </p>
+              <p class="second-dimension">
+                Au moment le plus dur,
+                <strong>{game.analysis.narrowest.waysForward}</strong>
+                {game.analysis.narrowest.waysForward > 1
+                  ? 'coups différents étaient jouables'
+                  : 'seul coup était jouable'} —
+                {game.analysis.narrowest.emptyCells} cases restaient vides.
+              </p>
+              <details class="provenance">
+                <summary>D’où viennent ces trois nombres</summary>
+                <p>
+                  Le score {game.rating.score.toFixed(1)} est calibré contre Sudoku Explainer :
+                  sur notre corpus, 97,8 % des grilles sous 4,0 reçoivent exactement sa note.
+                </p>
+                <p>
+                  Les deux autres sont des <strong>comptages</strong>, pas des notes. Ils
+                  décrivent le chemin que notre solveur emprunte — le vôtre sera différent.
+                  Personne ne publie d’équivalent, donc rien ne permet de les confronter : nous
+                  les affichons pour ce qu’ils sont, sans échelle inventée.
+                </p>
+              </details>
+            {/if}
             <p class="muted small">
               Grille <code>{game.seed}</code> — {game.clues} indices, solution unique garantie,
               résoluble sans jamais deviner.
@@ -1264,6 +1303,31 @@
 
   .verdict p:last-child {
     margin-bottom: 0;
+  }
+
+  .second-dimension {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  .provenance {
+    margin-top: 0.5rem;
+    color: var(--text-faint);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .provenance summary {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .provenance p {
+    margin: 0 0 0.5rem;
   }
 
   .verdict .score {

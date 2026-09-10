@@ -39,8 +39,15 @@ export interface WayForward {
   readonly patterns: number;
 }
 
-/** Ce que le coup change sur le plateau, sous une forme comparable. */
-function conclusionOf(step: Step): string {
+/**
+ * Ce que le coup change sur le plateau, sous une forme comparable.
+ *
+ * Exportée parce qu'un appelant qui veut retrouver « le coup joué » parmi les
+ * issues doit employer **exactement** cette identité. Une clé approchée —
+ * technique et nombre de conclusions, par exemple — marque quatre singles cachés
+ * comme joués là où un seul l'a été.
+ */
+export function conclusionKey(step: Step): string {
   const placements = step.placements
     .map((p) => `${String(p.cell)}=${String(p.digit)}`)
     .sort()
@@ -76,7 +83,7 @@ export function waysForward(
 
   for (const entry of registry) {
     for (const step of entry.findAll(state)) {
-      const key = conclusionOf(step);
+      const key = conclusionKey(step);
       const seen = byConclusion.get(key);
       // Le registre est trié par difficulté croissante : le premier pas trouvé
       // pour une conclusion est le moins cher, donc celui qu'on garde.

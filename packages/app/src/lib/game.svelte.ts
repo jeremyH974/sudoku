@@ -7,6 +7,7 @@ import {
   encodeGrid,
   findConflicts,
   findNextStep,
+  analysePath,
   findNextStepFrom,
   findSolution,
   formatGrid,
@@ -156,6 +157,19 @@ export class Game {
   hintTier = $state<HintTier>(0);
   /** Message affiché quand aucun indice n'est possible, et pourquoi. */
   hintNotice = $state<string | null>(null);
+
+  /**
+   * Mesure du chemin : effort et tension. `null` tant qu'aucune grille n'est
+   * notée, ou pour un exercice — une position n'a pas de chemin à elle.
+   *
+   * Calculée à la demande, sur une grille chargée, jamais dans `rate()` : celle-
+   * ci est la boucle chaude du générateur. Coût ~1,4 ms, une fois par grille.
+   */
+  analysis = $derived.by(() => {
+    const rating = this.rating;
+    if (rating === null) return null;
+    return analysePath(Uint8Array.from(this.puzzle), rating);
+  });
 
   conflicts = $derived(new Set(findConflicts(Uint8Array.from(this.values))));
   filledCount = $derived(this.values.filter((v) => v !== EMPTY).length);
