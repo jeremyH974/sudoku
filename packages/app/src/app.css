@@ -86,6 +86,24 @@
   --hint-target-bg: #d9ecdc;
   --hint-target-border: #1c6b45;
 
+  /*
+    Les états d'un contrôle qu'on presse, nommés par rôle comme le reste.
+    Mesurés : --accent-text y garde 9,8:1 au survol et 11,5:1 à l'appui (8,3:1
+    au repos), et --text 13,6:1 sur --surface-pressed.
+  */
+  --accent-hover: #1a4478;
+  --accent-active: #163a66;
+  --surface-pressed: #e4e3df;
+
+  /*
+    Les deux seules élévations, et les seuls jetons non colorés qui dépendent du
+    thème : une ombre portée disparaît sur fond sombre, où l'élévation se dit
+    par un liseré. D'où leur place ici, recopiés dans les trois blocs, et non
+    avec les échelles invariantes plus bas.
+  */
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 12%);
+  --shadow-floating: 0 2px 12px rgb(0 0 0 / 22%);
+
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -133,6 +151,19 @@
     --hint-border: #d4a548;
     --hint-target-bg: #1e3a2a;
     --hint-target-border: #62c295;
+
+    /* États pressés : --accent-text y garde 5,7:1 au survol, 6,5:1 à l'appui. */
+    --accent-hover: #5b8ed6;
+    --accent-active: #6b99da;
+    --surface-pressed: #34383e;
+
+    /*
+      Sur fond sombre, une ombre portée est invisible : l'élévation se dit par
+      un liseré. Mesuré sur la pastille active du sélecteur de thème — 1,06:1
+      avec la seule surface, 1,53:1 avec ce liseré.
+    */
+    --shadow-raised: 0 0 0 1px var(--border);
+    --shadow-floating: 0 2px 16px rgb(0 0 0 / 45%);
   }
 }
 
@@ -181,12 +212,102 @@
   --hint-border: #d4a548;
   --hint-target-bg: #1e3a2a;
   --hint-target-border: #62c295;
+
+  /* États pressés : --accent-text y garde 5,7:1 au survol, 6,5:1 à l'appui. */
+  --accent-hover: #5b8ed6;
+  --accent-active: #6b99da;
+  --surface-pressed: #34383e;
+
+  /*
+    Sur fond sombre, une ombre portée est invisible : l'élévation se dit par un
+    liseré. Mesuré sur la pastille active du sélecteur de thème — 1,06:1 avec
+    la seule surface, 1,53:1 avec ce liseré.
+  */
+  --shadow-raised: 0 0 0 1px var(--border);
+  --shadow-floating: 0 2px 16px rgb(0 0 0 / 45%);
 }
 
 /* L'utilisateur a explicitement choisi le clair : on l'impose au navigateur
    aussi, pour que les contrôles natifs et les barres de défilement suivent. */
 :root[data-theme='light'] {
   color-scheme: light;
+}
+
+/*
+  Les échelles — ce qui ne dépend pas du thème.
+
+  Jusqu'à l'incrément 10, ce fichier ne portait que des couleurs, et tout le
+  reste s'improvisait composant par composant : l'audit y a compté dix rayons,
+  vingt-deux tailles de texte, dix-sept gouttières. Aucune de ces valeurs
+  n'avait été choisie ; elles s'étaient accumulées. Les échelles ci-dessous sont
+  courtes à dessein — chaque pas absorbe des valeurs voisines que l'œil ne
+  distinguait pas —, et `packages/cli/src/appStyles.test.ts` interdit d'en
+  sortir.
+
+  Ces jetons ne changent pas d'un thème à l'autre : c'est pourquoi ils vivent
+  dans un bloc à part, et ne pas les recopier dans les trois blocs de palette
+  documente leur invariance. Seules les élévations dépendent du thème ; elles
+  sont déclarées plus haut, avec les couleurs.
+
+  Tout est en `rem`, sauf les rayons : un rayon n'a pas à grandir avec le
+  réglage « gros caractères ».
+*/
+:root {
+  /* Tout ce qui se touche prend `md` ; tout ce qui contient prend `lg`. */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 2rem;
+
+  --leading-tight: 1.15;
+  --leading-ui: 1.4;
+  --leading-prose: 1.6;
+
+  /*
+    Deux durées, et aucune au-delà de 140 ms : ici le mouvement confirme une
+    action, il ne décore pas. `--dur-instant` reprend les 90 ms que le fond des
+    cases avait déjà choisies. Pas de durée « lente » : un jeton disponible
+    finit toujours par servir.
+  */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur-instant: 90ms;
+  --dur-quick: 140ms;
+
+  /*
+    La cible tactile minimale : 44 px à la taille de base. Elle ne se réduit
+    jamais — c'est une règle du projet, et le test des styles vérifie que ce
+    jeton n'a pas été « rangé » à une valeur plus petite.
+  */
+  --tap: 2.75rem;
+  --tap-lg: 3rem;
+
+  /*
+    Deux largeurs de même valeur, et pourtant deux jetons : ce sont deux
+    décisions qui peuvent diverger. La largeur maximale de la grille, sur
+    laquelle la barre du pouce doit s'aligner ; et la mesure de lecture, environ
+    68 caractères à la taille de base.
+  */
+  --board-max: 34rem;
+  --measure: 34rem;
+
+  /* La voix du papier, déclarée : Georgia, et une chasse fixe pour les codes. */
+  --font-paper: Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, 'Courier New', monospace;
 }
 
 * {
@@ -232,8 +353,28 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  line-height: 1.4;
+  line-height: var(--leading-ui);
   -webkit-text-size-adjust: 100%;
+}
+
+/*
+  L'anneau de focus de toute l'application.
+
+  Il vivait dans le style d'un composant, `App.svelte`, atteint par quatre
+  `:global()` : la première refonte de ce fichier l'aurait fait disparaître sans
+  que rien ne casse. Il est global par nature, il vit donc ici — et les liens
+  l'obtiennent aussi, eux qui en étaient privés.
+
+  `SudokuBoard.svelte` le surcharge pour les cases, à dessein : un contour tracé
+  vers l'extérieur y serait rogné par les cases voisines.
+*/
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

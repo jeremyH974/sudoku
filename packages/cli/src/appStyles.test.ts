@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync } from 'node:fs';
-import { extname, join, relative, resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { extname, join, relative, resolve, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -65,5 +65,278 @@ describe('styles de l’application', () => {
   it('trouve bien des fichiers à inspecter', () => {
     // Sans cela, un chemin devenu faux rendrait le test ci-dessus vert et muet.
     expect(styleFiles(APP_SRC).length).toBeGreaterThan(8);
+  });
+});
+
+/*
+ * ─── La discipline des jetons ───────────────────────────────────────────────
+ *
+ * L'incrément 10 a compté dix rayons, vingt-deux tailles de texte et cinq
+ * graisses — dont deux, 620 et 650, qui rendent au pixel près comme 600 et 700.
+ * Aucune n'avait été choisie : elles s'étaient accumulées, fichier par fichier,
+ * faute d'une échelle à laquelle se tenir. `app.css` porte désormais cette
+ * échelle, et les règles ci-dessous empêchent d'en sortir.
+ *
+ * Elles ne lisent que les blocs `<style>` (voir `styleOf`), et elles épargnent
+ * deux familles de fichiers : le papier, pour toujours, et les fichiers pas
+ * encore migrés, le temps de la migration seulement.
+ */
+
+/**
+ * Le papier : il vit en millimètres, n'a pas de thème, et son noir est un vrai
+ * noir — un `var(--text)` y imprimerait du gris clair sous thème sombre. C'est
+ * l'exception à la discipline des jetons, écrite dans le test plutôt que dans un
+ * commentaire, parce qu'un commentaire se contourne et qu'une liste, non.
+ */
+const PAPER = [
+  'print/PrintSheet.svelte',
+  'print/PrintableGrid.svelte',
+  'print/QrCode.svelte',
+  'print/print.css',
+];
+
+/**
+ * Le cliquet de la migration : les fichiers pas encore mis sur les jetons.
+ *
+ * Chaque commit de migration en retire un, et un fichier qui n'y figure plus
+ * obéit aussitôt à toutes les règles — plutôt qu'un total qui baisserait en
+ * laissant régresser un fichier déjà migré. Le dernier commit de la migration
+ * supprime la liste : un cliquet qui ne retient plus rien est du bruit.
+ */
+const NOT_YET_MIGRATED = new Set([
+  'App.svelte',
+  'lib/ProgressPanel.svelte',
+  'lib/AnalysisPanel.svelte',
+  'lib/LearnPanel.svelte',
+  'lib/SudokuBoard.svelte',
+  'lib/UpdateBanner.svelte',
+  'print/PrintStudio.svelte',
+]);
+
+/** Les graisses qu'une police système statique sait rendre ; les autres s'arrondissent. */
+const WEIGHTS = new Set(['400', '500', '600', '700', 'normal', 'bold', 'inherit']);
+
+/** Au-delà, le mouvement cesse de confirmer une action et commence à décorer. */
+const LONGEST_MOTION_MS = 200;
+
+interface Sheet {
+  /** Chemin relatif à `packages/app/src`, à barres obliques quel que soit le système. */
+  readonly path: string;
+  /** Le CSS seul, sans commentaires. */
+  readonly css: string;
+}
+
+/**
+ * Le CSS d'un fichier : ses blocs `<style>` s'il est un composant.
+ *
+ * Les règles de jetons ne lisent que cela, et c'est délibéré. `App.svelte`
+ * calcule trois tailles de police dans un attribut `style` — celles des trois
+ * « A » du réglage de taille, où **la taille du glyphe est le libellé** : elles
+ * doivent survivre. Le motif ancré en début de ligne écarte aussi le
+ * `{@html '<style>…'}` de `PrintStudio.svelte`, qui n'est pas un bloc de style
+ * du composant.
+ *
+ * La règle des unités de fenêtre, plus haut, lit toujours le fichier entier : un
+ * `vw` dans un attribut `style` est tout aussi fautif.
+ */
+function styleOf(file: string, source: string): string {
+  if (extname(file) === '.css') return source;
+  return [...source.matchAll(/^<style[^>]*>([\s\S]*?)^<\/style>/gm)]
+    .map((match) => match[1])
+    .join('\n');
+}
+
+const sheets: Sheet[] = styleFiles(APP_SRC).map((file) => ({
+  path: relative(APP_SRC, file).split(sep).join('/'),
+  css: withoutComments(styleOf(file, readFileSync(file, 'utf8'))),
+}));
+const appCss = sheets.find((sheet) => sheet.path === 'app.css')?.css ?? '';
+
+const migrated = (sheet: Sheet): boolean => !NOT_YET_MIGRATED.has(sheet.path);
+/** Tenu aux jetons : ni le fichier qui les déclare, ni le papier, ni un fichier en attente. */
+const onTokens = (sheet: Sheet): boolean =>
+  sheet.path !== 'app.css' && !PAPER.includes(sheet.path) && migrated(sheet);
+
+/** Les valeurs d'une propriété, telles qu'écrites. */
+function values(css: string, declaration: RegExp): string[] {
+  return [...css.matchAll(declaration)].map((match) => match[1].trim());
+}
+
+const RADIUS = /(?<![\w-])border-radius\s*:\s*([^;{}]+)/g;
+const FONT_SIZE = /(?<![\w-])font-size\s*:\s*([^;{}]+)/g;
+const FONT_WEIGHT = /(?<![\w-])font-weight\s*:\s*([^;{}]+)/g;
+const DURATION = /(?<![\w-])(?:transition|animation|--dur-[a-z]+)(?:-duration)?\s*:\s*([^;{}]+)/g;
+
+interface Rule {
+  readonly selector: string;
+  /** Les préludes des at-rules qui l'englobent : `@media (hover: hover)`, … */
+  readonly within: readonly string[];
+}
+
+/** Chaque sélecteur d'une feuille, avec les at-rules qui l'englobent. */
+function rulesOf(css: string): Rule[] {
+  const rules: Rule[] = [];
+  const stack: string[] = [];
+  let prelude = '';
+  for (const char of css) {
+    if (char === '{') {
+      const head = prelude.trim();
+      if (!head.startsWith('@')) {
+        for (const selector of head.split(',')) {
+          rules.push({ selector: selector.trim(), within: [...stack] });
+        }
+      }
+      stack.push(head);
+      prelude = '';
+    } else if (char === '}') {
+      stack.pop();
+      prelude = '';
+    } else if (char === ';') {
+      prelude = '';
+    } else {
+      prelude += char;
+    }
+  }
+  return rules;
+}
+
+/** Le sélecteur sans ses états : `.action:hover:not(:disabled)` devient `.action`. */
+const baseOf = (selector: string): string =>
+  selector.replace(/:(?:hover|active|focus-visible|focus|disabled)|:not\([^)]*\)/g, '').trim();
+
+describe('discipline des jetons', () => {
+  it('reconnaît bien ce qu’elle inspecte', () => {
+    // Sans ces bornes, une expression devenue fausse rendrait les règles
+    // ci-dessous vertes et muettes. Elles portent sur tous les fichiers, en
+    // attente de migration compris : c'est la mécanique qu'on éprouve.
+    expect(sheets.flatMap(({ css }) => values(css, RADIUS)).length).toBeGreaterThan(30);
+    expect(sheets.flatMap(({ css }) => values(css, FONT_SIZE)).length).toBeGreaterThan(40);
+    expect(
+      sheets.some(({ css }) => rulesOf(css).some((rule) => rule.selector.includes(':hover'))),
+    ).toBe(true);
+    expect(appCss).toContain('--radius-md');
+  });
+
+  it('ne donne de rayon que par un jeton', () => {
+    // Une valeur en `em` reste permise : elle suit la taille du texte qui
+    // l'entoure, comme le tracé des marques de candidats à l'intérieur d'une case.
+    const offenders = sheets.filter(onTokens).flatMap(({ path, css }) =>
+      values(css, RADIUS)
+        .filter(
+          (value) =>
+            !value.split(/\s+/).every((part) => /^(?:var\(--radius-[a-z]+\)|0|[\d.]+em)$/.test(part)),
+        )
+        .map((value) => `${path} : border-radius: ${value}`),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it('ne donne de taille de texte en rem que par un jeton', () => {
+    // Une seule exception, nommée : les chiffres de la grille, qui combinent
+    // `cqi` et `--text-scale` sous un plafond en rem. C'est le levier qui fait
+    // vivre « gros caractères » sur un téléphone.
+    const offenders = sheets.filter(onTokens).flatMap(({ path, css }) =>
+      values(css, FONT_SIZE)
+        .filter((value) => /\d(?:\.\d+)?rem/.test(value) && !value.includes('cqi'))
+        .map((value) => `${path} : font-size: ${value}`),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it('ne connaît que des graisses qui existent partout', () => {
+    // Mesuré au pixel à l'incrément 10 : faute d'une police variable, 620 rend
+    // exactement comme 600 et 650 exactement comme 700. Les chiffres donnés du
+    // plateau (650) avaient ainsi la graisse des candidats marqués (700), sans
+    // que personne l'ait voulu.
+    const offenders = sheets.filter(migrated).flatMap(({ path, css }) =>
+      values(css, FONT_WEIGHT)
+        .filter((value) => !WEIGHTS.has(value))
+        .map((value) => `${path} : font-weight: ${value}`),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it('n’écrit de couleur que dans le fichier des jetons', () => {
+    // Une couleur écrite ailleurs n'a ni variante sombre ni audit de contraste.
+    const offenders = sheets
+      .filter(onTokens)
+      .flatMap(({ path, css }) =>
+        [...css.matchAll(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/g)].map(
+          (match) => `${path} : ${match[0]}`,
+        ),
+      );
+    expect(offenders).toEqual([]);
+  });
+
+  it('ne fait rien durer plus de 200 ms', () => {
+    const offenders: string[] = [];
+    let seen = 0;
+    for (const { path, css } of sheets) {
+      for (const value of values(css, DURATION)) {
+        for (const [literal, amount, unit] of value.matchAll(/(\d*\.?\d+)(ms|s)\b/g)) {
+          seen++;
+          const ms = unit === 's' ? Number(amount) * 1000 : Number(amount);
+          if (ms > LONGEST_MOTION_MS) offenders.push(`${path} : ${literal}`);
+        }
+      }
+    }
+    // Les jetons de durée et le garde-fou du mouvement réduit, au moins.
+    expect(seen).toBeGreaterThan(2);
+    expect(offenders).toEqual([]);
+  });
+
+  it('ne survole qu’avec un pointeur qui survole', () => {
+    // Au doigt, un navigateur mobile émule le survol au toucher — et le laisse
+    // collé jusqu'au toucher suivant : la touche du pavé reste éclairée après
+    // qu'on a posé le chiffre. Un survol n'a de sens que sous `(hover: hover)`.
+    const offenders = sheets.filter(migrated).flatMap(({ path, css }) =>
+      rulesOf(css)
+        .filter((rule) => rule.selector.includes(':hover'))
+        .filter((rule) => !rule.within.some((at) => /@media[^{]*\(hover:\s*hover\)/.test(at)))
+        .map((rule) => `${path} : ${rule.selector}`),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it('donne un état pressé à tout ce qui se survole', () => {
+    // Au doigt, `:active` est le seul état qui existe : un contrôle qui réagit
+    // au survol mais pas à l'appui est muet sur la cible visée en premier. On ne
+    // peut pas savoir d'un texte CSS ce qui est interactif — mais ce qui a un
+    // survol l'est, et c'est lui qu'on apparie.
+    const offenders = sheets.filter(migrated).flatMap(({ path, css }) => {
+      const rules = rulesOf(css);
+      const pressed = new Set(
+        rules
+          .filter((rule) => rule.selector.includes(':active'))
+          .map((rule) => baseOf(rule.selector)),
+      );
+      return rules
+        .filter((rule) => rule.selector.includes(':hover') && !pressed.has(baseOf(rule.selector)))
+        .map((rule) => `${path} : ${rule.selector}`);
+    });
+    expect(offenders).toEqual([]);
+  });
+
+  it('garde le garde-fou du mouvement réduit', () => {
+    // Le bloc qui neutralise toute durée quand le système le demande : c'est lui
+    // qui rend sûr le peu de mouvement que l'application s'autorise.
+    expect(appCss).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
+  });
+
+  it('garde la cible tactile à 44 px', () => {
+    // Ceci ne prouve pas que les cibles font 44 px à l'écran : un DOM simulé ne
+    // calcule aucune mise en page, `src/test/axe.ts` le dit. Cela attrape le
+    // seul mode de défaillance qu'une relecture laisserait passer — un jeton
+    // « rangé » à une valeur plus petite.
+    expect(appCss).toMatch(/--tap:\s*2\.75rem;/);
+  });
+
+  it('n’exempte que des fichiers qui existent', () => {
+    // Un renommage élargirait sinon l'exemption en silence : le fichier renommé
+    // échapperait à toutes les règles sans que rien ne le dise.
+    const missing = [...PAPER, ...NOT_YET_MIGRATED].filter(
+      (path) => !existsSync(join(APP_SRC, path)),
+    );
+    expect(missing).toEqual([]);
   });
 });

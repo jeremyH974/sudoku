@@ -1352,13 +1352,6 @@
     white-space: nowrap;
   }
 
-  :global(button:focus-visible),
-  :global(select:focus-visible),
-  :global(input:focus-visible),
-  :global(summary:focus-visible) {
-    outline: 3px solid var(--focus);
-    outline-offset: 2px;
-  }
 
   /*
     ─── La barre du pouce ──────────────────────────────────────────────────────
