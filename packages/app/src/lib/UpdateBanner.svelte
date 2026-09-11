@@ -47,10 +47,10 @@
   .banner {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: var(--space-3);
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
     padding: 0.7rem 0.9rem;
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -72,7 +72,7 @@
   }
 
   button {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     padding: 0.35rem 0.8rem;
     border-radius: 7px;
     font: inherit;

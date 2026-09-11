@@ -229,7 +229,7 @@
 
   h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--text-base);
     font-weight: 600;
   }
 
@@ -275,7 +275,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .pick label {
@@ -284,19 +284,19 @@
   }
 
   select {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     padding: 0.4rem 0.6rem;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
   }
 
   button {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     padding: 0.4rem 0.9rem;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font: inherit;
     cursor: pointer;
   }
@@ -309,7 +309,7 @@
   }
 
   .ghost {
-    min-width: 2.75rem;
+    min-width: var(--tap);
     border: 1px solid var(--border);
     background: none;
     color: var(--text);
@@ -345,7 +345,7 @@
   .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 0.25rem;
+    gap: var(--space-1);
   }
 
   .dow {
@@ -366,7 +366,7 @@
     justify-content: center;
     gap: 0;
     aspect-ratio: 1;
-    min-height: 2.75rem;
+    min-height: var(--tap);
     padding: 0;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -393,7 +393,7 @@
 
   .mark {
     height: 0.9em;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     line-height: 1;
     color: var(--accent);
   }
@@ -406,7 +406,7 @@
 
   th,
   td {
-    padding: 0.45rem 0.5rem;
+    padding: 0.45rem var(--space-2);
     text-align: left;
     border-bottom: 1px solid var(--border);
     font-variant-numeric: tabular-nums;
@@ -427,7 +427,7 @@
   }
 
   .sample {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--text-muted);
   }
 </style>

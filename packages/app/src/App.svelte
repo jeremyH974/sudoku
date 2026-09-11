@@ -767,8 +767,8 @@
     z-index: 20;
     display: inline-flex;
     align-items: center;
-    min-height: 2.75rem;
-    padding: 0 1rem;
+    min-height: var(--tap);
+    padding: 0 var(--space-4);
     border-radius: 6px;
     background: var(--accent);
     color: var(--accent-text);
@@ -783,7 +783,7 @@
   header {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: var(--space-4);
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1.25rem;
@@ -792,7 +792,7 @@
   .preferences {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: var(--space-3);
     align-items: center;
   }
 
@@ -809,8 +809,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 2.75rem;
-    min-height: 2.75rem;
+    min-width: var(--tap);
+    min-height: var(--tap);
     border: none;
     border-radius: 7px;
     background: none;
@@ -844,8 +844,8 @@
       téléphone : sans le `min-width`, il restait un bouton de 32 px de large,
       et l'audit de l'incrément 8 l'a mesuré.
     */
-    min-height: 2.75rem;
-    min-width: 2.75rem;
+    min-height: var(--tap);
+    min-width: var(--tap);
     justify-content: center;
     padding: 0.3rem 0.6rem;
     border: none;
@@ -889,7 +889,7 @@
   */
   h1 {
     margin: 0;
-    font-size: 2rem;
+    font-size: var(--text-xl);
     letter-spacing: -0.02em;
   }
 
@@ -907,16 +907,16 @@
       qui sort de l'écran.
     */
     flex-wrap: wrap;
-    gap: 0.25rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-1);
+    margin-bottom: var(--space-5);
     border-bottom: 1px solid var(--border);
   }
 
   .tabs button {
     display: inline-flex;
     align-items: center;
-    min-height: 2.75rem;
-    padding: 0.6rem 1rem;
+    min-height: var(--tap);
+    padding: 0.6rem var(--space-4);
     border: none;
     border-bottom: 2px solid transparent;
     background: none;
@@ -946,7 +946,7 @@
   .layout {
     display: grid;
     grid-template-columns: minmax(0, 34rem) minmax(15rem, 22rem);
-    gap: 2rem;
+    gap: var(--space-6);
     align-items: start;
   }
 
@@ -961,7 +961,7 @@
   .board-column {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--space-3);
     min-width: 0;
     max-width: 34rem;
   }
@@ -970,7 +970,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     margin: 0;
     color: var(--text-muted);
     font-size: 0.95rem;
@@ -1008,7 +1008,7 @@
   }
 
   .hint {
-    padding: 0.8rem 1rem;
+    padding: 0.8rem var(--space-4);
     border: 1px solid var(--hint-border);
     border-radius: 10px;
     background: var(--hint-bg);
@@ -1017,7 +1017,7 @@
   }
 
   .hint p {
-    margin: 0 0 0.5rem;
+    margin: 0 0 var(--space-2);
   }
 
   .hint p:last-child {
@@ -1057,7 +1057,7 @@
   .pad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .pad-key {
@@ -1073,7 +1073,7 @@
     min-height: 3.25rem;
     padding: 0.4rem;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font-size: 1.35rem;
@@ -1101,7 +1101,7 @@
   .marks {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .mark-key {
@@ -1110,9 +1110,9 @@
     align-items: center;
     justify-content: center;
     gap: 0.1rem;
-    min-height: 2.75rem;
+    min-height: var(--tap);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text-muted);
     font: inherit;
@@ -1151,7 +1151,7 @@
   .actions {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .action {
@@ -1160,9 +1160,9 @@
     gap: 0.2rem;
     align-items: center;
     min-height: 3rem;
-    padding: 0.5rem 0.3rem;
+    padding: var(--space-2) 0.3rem;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font-size: 0.85rem;
@@ -1191,12 +1191,12 @@
 
   .hint-button {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     justify-content: center;
     align-items: center;
     min-height: 2.9rem;
     border: 1px solid var(--hint-border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--hint-bg);
     color: var(--text);
     font: inherit;
@@ -1220,7 +1220,7 @@
     flex-direction: column;
     gap: 0.6rem;
     margin: 0;
-    padding: 0.9rem 1rem 1.1rem;
+    padding: 0.9rem var(--space-4) 1.1rem;
     border: 1px solid var(--border);
     border-radius: 10px;
   }
@@ -1234,14 +1234,14 @@
   label {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-1);
     color: var(--text-muted);
     font-size: 0.85rem;
   }
 
   select {
-    min-height: 2.75rem;
-    padding: 0.35rem 0.5rem;
+    min-height: var(--tap);
+    padding: 0.35rem var(--space-2);
     border: 1px solid var(--border);
     border-radius: 6px;
     background: var(--surface);
@@ -1257,10 +1257,10 @@
   }
 
   .primary {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     margin-top: 0.2rem;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--accent);
     color: var(--accent-text);
     font: inherit;
@@ -1269,9 +1269,9 @@
   }
 
   .secondary {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
@@ -1289,7 +1289,7 @@
   }
 
   .verdict {
-    padding: 0.75rem 0.9rem;
+    padding: var(--space-3) 0.9rem;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--surface-sunken);
@@ -1313,26 +1313,26 @@
   }
 
   .provenance {
-    margin-top: 0.5rem;
+    margin-top: var(--space-2);
     color: var(--text-faint);
     font-size: 0.82rem;
     line-height: 1.5;
   }
 
   .provenance summary {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     display: flex;
     align-items: center;
     cursor: pointer;
   }
 
   .provenance p {
-    margin: 0 0 0.5rem;
+    margin: 0 0 var(--space-2);
   }
 
   .verdict .score {
     padding: 0.05rem 0.4rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--surface);
     color: var(--text-muted);
     font-size: 0.78rem;
@@ -1419,11 +1419,11 @@
       joue sur un écran de six pouces.
     */
     .page {
-      padding-top: 0.75rem;
+      padding-top: var(--space-3);
     }
 
     header {
-      margin-bottom: 0.75rem;
+      margin-bottom: var(--space-3);
     }
 
     h1 {
@@ -1436,11 +1436,11 @@
 
     .tabs {
       gap: 0.15rem;
-      margin-bottom: 0.75rem;
+      margin-bottom: var(--space-3);
     }
 
     .tabs button {
-      padding: 0.6rem 0.5rem;
+      padding: 0.6rem var(--space-2);
       font-size: 0.82rem;
     }
 
@@ -1465,7 +1465,7 @@
 
     .size-option,
     .theme-option {
-      min-width: 2.75rem;
+      min-width: var(--tap);
       padding-inline: 0.15rem;
     }
   }

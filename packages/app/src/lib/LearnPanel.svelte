@@ -163,7 +163,7 @@
     margin: 0;
     padding: 0.7rem 0.9rem;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface-sunken);
     color: var(--text-muted);
   }
@@ -171,7 +171,7 @@
   .chapter {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--space-3);
   }
 
   h2 {
@@ -192,7 +192,7 @@
   .technique {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-2);
     padding: 0.85rem 0.95rem;
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -210,13 +210,13 @@
   .head {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--space-2);
     align-items: baseline;
   }
 
   .badge {
     padding: 0.1rem 0.45rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--surface-sunken);
     color: var(--text-muted);
     font-size: 0.78rem;
@@ -242,13 +242,13 @@
   .row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .row button {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     padding: 0.4rem 0.9rem;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font: inherit;
     font-size: 0.9rem;
     cursor: pointer;
@@ -277,7 +277,7 @@
     gap: 0.6rem;
     padding-top: 0.4rem;
     border-top: 1px solid var(--border);
-    line-height: 1.6;
+    line-height: var(--leading-prose);
   }
 
   .body p {
@@ -290,8 +290,8 @@
   }
 
   .aside.warn {
-    padding: 0.6rem 0.75rem;
-    border-radius: 8px;
+    padding: 0.6rem var(--space-3);
+    border-radius: var(--radius-md);
     background: var(--surface-sunken);
   }
 </style>

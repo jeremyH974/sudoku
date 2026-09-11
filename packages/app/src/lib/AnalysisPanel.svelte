@@ -228,7 +228,7 @@
   .analysis {
     display: grid;
     grid-template-columns: minmax(0, 27rem) minmax(17rem, 1fr);
-    gap: 2rem;
+    gap: var(--space-6);
     align-items: start;
   }
 
@@ -243,7 +243,7 @@
     display: flex;
     min-width: 0;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--space-3);
   }
 
   .transport {
@@ -254,7 +254,7 @@
   }
 
   .transport button {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     padding: 0.4rem 0.7rem;
     border: 1px solid var(--border);
     border-radius: 7px;
@@ -287,7 +287,7 @@
   */
   input[type='range'] {
     width: 100%;
-    min-height: 2.75rem;
+    min-height: var(--tap);
     accent-color: var(--accent);
   }
 
@@ -300,13 +300,13 @@
     display: flex;
     gap: 0.6rem;
     align-items: baseline;
-    margin: 0 0 0.5rem;
+    margin: 0 0 var(--space-2);
     font-size: 1.15rem;
   }
 
   .score {
     padding: 0.1rem 0.45rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--surface-sunken);
     color: var(--text-muted);
     font-size: 0.8rem;
@@ -371,18 +371,18 @@
   }
 
   h3 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 var(--space-2);
     font-size: 0.9rem;
   }
 
   .alternatives {
-    margin: 1rem 0;
+    margin: var(--space-4) 0;
   }
 
   .alternatives ul {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-1);
     margin: 0.4rem 0 0.6rem;
     padding: 0;
     list-style: none;
@@ -395,7 +395,7 @@
 
   .tag {
     padding: 0.05rem 0.4rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--accent-soft);
     color: var(--text);
     font-size: 0.72rem;
@@ -409,7 +409,7 @@
 
   .breakdown li {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     align-items: center;
     padding: 0.3rem 0;
     border-bottom: 1px solid var(--border);
@@ -419,10 +419,10 @@
   .badge {
     min-width: 2.2rem;
     padding: 0.08rem 0.35rem;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: var(--surface-sunken);
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-variant-numeric: tabular-nums;
     text-align: center;
   }

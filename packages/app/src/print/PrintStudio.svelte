@@ -191,7 +191,7 @@
   .studio {
     display: grid;
     grid-template-columns: 18rem minmax(0, 1fr);
-    gap: 2rem;
+    gap: var(--space-6);
     align-items: start;
   }
 
@@ -218,23 +218,23 @@
   label {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-1);
     color: var(--text-muted);
     font-size: 0.85rem;
   }
 
   label.checkbox {
     flex-direction: row;
-    gap: 0.5rem;
+    gap: var(--space-2);
     align-items: center;
-    min-height: 2.75rem;
+    min-height: var(--tap);
   }
 
   input[type='text'],
   input[type='number'],
   select {
-    min-height: 2.75rem;
-    padding: 0.35rem 0.5rem;
+    min-height: var(--tap);
+    padding: 0.35rem var(--space-2);
     border: 1px solid var(--border);
     border-radius: 6px;
     background: var(--surface);
@@ -251,7 +251,7 @@
 
   .notice {
     margin: 0;
-    padding: 0.5rem 0.7rem;
+    padding: var(--space-2) 0.7rem;
     border-radius: 7px;
     background: var(--surface-sunken);
     font-size: 0.82rem;
@@ -259,9 +259,9 @@
 
   .primary,
   .secondary {
-    min-height: 2.75rem;
+    min-height: var(--tap);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -307,9 +307,9 @@
   .sheets {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--space-5);
     align-items: center;
-    padding: 1.5rem;
+    padding: var(--space-5);
     border-radius: 10px;
     background: var(--surface-sunken);
     overflow-x: auto;
