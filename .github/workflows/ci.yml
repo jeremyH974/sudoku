@@ -74,6 +74,13 @@ jobs:
       group: pages
       cancel-in-progress: false
 
+    # L'environnement `github-pages` est créé par GitHub à l'activation de Pages,
+    # avec une règle qui n'autorise que la branche `main` à y publier. Ce dépôt
+    # est sur `master` : la première publication a été refusée pour cette seule
+    # raison, et `master` a été ajoutée à la règle, `main` restant autorisée comme
+    # dans le déclenchement ci-dessus. C'est un réglage du dépôt, pas du code : à
+    # refaire si le dépôt est recréé —
+    #   gh api -X POST repos/<propriétaire>/sudoku/environments/github-pages/deployment-branch-policies -f name=master -f type=branch
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
