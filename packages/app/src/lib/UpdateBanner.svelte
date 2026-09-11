@@ -1,5 +1,6 @@
 <script lang="ts">
   import { registerSW } from 'virtual:pwa-register';
+  import { createUpdatePolicy } from './updatePolicy.js';
 
   let needRefresh = $state(false);
   let offlineReady = $state(false);
@@ -8,12 +9,20 @@
   /*
     L'enregistrement se fait au montage, une seule fois.
 
-    On garde `updateSW` de côté plutôt que de recharger d'emblée : c'est
-    l'utilisateur qui décide quand interrompre sa partie. Le service worker
-    attend sagement dans l'état « waiting » entre-temps.
+    Une nouvelle version en attente est appliquée d'office tant que la page
+    vient de s'ouvrir et que personne n'y a touché — `updatePolicy.ts` dit
+    pourquoi la bannière seule ne suffisait pas. Dès le premier geste, c'est de
+    nouveau l'utilisateur qui décide quand interrompre sa partie, et le service
+    worker attend sagement dans l'état « waiting ».
   */
+  const policy = createUpdatePolicy();
+
   reload = registerSW({
     onNeedRefresh() {
+      if (policy.decide() === 'apply' && reload !== null) {
+        void reload();
+        return;
+      }
       needRefresh = true;
     },
     onOfflineReady() {

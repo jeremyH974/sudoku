@@ -35,6 +35,11 @@ export default defineConfig({
         Recharger la page sous les doigts de quelqu'un en train de résoudre une
         grille est brutal, même sans perte de données — et une partie est en
         cours la plupart du temps. Une bannière discrète laisse la main.
+
+        « prompt » ne veut pas dire attendre indéfiniment : `UpdateBanner.svelte`
+        applique d'office une version en attente à l'ouverture, avant le premier
+        geste. À la mise en ligne, une bannière passée inaperçue avait laissé
+        l'auteur lui-même sur une version corrigée depuis.
       */
       registerType: 'prompt',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],

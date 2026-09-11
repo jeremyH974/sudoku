@@ -42,8 +42,9 @@ vérifier, pas une seconde construction qui lui ressemble.
 
 **L'installer.** Chrome et Edge proposent « Installer l'application » dans la barre d'adresse ;
 Safari, sur iPhone et iPad, « Sur l'écran d'accueil » depuis le menu de partage. Installée, elle
-démarre sans réseau — défi du jour compris — et se met à jour par une bannière, jamais sous les
-doigts de quelqu'un en train de jouer.
+démarre sans réseau — défi du jour compris. Une nouvelle version s'applique d'elle-même à
+l'ouverture, avant le premier geste ; une fois la partie commencée, elle attend votre accord sur
+une bannière, pour ne jamais recharger sous les doigts de quelqu'un en train de jouer.
 
 **Les QR codes des cahiers** encodent l'adresse d'où le studio a été ouvert. Un cahier imprimé
 depuis l'adresse publique s'ouvre donc sur n'importe quel téléphone ; un cahier imprimé depuis
@@ -718,7 +719,9 @@ Worker du moteur, le manifeste, les quatre icônes — **et les deux corpus**, 2
 compressés, moteur compris — il n'y a rien à arbitrer entre ce qu'on met en cache et ce qu'on
 laisse au réseau : il n'y a aucun réseau à solliciter une fois la page chargée. La mise à jour
 passe par une bannière plutôt que par un rechargement forcé, car recharger la page sous les doigts
-de quelqu'un en train de résoudre une grille est brutal.
+de quelqu'un en train de résoudre une grille est brutal — sauf à l'ouverture, avant le premier
+geste, où elle s'applique d'office : à la mise en ligne, une bannière passée inaperçue avait laissé
+l'auteur lui-même sur une version corrigée depuis (voir `lib/updatePolicy.ts`).
 
 ### Ce qui avait bloqué la vérification pendant deux incréments
 
