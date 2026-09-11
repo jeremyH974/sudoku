@@ -76,35 +76,50 @@
 </script>
 
 <section class="progress">
-  <div class="cards">
-    <div class="card">
-      <span class="value">{streak}</span>
-      <!-- « résolus », jamais « de suite » : c'est le mot qui porte le sens. -->
-      <span class="caption">{streak === 1 ? 'jour résolu' : 'jours résolus'} d’affilée</span>
-      {#if best > streak}
-        <span class="note">record : {best}</span>
-      {/if}
+  {#if overall.played === 0}
+    <!--
+      Aucune partie : pas de tableau de bord de zéros. Ces compteurs sont
+      honnêtes — un chiffre qu'on n'a pas ne s'invente pas —, mais présentés
+      comme un tableau rempli de vide, trois « 0 » et un tiret étaient la première
+      chose que voyait quelqu'un qui arrivait par le lien. On dit plutôt ce qui
+      les remplira.
+    -->
+    <p class="intro">
+      Vos statistiques apparaîtront ici dès votre première grille terminée : les jours
+      résolus d’affilée, les parties, celles menées sans indice, et le niveau le plus haut
+      atteint. Le défi du jour, juste en dessous, est un bon premier pas.
+    </p>
+  {:else}
+    <div class="cards">
+      <div class="card">
+        <span class="value">{streak}</span>
+        <!-- « résolus », jamais « de suite » : c'est le mot qui porte le sens. -->
+        <span class="caption">{streak === 1 ? 'jour résolu' : 'jours résolus'} d’affilée</span>
+        {#if best > streak}
+          <span class="note">record : {best}</span>
+        {/if}
+      </div>
+      <div class="card">
+        <span class="value">{overall.played}</span>
+        <span class="caption">{overall.played === 1 ? 'partie terminée' : 'parties terminées'}</span>
+        {#if overall.dailies > 0}
+          <span class="note">dont {overall.dailies} défi{overall.dailies > 1 ? 's' : ''}</span>
+        {/if}
+      </div>
+      <div class="card">
+        <span class="value">{overall.unaided}</span>
+        <span class="caption">sans indice appliqué</span>
+      </div>
+      <div class="card">
+        <span class="value strong">
+          {overall.highestLevel === null
+            ? '—'
+            : (LEVELS.find((l) => l.id === overall.highestLevel)?.label ?? '—')}
+        </span>
+        <span class="caption">niveau le plus haut terminé</span>
+      </div>
     </div>
-    <div class="card">
-      <span class="value">{overall.played}</span>
-      <span class="caption">{overall.played === 1 ? 'partie terminée' : 'parties terminées'}</span>
-      {#if overall.dailies > 0}
-        <span class="note">dont {overall.dailies} défi{overall.dailies > 1 ? 's' : ''}</span>
-      {/if}
-    </div>
-    <div class="card">
-      <span class="value">{overall.unaided}</span>
-      <span class="caption">sans indice appliqué</span>
-    </div>
-    <div class="card">
-      <span class="value strong">
-        {overall.highestLevel === null
-          ? '—'
-          : (LEVELS.find((l) => l.id === overall.highestLevel)?.label ?? '—')}
-      </span>
-      <span class="caption">niveau le plus haut terminé</span>
-    </div>
-  </div>
+  {/if}
 
   <h2>Le défi du jour</h2>
   {#if corpus === null}
@@ -176,47 +191,55 @@
     {/each}
   </div>
 
-  <h2>Par niveau</h2>
-  {#if overall.played === 0}
-    <p class="empty">
-      Rien à afficher pour l’instant : terminez une grille et elle apparaîtra ici.
-    </p>
-  {:else}
-    <table>
-      <thead>
-        <tr>
-          <th scope="col">Niveau</th>
-          <th scope="col">Terminées</th>
-          <th scope="col">Meilleur temps</th>
-          <th scope="col">Temps médian</th>
-          <th scope="col">Sans indice</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each byLevel as row (row.level)}
-          <tr class:idle={row.played === 0}>
-            <th scope="row">{row.label}</th>
-            <td>{row.played}</td>
-            <td>{row.bestMs === null ? '—' : formatDuration(row.bestMs)}</td>
-            <td>
-              {#if row.medianMs !== null}
-                {formatDuration(row.medianMs)}
-                <span class="sample">sur {row.timed}</span>
-              {:else if row.timed > 0}
-                <!--
-                  Ni chiffre approximatif, ni case vide sans explication : on dit
-                  ce qui manque. Même règle que pour une difficulté non mesurée.
-                -->
-                <span class="sample">encore {5 - row.timed} partie{5 - row.timed > 1 ? 's' : ''}</span>
-              {:else}
-                —
-              {/if}
-            </td>
-            <td>{row.played === 0 ? '—' : row.unaided}</td>
+  {#if overall.played > 0}
+    <h2>Par niveau</h2>
+    <!--
+      Un cadre qui défile plutôt qu'un tableau qui déborde : cinq colonnes ne
+      tiennent pas toujours sur un téléphone en « gros caractères », et la page
+      ne doit jamais défiler de côté. Un bloc qui défile doit se laisser
+      atteindre au clavier, d'où la tabulation et le nom — c'est le motif
+      recommandé pour une région défilante, que l'avertissement générique ignore.
+    -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <div class="table-wrap" role="region" aria-label="Statistiques par niveau" tabindex="0">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Niveau</th>
+            <th scope="col">Terminées</th>
+            <th scope="col">Meilleur temps</th>
+            <th scope="col">Temps médian</th>
+            <th scope="col">Sans indice</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each byLevel as row (row.level)}
+            <tr class:idle={row.played === 0}>
+              <th scope="row">{row.label}</th>
+              <td>{row.played}</td>
+              <td>{row.bestMs === null ? '—' : formatDuration(row.bestMs)}</td>
+              <td>
+                {#if row.medianMs !== null}
+                  {formatDuration(row.medianMs)}
+                  <span class="sample">sur {row.timed}</span>
+                {:else if row.timed > 0}
+                  <!--
+                    Ni chiffre approximatif, ni case vide sans explication : on dit
+                    ce qui manque. Même règle que pour une difficulté non mesurée.
+                  -->
+                  <span class="sample"
+                    >encore {5 - row.timed} partie{5 - row.timed > 1 ? 's' : ''}</span
+                  >
+                {:else}
+                  —
+                {/if}
+              </td>
+              <td>{row.played === 0 ? '—' : row.unaided}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   {/if}
 </section>
 
@@ -224,50 +247,72 @@
   .progress {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: var(--space-5);
   }
 
   h2 {
     margin: 0;
-    font-size: var(--text-base);
+    font-size: var(--text-md);
     font-weight: 600;
   }
 
+  .intro {
+    max-width: var(--measure);
+    margin: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-sunken);
+    color: var(--text-muted);
+    line-height: var(--leading-prose);
+  }
+
+  /*
+    Deux colonnes, ou quatre : jamais trois plus une. En colonnes automatiques,
+    la quatrième carte passait seule à la ligne, à demi-largeur, dès que la
+    place manquait pour quatre.
+  */
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-    gap: 0.6rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 44rem) {
+    .cards {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   .card {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.8rem 0.9rem;
+    gap: var(--space-1);
+    padding: var(--space-4);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     background: var(--surface-sunken);
   }
 
   .value {
-    font-size: 1.9rem;
+    font-size: var(--text-xl);
     font-weight: 700;
-    line-height: 1.1;
+    line-height: var(--leading-tight);
     font-variant-numeric: tabular-nums;
   }
 
   .value.strong {
-    font-size: 1.25rem;
+    font-size: var(--text-lg);
     padding-block: 0.35rem;
   }
 
   .caption {
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
   }
 
   .note {
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
   }
 
@@ -279,7 +324,7 @@
   }
 
   .pick label {
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
   }
 
@@ -299,6 +344,9 @@
     border-radius: var(--radius-md);
     font: inherit;
     cursor: pointer;
+    transition:
+      background-color var(--dur-quick) var(--ease),
+      border-color var(--dur-quick) var(--ease);
   }
 
   .primary {
@@ -315,10 +363,22 @@
     color: var(--text);
   }
 
+  .primary:active {
+    background: var(--accent-active);
+    transition-duration: 0s;
+  }
+
+  .ghost:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
   .hint,
   .empty {
+    max-width: var(--measure);
     margin: 0;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
+    line-height: var(--leading-prose);
     color: var(--text-muted);
   }
 
@@ -328,6 +388,7 @@
     gap: 0.6rem;
     align-items: center;
     justify-content: space-between;
+    max-width: 28rem;
   }
 
   .nav {
@@ -339,19 +400,28 @@
   .month {
     min-width: 9rem;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: var(--text-base);
   }
 
+  /*
+    Le calendrier a sa propre largeur, et ses jours se partagent la place au
+    lieu de l'imposer. Deux défauts mesurés à l'incrément 10 : sur un grand
+    écran, sept colonnes pleine largeur faisaient des jours de 150 px ; sur un
+    téléphone de 375 px en « très gros caractères », le minimum de 2,75 rem par
+    jour — 55 px — faisait déborder la page de 60 px. La cible reste d'au moins
+    44 px, mais par la largeur de la grille : (375 − 40 − 12) / 7 ≈ 46 px.
+  */
   .calendar {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: var(--space-1);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 2px;
+    max-width: 28rem;
   }
 
   .dow {
     padding-bottom: 0.2rem;
     text-align: center;
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--text-muted);
   }
 
@@ -366,12 +436,18 @@
     justify-content: center;
     gap: 0;
     aspect-ratio: 1;
-    min-height: var(--tap);
+    /*
+      Le minimum générique des boutons de ce panneau ne vaut pas ici : avec le
+      rapport 1, il se reportait sur la largeur, et un jour de 55 px empiétait
+      sur sa colonne de 46 en « très gros caractères ». La cible de 44 px est
+      tenue par la largeur de la grille, mesurée.
+    */
+    min-height: 0;
     padding: 0;
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
   }
 
@@ -391,6 +467,11 @@
     outline-offset: -2px;
   }
 
+  .day:active:not(:disabled) {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
   .mark {
     height: 0.9em;
     font-size: var(--text-xs);
@@ -398,24 +479,49 @@
     color: var(--accent);
   }
 
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.86rem;
+    font-size: var(--text-sm);
   }
 
   th,
   td {
-    padding: 0.45rem var(--space-2);
+    padding: var(--space-2) var(--space-3);
     text-align: left;
     border-bottom: 1px solid var(--border);
     font-variant-numeric: tabular-nums;
   }
 
+  /*
+    Les nombres s'alignent à droite : c'est ainsi qu'on compare deux durées d'un
+    coup d'œil. Ils ne se coupent pas non plus en deux lignes — le cadre défile.
+  */
+  thead th:not(:first-child),
+  td {
+    text-align: right;
+  }
+
+  td {
+    white-space: nowrap;
+  }
+
   thead th {
-    font-size: 0.76rem;
+    border-bottom-width: 2px;
+    background: var(--surface-sunken);
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--text-muted);
+  }
+
+  tbody tr:last-child > * {
+    border-bottom: none;
   }
 
   tbody th {
@@ -429,5 +535,23 @@
   .sample {
     font-size: var(--text-xs);
     color: var(--text-muted);
+  }
+
+  /*
+    Le survol n'existe qu'avec un pointeur qui survole : sans cette garde, un
+    navigateur mobile l'émule au toucher et le laisse collé.
+  */
+  @media (hover: hover) and (pointer: fine) {
+    .primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .ghost:hover {
+      background: var(--surface-hover);
+    }
+
+    .day:hover:not(:disabled) {
+      border-color: var(--text-muted);
+    }
   }
 </style>

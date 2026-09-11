@@ -104,7 +104,6 @@ const PAPER = [
  * supprime la liste : un cliquet qui ne retient plus rien est du bruit.
  */
 const NOT_YET_MIGRATED = new Set([
-  'lib/ProgressPanel.svelte',
   'lib/AnalysisPanel.svelte',
   'lib/LearnPanel.svelte',
   'lib/UpdateBanner.svelte',
