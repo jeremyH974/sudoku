@@ -4,6 +4,7 @@
   import type { Level, Symmetry } from '@sudoku/engine';
   import { Game } from './lib/game.svelte.js';
   import SudokuBoard from './lib/SudokuBoard.svelte';
+  import Icon from './lib/Icon.svelte';
   import AnalysisPanel from './lib/AnalysisPanel.svelte';
   import PrintStudio from './print/PrintStudio.svelte';
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
@@ -444,7 +445,7 @@
               title={option.label}
               onclick={() => theme.set(option.id)}
             >
-              <span aria-hidden="true">{option.icon}</span>
+              <Icon name={option.icon} />
               <span>{option.label}</span>
             </button>
           {/each}

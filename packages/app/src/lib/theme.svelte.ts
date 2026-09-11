@@ -71,8 +71,13 @@ class ThemeStore {
 
 export const theme = new ThemeStore();
 
-export const THEME_OPTIONS: { id: ThemePreference; label: string; icon: string }[] = [
-  { id: 'light', label: 'Clair', icon: '☀' },
-  { id: 'dark', label: 'Sombre', icon: '☾' },
-  { id: 'system', label: 'Système', icon: '◐' },
+/* Les icônes sont des tracés (`icons.ts`), plus des glyphes au rendu variable. */
+export const THEME_OPTIONS: {
+  id: ThemePreference;
+  label: string;
+  icon: 'sun' | 'moon' | 'system';
+}[] = [
+  { id: 'light', label: 'Clair', icon: 'sun' },
+  { id: 'dark', label: 'Sombre', icon: 'moon' },
+  { id: 'system', label: 'Système', icon: 'system' },
 ];

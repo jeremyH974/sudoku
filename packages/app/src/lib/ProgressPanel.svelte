@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { LEVELS } from '@sudoku/engine';
   import type { Level } from '@sudoku/engine';
   import { daysInMonth, localDayKey, nextDay, previousDay, startOfMonth, weekdayOf } from './day.js';
@@ -154,11 +155,11 @@
     <h2>Calendrier</h2>
     <div class="nav">
       <button type="button" class="ghost" onclick={() => shiftMonth(-1)} aria-label="Mois précédent"
-        >◀</button
+        ><Icon name="previous" /></button
       >
       <span class="month">{monthLabel}</span>
       <button type="button" class="ghost" onclick={() => shiftMonth(1)} aria-label="Mois suivant"
-        >▶</button
+        ><Icon name="next" /></button
       >
     </div>
   </div>
@@ -185,7 +186,7 @@
             La coche, et pas seulement la couleur : à l'impression en noir et
             blanc comme pour un daltonien, le fond vert ne dit rien.
           -->
-          <span class="mark" aria-hidden="true">{done.has(day) ? '✓' : ''}</span>
+          <span class="mark" aria-hidden="true">{#if done.has(day)}<Icon name="check" />{/if}</span>
         </button>
       {/if}
     {/each}
@@ -472,11 +473,24 @@
     transition-duration: 0s;
   }
 
+  /*
+    La hauteur est réservée même sans coche : jours résolus et jours à faire
+    gardent la même disposition. La coche est un tracé — en police système,
+    `✓` à 12 px rendait un trait d'un pixel, dessiné différemment d'un appareil
+    à l'autre, pour le seul signe qui dit « résolu » sans la couleur. Son trait
+    est donc renforcé ici.
+  */
   .mark {
-    height: 0.9em;
+    height: 1.25em;
     font-size: var(--text-xs);
     line-height: 1;
     color: var(--accent);
+  }
+
+  .mark :global(svg) {
+    width: 1.25em;
+    height: 1.25em;
+    stroke-width: 3;
   }
 
   .table-wrap {

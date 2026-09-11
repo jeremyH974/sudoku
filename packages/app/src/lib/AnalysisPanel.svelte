@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { conclusionKey, waysForward } from '@sudoku/engine';
   import { replayPath } from '@sudoku/engine';
   import type { Game } from './game.svelte.js';
@@ -106,7 +107,16 @@
       />
 
       <div class="transport" role="group" aria-label="Navigation dans le chemin de résolution">
-        <button type="button" onclick={() => (index = 0)} disabled={index === 0}>⏮</button>
+        <!--
+          Des boutons à icône, donc nommés : le glyphe qu'ils affichaient leur
+          tenait lieu de nom, et une icône masquée les laisserait muets.
+        -->
+        <button
+          type="button"
+          onclick={() => (index = 0)}
+          disabled={index === 0}
+          aria-label="Première étape"><Icon name="first" /></button
+        >
         <button type="button" onclick={() => go(-1)} disabled={index === 0}>Précédent</button>
         <!--
           Pas de `aria-live` ici. Balayer soixante étapes au curseur déclencherait
@@ -123,7 +133,8 @@
         <button
           type="button"
           onclick={() => (index = frames.length - 1)}
-          disabled={index >= frames.length - 1}>⏭</button
+          disabled={index >= frames.length - 1}
+          aria-label="Dernière étape"><Icon name="last" /></button
         >
       </div>
 
