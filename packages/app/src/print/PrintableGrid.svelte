@@ -63,10 +63,17 @@
     --rule-thick: 2.25pt;
   }
 
-  /* Le corrigé, plus petit, garde le même rapport à une échelle réduite. */
+  /*
+    Le corrigé, plus petit. Son filet épais est proportionnellement plus fort que
+    celui de la grille à jouer, et c'est mesuré : un navigateur arrondit une
+    bordure au pixel physique entier inférieur, et à 1,35 pt le filet épais
+    tombait sur deux pixels contre un pour le filet fin, à l'échelle d'écran
+    courante (1,5). L'aperçu d'impression — ce qu'on regarde avant d'imprimer —
+    ne distinguait plus les blocs. 1,8 pt en garde trois.
+  */
   .grid.compact {
     --rule-thin: 0.3pt;
-    --rule-thick: 1.35pt;
+    --rule-thick: 1.8pt;
   }
 
   td {

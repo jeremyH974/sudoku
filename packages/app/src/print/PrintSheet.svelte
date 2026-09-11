@@ -236,10 +236,19 @@
     font-size: 6mm;
   }
 
+  /*
+    Trois colonnes, pour tenir sur la page — et c'est mesuré. En deux colonnes,
+    chaque corrigé faisait 82 mm de côté : trois rangées descendaient jusqu'à
+    311 mm sur une feuille A4 de 297, et la feuille, qui masque tout
+    débordement, coupait les grilles 5 et 6 sans rien signaler. Le défaut
+    restait invisible tant qu'un cahier comptait moins de cinq grilles. En trois
+    colonnes, un corrigé fait environ 53 mm et deux rangées tiennent en 140 mm :
+    de la marge en A4 comme en Letter (279 mm), reliure comprise.
+  */
   .solutions {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8mm 10mm;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8mm;
   }
 
   figure {
