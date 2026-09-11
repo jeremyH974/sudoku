@@ -286,12 +286,12 @@
     display: grid;
     grid-template-rows: repeat(9, 1fr);
     width: 100%;
-    max-width: 34rem;
+    max-width: var(--board-max);
     margin-inline: auto;
     container-type: inline-size;
     aspect-ratio: 1;
     border: 3px solid var(--grid-strong);
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     background: var(--grid-strong);
     gap: 1px;
     touch-action: manipulation;
@@ -345,24 +345,38 @@
     */
     font-size: min(calc(6.2cqi * var(--text-scale, 1)), 2.4rem);
     color: var(--value-player);
-    transition: background-color 90ms ease;
+    transition:
+      background-color var(--dur-instant) var(--ease),
+      box-shadow var(--dur-instant) var(--ease);
   }
 
   .board.passive .cell {
     cursor: default;
   }
 
+  /*
+    700 et non 650 : mesuré au pixel, 650 rendait exactement comme 700 faute
+    d'une police variable. On écrit ce qui s'affiche.
+  */
   .cell.given {
     color: var(--value-given);
-    font-weight: 650;
+    font-weight: 700;
   }
 
   .cell.peer {
     background: var(--cell-peer);
   }
 
+  /*
+    Les chiffres identiques sont cerclés, pas remplis. Remplie, une case
+    surlignée ressemblait trait pour trait à la case qu'on venait de jouer : le
+    premier regard extérieur a cru, deux fois, que l'application posait le
+    chiffre ailleurs. Un liseré dit « ce chiffre est déjà ici » ; un fond disait
+    « on vient d'agir ici ». Les liserés des indices, déclarés plus bas, passent
+    devant.
+  */
   .cell.same-value {
-    background: var(--cell-same);
+    box-shadow: inset 0 0 0 2px var(--cell-same);
   }
 
   .cell.selected {
@@ -413,7 +427,7 @@
     position: absolute;
     inset: auto 18% 8% 18%;
     height: 3px;
-    border-radius: 2px;
+    border-radius: var(--radius-pill);
     background: var(--value-conflict);
   }
 
@@ -471,7 +485,11 @@
     color: var(--mark-b);
     outline: 0.09em solid var(--mark-b);
     outline-offset: -0.05em;
-    border-radius: 2px;
+    /*
+      En `em`, comme le reste du tracé : c'est le seul rayon de l'application
+      dont le conteneur grandit avec le réglage « gros caractères ».
+    */
+    border-radius: 0.06em;
   }
 
   .note[data-mark='3'] {

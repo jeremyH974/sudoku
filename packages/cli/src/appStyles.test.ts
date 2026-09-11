@@ -107,7 +107,6 @@ const NOT_YET_MIGRATED = new Set([
   'lib/ProgressPanel.svelte',
   'lib/AnalysisPanel.svelte',
   'lib/LearnPanel.svelte',
-  'lib/SudokuBoard.svelte',
   'lib/UpdateBanner.svelte',
   'print/PrintStudio.svelte',
 ]);

@@ -45,7 +45,12 @@
   --grid-strong: #2f2e2b;
   --cell-bg: #ffffff;
   --cell-peer: #eef1f6;
-  --cell-same: #dbe4f2;
+  /*
+    Le liseré des chiffres identiques — un liseré, plus un fond : rempli, il
+    faisait ressembler une case surlignée à la case qu'on vient de jouer.
+    8,3:1 sur une case blanche, 5,4:1 en sombre.
+  */
+  --cell-same: #1f4e8c;
   --cell-selected: #c3d5ef;
   --cell-conflict: #fbe4d8;
 
@@ -123,7 +128,7 @@
     --grid-strong: #6a6f78;
     --cell-bg: #212327;
     --cell-peer: #272c34;
-    --cell-same: #2e3a4b;
+    --cell-same: #6b99da;
     --cell-selected: #3a4d68;
     --cell-conflict: #43281d;
 
@@ -184,7 +189,7 @@
   --grid-strong: #6a6f78;
   --cell-bg: #212327;
   --cell-peer: #272c34;
-  --cell-same: #2e3a4b;
+  --cell-same: #6b99da;
   --cell-selected: #3a4d68;
   --cell-conflict: #43281d;
 
