@@ -3,9 +3,9 @@
 Générateur et jeu de Sudoku **sans rien à installer** : tout tourne dans le navigateur.
 Aucune publicité, aucun compte, aucun suivi, aucune requête réseau après le chargement.
 
-> **État : incrément 5 terminé.** La partie en cours survit à la fermeture de l'onglet, et
-> l'application est installable avec un service worker qui met tout en cache.
-> ⚠️ Le fonctionnement hors ligne **n'a pas pu être vérifié** — voir la réserve plus bas.
+> **En ligne : <https://jeremyh974.github.io/sudoku/>** — à ouvrir dans un navigateur, rien à
+> installer. Hors ligne vérifié, installable comme une application, notation calibrée à 97,8 %
+> d'accord exact avec l'oracle sous 4,0. Ce qui est garanti — et ce qui ne l'est pas — est plus bas.
 
 ## Démarrer
 
@@ -13,6 +13,10 @@ Aucune publicité, aucun compte, aucun suivi, aucune requête réseau après le 
 pnpm install
 pnpm dev
 ```
+
+`pnpm dev` sert l'application sous `http://localhost:5173/sudoku/`, et la racine y redirige. La
+base est celle de la production, à dessein : un chemin qui l'ignorerait casse ici avant de casser
+en ligne.
 
 | Commande | Rôle |
 |---|---|
@@ -27,6 +31,30 @@ pnpm dev
 
 Le studio d'impression est dans l'onglet « Imprimer » ; une grille scannée s'ouvre via une adresse
 en `#g=…`.
+
+## L'adresse publique
+
+L'application est servie à **<https://jeremyh974.github.io/sudoku/>**, en fichiers statiques :
+aucun serveur applicatif, aucun compte, aucune requête réseau une fois la page chargée. Chaque
+push sur la branche principale la republie (`.github/workflows/ci.yml`), et **seulement si** le
+typecheck, le lint et les tests passent. Ce qui part en ligne est le dossier que la CI vient de
+vérifier, pas une seconde construction qui lui ressemble.
+
+**L'installer.** Chrome et Edge proposent « Installer l'application » dans la barre d'adresse ;
+Safari, sur iPhone et iPad, « Sur l'écran d'accueil » depuis le menu de partage. Installée, elle
+démarre sans réseau — défi du jour compris — et se met à jour par une bannière, jamais sous les
+doigts de quelqu'un en train de jouer.
+
+**Les QR codes des cahiers** encodent l'adresse d'où le studio a été ouvert. Un cahier imprimé
+depuis l'adresse publique s'ouvre donc sur n'importe quel téléphone ; un cahier imprimé depuis
+`localhost` ne s'ouvre que sur la machine qui l'a produit.
+
+**Pas de licence, et c'est délibéré.** Le dépôt est public mais n'a pas de fichier `LICENSE` :
+sans licence, tous les droits restent réservés. Le code est lisible, il n'est pas réutilisable ;
+l'application, elle, s'utilise librement. Les conditions de GitHub permettent seulement de le
+consulter et d'en faire un fork sur GitHub même. Le choix entre MIT et Apache-2.0 reste ouvert
+(`docs/plan.md`, point ouvert n° 1) : le trancher plus tard n'ouvre qu'une porte, le trancher trop
+tôt pourrait en fermer une.
 
 ## Le parti pris
 
@@ -663,18 +691,26 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
 ## Hors ligne : vérifié
 
 L'application démarre et se joue **sans réseau**. Ce n'est plus une intention : la vérification a
-été faite dans un vrai Chrome, sur un build de production servi par `vite preview`, en coupant le
-serveur avant de recharger. Relevé depuis la page elle-même, serveur arrêté :
+été faite sur un build de production servi par `vite preview`, en coupant le serveur avant de
+recharger. Elle a été **refaite à l'incrément 10, sous le sous-chemin de la mise en ligne**, dans
+le navigateur intégré de l'environnement de développement. Relevé depuis la page elle-même,
+serveur arrêté :
 
 | Contrôle | Relevé |
 |---|---|
 | Requête réseau depuis la page | `TypeError: Failed to fetch` — le serveur est bien coupé |
-| Service worker | `activated`, portée `/`, script `/sw.js` |
+| Service worker | `activated`, portée `/sudoku/`, script `/sudoku/sw.js` |
 | Page servie par le service worker | oui (`navigator.serviceWorker.controller`) |
 | Entrées en cache | 12, dont les deux corpus — défis quotidiens **et** leçons |
-| Défi du jour ouvert hors ligne | 274 jours lus depuis le cache, grille rendue, niveau mesuré |
-| Onglet Apprendre hors ligne | 24 techniques listées, exercice Swordfish ouvert |
-| Grille rendue | 81 cases, 53 portant des candidats |
+| Défi du jour hors ligne | bouton actif, jours du calendrier jouables, aucun message d'erreur |
+| Onglet Apprendre hors ligne | 24 techniques listées, aucun message d'erreur |
+| Cahier généré hors ligne | 6 grilles Moyen en une seconde, 7 pages corrigés compris |
+| Grille rendue | 81 cases |
+
+La construction annonce **16** entrées de précache et le cache en contient **12** : rien ne manque.
+Les quatre icônes figurent deux fois dans le manifeste de précache — une fois comme ressources
+déclarées (`includeAssets` et icônes du manifeste), une fois par le motif de fichiers —, avec la
+même révision, et Workbox n'en garde qu'une. Le chiffre qui compte est celui du cache.
 
 Le précache couvre l'intégralité de l'application : le HTML, la feuille de style, le bundle, le
 Worker du moteur, le manifeste, les quatre icônes — **et les deux corpus**, 274 jours de défis et
@@ -707,8 +743,13 @@ chargé à part, pour réduire le nombre de pièces mobiles au démarrage.
 Pour refaire la vérification :
 
 ```bash
-pnpm build && pnpm --filter @sudoku/app exec vite preview
+pnpm build && pnpm --filter @sudoku/app exec vite preview --port 4181
 ```
+
+Le port n'est pas un détail. Un service worker installé par une vérification antérieure survit à
+l'arrêt du serveur, et celui d'avant la mise en ligne avait la portée `/` : il intercepterait
+`/sudoku/` et servirait l'ancien build — on croirait vérifier la nouvelle version en regardant la
+précédente. Le port fait partie de l'origine ; en changer, c'est repartir d'un navigateur vierge.
 
 ## Suite
 

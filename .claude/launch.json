@@ -19,9 +19,9 @@
         "@sudoku/app",
         "preview",
         "--port",
-        "4180"
+        "4181"
       ],
-      "port": 4180
+      "port": 4181
     }
   ]
 }

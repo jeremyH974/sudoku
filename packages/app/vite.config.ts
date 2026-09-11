@@ -3,6 +3,29 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  /*
+    La base : le nom du dépôt, écrit en dur et sans condition.
+
+    L'application est publiée sur GitHub Pages, à l'adresse annoncée dans le
+    README, donc servie sous `/sudoku/`. Deux formulations ont été écartées, pour
+    la même raison :
+
+      · `base: './'` — Vite ramène `'./'` à `'/'` en mode `serve`. Le serveur de
+        développement et `vite preview` serviraient donc à la racine pendant que
+        la construction produirait des chemins relatifs : on ne vérifierait
+        jamais localement la configuration réellement déployée ;
+      · un branchement sur l'environnement — le même défaut, en plus explicite.
+
+    Une base absolue et inconditionnelle fait l'inverse : `pnpm dev` sert sous
+    `/sudoku/` (la racine y redirige), `vite preview` aussi, et un chemin absolu
+    oublié casse ici avant de casser en ligne. C'est le raisonnement de
+    `devOptions: { enabled: false }` plus bas : on refuse la commodité qui
+    fabrique une réalité de développement différente de la vraie.
+
+    Déménager l'application coûte cette ligne et l'adresse du README ;
+    `packages/cli/src/appBase.test.ts` vérifie que les deux ne divergent pas.
+  */
+  base: '/sudoku/',
   plugins: [
     svelte(),
     VitePWA({

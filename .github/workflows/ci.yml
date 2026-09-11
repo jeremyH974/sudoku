@@ -8,6 +8,12 @@ on:
     branches: [master, main]
   pull_request:
 
+# Lecture seule par défaut. Seul le job de publication élargit ses droits, et il
+# les énumère lui-même : le job qui exécute les tests n'a aucune raison d'écrire
+# quoi que ce soit.
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -31,3 +37,48 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
+
+      # Ce qui part en ligne est exactement ce qui vient d'être vérifié : le même
+      # dossier, produit par la même exécution. Reconstruire dans le job de
+      # publication donnerait deux sources de vérité pour une seule adresse.
+      #
+      # La condition désigne la branche par défaut du dépôt plutôt qu'un nom écrit
+      # en dur : renommer master en main ne doit pas arrêter la publication en
+      # silence, comme l'absence de « main » ci-dessus avait arrêté le
+      # déclenchement pendant six incréments.
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
+        with:
+          path: packages/app/dist
+
+  deploy:
+    # La publication ne part jamais devant les vérifications : rien n'est
+    # « terminé » tant que typecheck, lint et tests ne passent pas, et l'adresse
+    # publique est le seul endroit où cette règle se voit de l'extérieur.
+    needs: check
+    if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write # publier sur le site Pages du dépôt
+      id-token: write # prouver au service Pages l'origine de l'artefact
+
+    # Une publication à la fois, et aucune n'est annulée en vol : une mise en
+    # ligne interrompue laisserait le site dans un état indéterminé. La clé vit
+    # sur ce job et non sur le workflow, où elle sérialiserait aussi les
+    # vérifications.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Pas de `configure-pages` : il ne sert qu'à exposer la base du site aux
+    # générateurs qui la lisent, et la nôtre est écrite dans `vite.config.ts`.
+    # Le job n'a besoin ni du dépôt ni de Node — seulement de l'artefact.
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
