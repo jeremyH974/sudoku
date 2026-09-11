@@ -105,4 +105,34 @@ describe('accessibilité de l’application', () => {
     const key = view.container.querySelector('.pad button')!;
     expect(key.getAttribute('aria-label')).toMatch(/^Noter le 1/);
   });
+
+  it('replie les réglages derrière un bouton, et le panneau ouvert reste accessible', async () => {
+    view = render(App, {});
+    const toggle = [...view.container.querySelectorAll('button')].find(
+      (element) => element.textContent?.trim() === 'Réglages',
+    )!;
+    const panel = view.container.querySelector('#reglages')!;
+    // Fermés, les réglages ne sont plus la deuxième chose qu'on voit sur chaque écran.
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(panel.hasAttribute('hidden')).toBe(true);
+
+    toggle.click();
+    view.flush();
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(panel.hasAttribute('hidden')).toBe(false);
+    await expectNoViolations(view.container);
+  });
+
+  it('mène aux aides depuis l’onglet Jouer', () => {
+    // Le premier regard extérieur cherchait les aides là où il jouait, et
+    // n'avait pas reconnu un bloc replié pour une option.
+    view = render(App, {});
+    const link = view.container.querySelector<HTMLButtonElement>('.assists-link')!;
+    expect(link.textContent).toContain('4 sur 4');
+
+    link.click();
+    view.flush();
+    expect(view.container.querySelector('#reglages')!.hasAttribute('hidden')).toBe(false);
+    expect(document.activeElement?.closest('.assist')).not.toBeNull();
+  });
 });

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { LEVELS, SIZE } from '@sudoku/engine';
+  import { flushSync } from 'svelte';
   import type { Level, Symmetry } from '@sudoku/engine';
   import { Game } from './lib/game.svelte.js';
   import SudokuBoard from './lib/SudokuBoard.svelte';
@@ -54,6 +55,23 @@
   ] as const;
   type TabId = (typeof TABS)[number]['id'];
   let tab = $state<TabId>('jeu');
+
+  /*
+    Le panneau des réglages — taille du texte, thème, aides. Replié par défaut ;
+    il s'ouvre depuis l'en-tête, ou depuis la ligne « Aides » de l'onglet Jouer,
+    qui y mène directement.
+  */
+  const SETTINGS_ID = 'reglages';
+  let settingsOpen = $state(false);
+
+  function openAssists(): void {
+    settingsOpen = true;
+    // Le panneau doit être ouvert dans le DOM avant d'y recevoir le focus : un
+    // champ masqué ne le prend pas. `flushSync` applique l'ouverture sur-le-champ,
+    // sans dépendre de l'ordre des tâches en attente.
+    flushSync();
+    document.querySelector<HTMLInputElement>(`#${SETTINGS_ID} .assist input`)?.focus();
+  }
 
   let records = $state<GameRecord[]>(loadRecords());
   let corpus = $state<DailyCorpus | null>(null);
@@ -370,46 +388,89 @@
       <p class="tagline">Rien à installer. Aucune publicité, aucun compte, aucun suivi.</p>
     </div>
 
-    <div class="preferences">
-      <!--
-        Trois « A » de tailles croissantes : le libellé dit le réglage, la taille
-        du glyphe le montre. Aucune information n'est portée par la seule
-        couleur, et le bouton actif se distingue aussi par sa graisse et son
-        fond, pas seulement par sa teinte.
-      -->
-      <div class="text-size" role="group" aria-label="Taille du texte">
-        {#each TEXT_SIZE_OPTIONS as option, i (option.id)}
-          <button
-            type="button"
-            class="size-option"
-            class:active={textSize.size === option.id}
-            aria-pressed={textSize.size === option.id}
-            title={option.label}
-            onclick={() => textSize.set(option.id)}
-          >
-            <span aria-hidden="true" style={`font-size: ${String(0.8 + i * 0.25)}rem`}>
-              {option.short}
-            </span>
-            <span class="sr-only">{option.label}</span>
-          </button>
-        {/each}
+    <button
+      type="button"
+      class="settings-toggle"
+      aria-expanded={settingsOpen}
+      aria-controls={SETTINGS_ID}
+      onclick={() => (settingsOpen = !settingsOpen)}
+    >
+      Réglages
+    </button>
+
+    <!--
+      Les réglages vivent dans l'en-tête, repliés : ils occupaient la place de la
+      navigation, au-dessus des onglets, sur chacun des cinq écrans. L'en-tête
+      est un repère de page, ce qui range le panneau dans un repère sans rien
+      ajouter.
+    -->
+    <div id={SETTINGS_ID} class="settings-panel" hidden={!settingsOpen}>
+      <div class="preference">
+        <span class="preference-label" id="reglage-taille">Taille du texte</span>
+        <!--
+          Trois « A » de tailles croissantes : le libellé dit le réglage, la
+          taille du glyphe le montre. Aucune information n'est portée par la seule
+          couleur, et le bouton actif se distingue aussi par sa graisse et son
+          fond, pas seulement par sa teinte.
+        -->
+        <div class="text-size" role="group" aria-labelledby="reglage-taille">
+          {#each TEXT_SIZE_OPTIONS as option, i (option.id)}
+            <button
+              type="button"
+              class="size-option"
+              class:active={textSize.size === option.id}
+              aria-pressed={textSize.size === option.id}
+              title={option.label}
+              onclick={() => textSize.set(option.id)}
+            >
+              <span aria-hidden="true" style={`font-size: ${String(0.8 + i * 0.25)}rem`}>
+                {option.short}
+              </span>
+              <span class="sr-only">{option.label}</span>
+            </button>
+          {/each}
+        </div>
       </div>
 
-    <div class="theme" role="group" aria-label="Thème de l’interface">
-      {#each THEME_OPTIONS as option (option.id)}
-        <button
-          type="button"
-          class="theme-option"
-          class:active={theme.preference === option.id}
-          aria-pressed={theme.preference === option.id}
-          title={option.label}
-          onclick={() => theme.set(option.id)}
-        >
-          <span aria-hidden="true">{option.icon}</span>
-          <span class="theme-label">{option.label}</span>
-        </button>
-      {/each}
+      <div class="preference">
+        <span class="preference-label" id="reglage-theme">Thème</span>
+        <div class="theme" role="group" aria-labelledby="reglage-theme">
+          {#each THEME_OPTIONS as option (option.id)}
+            <button
+              type="button"
+              class="theme-option"
+              class:active={theme.preference === option.id}
+              aria-pressed={theme.preference === option.id}
+              title={option.label}
+              onclick={() => theme.set(option.id)}
+            >
+              <span aria-hidden="true">{option.icon}</span>
+              <span>{option.label}</span>
+            </button>
+          {/each}
+        </div>
       </div>
+
+      <!--
+        Les aides visuelles, éteignables une à une : voir `assists.svelte.ts`. La
+        cible tactile est la ligne entière, libellé compris — la case à cocher
+        seule serait trop petite pour un doigt.
+      -->
+      <fieldset class="assists">
+        <legend>Aides pendant la partie</legend>
+        {#each ASSIST_OPTIONS as option (option.id)}
+          <label class="assist">
+            <input
+              type="checkbox"
+              checked={assists[option.id]}
+              onchange={(event) => {
+                assists.set(option.id, event.currentTarget.checked);
+              }}
+            />
+            {option.label}
+          </label>
+        {/each}
+      </fieldset>
     </div>
   </header>
 
@@ -597,28 +658,16 @@
         </button>
 
         <!--
-          Les aides visuelles, éteignables une à une : voir `assists.svelte.ts`.
-          Repliées par défaut pour ne pas allonger la colonne ; le résumé dit
-          combien sont actives sans qu'on ait à l'ouvrir.
+          Les aides vivent dans les réglages, mais c'est en jouant qu'on les
+          cherche : le premier regard extérieur n'avait pas reconnu un bloc
+          replié pour une option. Cette ligne dit leur état et mène au panneau.
         -->
-        <details class="assists">
-          <summary>
-            Aides pendant la partie
-            <span class="assists-count">· {assists.enabledCount} sur {ASSIST_OPTIONS.length}</span>
-          </summary>
-          {#each ASSIST_OPTIONS as option (option.id)}
-            <label class="assist">
-              <input
-                type="checkbox"
-                checked={assists[option.id]}
-                onchange={(event) => {
-                  assists.set(option.id, event.currentTarget.checked);
-                }}
-              />
-              {option.label}
-            </label>
-          {/each}
-        </details>
+        <button type="button" class="assists-link" onclick={openAssists}>
+          Aides pendant la partie
+          <span class="assists-count"
+            >{assists.enabledCount} sur {ASSIST_OPTIONS.length} · Modifier</span
+          >
+        </button>
 
         <fieldset class="settings">
           <legend>Nouvelle grille</legend>
@@ -796,7 +845,7 @@
     align-items: center;
     min-height: var(--tap);
     padding: 0 var(--space-4);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--accent);
     color: var(--accent-text);
     text-decoration: none;
@@ -807,28 +856,96 @@
     top: 1rem;
   }
 
+  /*
+    Une grille plutôt qu'une ligne qui se replie : le bouton des réglages reste
+    sur la rangée du titre à toutes les largeurs, et c'est la signature qui se
+    replie sous le titre. Mesuré sur un téléphone de 390 px, le bouton tombait
+    sinon à 142 px du haut, seul sur sa rangée. Ouvert, le panneau occupe toute
+    la seconde rangée.
+  */
   header {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--space-4);
-    justify-content: space-between;
-    align-items: flex-start;
+    align-items: start;
     margin-bottom: 1.25rem;
   }
 
-  .preferences {
+  /*
+    Un seul bouton sur la ligne du titre. Les réglages occupaient la place de la
+    navigation — au-dessus des onglets, sur les cinq écrans — ; ils sont repliés
+    dans un panneau qui prend toute la largeur de l'en-tête quand on l'ouvre.
+  */
+  .settings-toggle {
+    min-height: var(--tap);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-quick) var(--ease),
+      border-color var(--dur-quick) var(--ease);
+  }
+
+  /* Ouvert, le bouton le dit aussi par sa bordure, pas seulement par le panneau. */
+  .settings-toggle[aria-expanded='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .settings-toggle:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .settings-toggle:hover {
+      background: var(--surface-hover);
+    }
+  }
+
+  .settings-panel {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  /* `display: grid` l'emporterait sinon sur l'attribut `hidden`. */
+  .settings-panel[hidden] {
+    display: none;
+  }
+
+  .preference {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+    justify-content: space-between;
     align-items: center;
   }
 
+  .preference-label {
+    font-weight: 600;
+  }
+
+  /*
+    Enveloppe et pastilles concentriques : 12 px de rayon autour, 8 px dedans,
+    4 px d'écart — 12 = 8 + 4. Les deux valeurs d'avant, 9 et 7, étaient
+    devinées.
+  */
   .text-size {
     display: flex;
-    gap: 0.15rem;
-    padding: 0.2rem;
+    gap: var(--space-1);
+    padding: var(--space-1);
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: var(--radius-lg);
     background: var(--surface-sunken);
   }
 
@@ -839,74 +956,95 @@
     min-width: var(--tap);
     min-height: var(--tap);
     border: none;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     background: none;
     color: var(--text-muted);
     font: inherit;
     cursor: pointer;
+    transition:
+      background-color var(--dur-quick) var(--ease),
+      color var(--dur-quick) var(--ease);
   }
 
+  /*
+    L'élévation passe par un jeton : en thème sombre, l'ombre portée était
+    invisible et la pastille active ne se détachait du fond qu'à 1,06:1. Le
+    liseré qui la remplace y monte à 1,53:1, et la graisse porte l'état sans la
+    couleur.
+  */
   .size-option.active {
     background: var(--surface);
     color: var(--text);
-    font-weight: 620;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+    font-weight: 600;
+    box-shadow: var(--shadow-raised);
+  }
+
+  .size-option:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .size-option:hover {
+      color: var(--text);
+    }
   }
 
   .theme {
     display: flex;
-    gap: 0.15rem;
-    padding: 0.2rem;
+    gap: var(--space-1);
+    padding: var(--space-1);
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: var(--radius-lg);
     background: var(--surface-sunken);
   }
 
   .theme-option {
     display: flex;
-    gap: 0.35rem;
+    gap: var(--space-2);
     align-items: center;
     /*
-      44 px sur les deux dimensions, y compris quand le libellé disparaît sur
-      téléphone : sans le `min-width`, il restait un bouton de 32 px de large,
-      et l'audit de l'incrément 8 l'a mesuré.
+      44 px sur les deux dimensions : sans le `min-width`, il restait un bouton
+      de 32 px de large, et l'audit de l'incrément 8 l'a mesuré.
     */
     min-height: var(--tap);
     min-width: var(--tap);
     justify-content: center;
-    padding: 0.3rem 0.6rem;
+    padding: var(--space-1) var(--space-3);
     border: none;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     cursor: pointer;
-  }
-
-  .theme-option:hover {
-    color: var(--text);
+    transition:
+      background-color var(--dur-quick) var(--ease),
+      color var(--dur-quick) var(--ease);
   }
 
   /*
     L'état actif ne repose pas sur la seule couleur : le bouton reçoit un fond
-    plein et un texte plus gras, lisibles même sans perception des teintes.
+    plein et un texte plus gras, lisibles même sans perception des teintes. Le
+    libellé reste toujours affiché : il était masqué sous 30 rem, et le glyphe —
+    celui dont la couverture varie le plus d'un système à l'autre — devenait
+    alors le seul porteur visuel de l'option. Le panneau des réglages a la place.
   */
   .theme-option.active {
     background: var(--surface);
     color: var(--text);
-    font-weight: 620;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+    font-weight: 600;
+    box-shadow: var(--shadow-raised);
   }
 
-  @media (max-width: 30rem) {
-    .theme-label {
-      position: absolute;
-      overflow: hidden;
-      clip-path: inset(50%);
-      width: 1px;
-      height: 1px;
-      white-space: nowrap;
+  .theme-option:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .theme-option:hover {
+      color: var(--text);
     }
   }
 
@@ -921,9 +1059,9 @@
   }
 
   .tagline {
-    margin: 0.35rem 0 0;
+    margin: var(--space-1) 0 0;
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: var(--text-base);
   }
 
   .tabs {
@@ -949,14 +1087,28 @@
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: 0.95rem;
+    font-size: var(--text-base);
     cursor: pointer;
+    transition:
+      background-color var(--dur-quick) var(--ease),
+      color var(--dur-quick) var(--ease);
   }
 
   .tabs button.active {
     border-bottom-color: var(--accent);
     color: var(--text);
     font-weight: 600;
+  }
+
+  .tabs button:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .tabs button:hover {
+      color: var(--text);
+    }
   }
 
   /*
@@ -972,14 +1124,14 @@
   */
   .layout {
     display: grid;
-    grid-template-columns: minmax(0, 34rem) minmax(15rem, 22rem);
+    grid-template-columns: minmax(0, var(--board-max)) minmax(15rem, 22rem);
     gap: var(--space-6);
     align-items: start;
   }
 
   @media (max-width: 53.5rem) {
     .layout {
-      grid-template-columns: minmax(0, 34rem);
+      grid-template-columns: minmax(0, var(--board-max));
       justify-content: center;
       gap: 1.25rem;
     }
@@ -990,7 +1142,7 @@
     flex-direction: column;
     gap: var(--space-3);
     min-width: 0;
-    max-width: 34rem;
+    max-width: var(--board-max);
   }
 
   .status {
@@ -1000,14 +1152,14 @@
     gap: var(--space-2);
     margin: 0;
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: var(--text-base);
     font-variant-numeric: tabular-nums;
   }
 
   .clock {
     padding: 0.1rem 0.45rem;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--surface-sunken);
     color: var(--text);
     font-weight: 600;
@@ -1016,17 +1168,17 @@
   }
 
   .muted-inline {
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     color: var(--text-faint);
   }
 
   .badge {
     padding: 0.1rem 0.45rem;
     border: 1px solid var(--accent);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--accent-soft);
     color: var(--text);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
   }
 
   .status.done {
@@ -1035,12 +1187,12 @@
   }
 
   .hint {
-    padding: 0.8rem var(--space-4);
+    padding: var(--space-4);
     border: 1px solid var(--hint-border);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     background: var(--hint-bg);
     color: var(--text);
-    line-height: 1.5;
+    line-height: var(--leading-prose);
   }
 
   .hint p {
@@ -1052,16 +1204,16 @@
   }
 
   .hint-title {
-    font-weight: 650;
+    font-weight: 700;
   }
 
   .muted {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
   }
 
   .small {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
   }
 
   .controls {
@@ -1103,13 +1255,10 @@
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
-    font-size: 1.35rem;
+    font-size: var(--text-lg);
     font-variant-numeric: tabular-nums;
     cursor: pointer;
-  }
-
-  .pad-key:hover {
-    background: var(--surface-hover);
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
   .pad-key.exhausted {
@@ -1117,12 +1266,36 @@
     background: var(--surface-sunken);
   }
 
+  /*
+    Au doigt, l'appui est le seul état qui existe : sans lui, rien ne répondait
+    avant que la grille ne se redessine. Couleur seule, sans déplacement — sous
+    le doigt, un décalage est caché par la pulpe, c'est la teinte qu'on voit.
+    L'appui est instantané ; le relâchement revient en fondu, par la transition
+    de la règle de base.
+  */
+  .pad-key:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  /*
+    Le survol n'existe qu'avec un pointeur qui survole. Sans cette garde, un
+    navigateur mobile émule le survol au toucher et le laisse collé : la touche
+    restait éclairée après qu'on avait posé le chiffre.
+  */
+  @media (hover: hover) and (pointer: fine) {
+    .pad-key:hover {
+      background: var(--surface-hover);
+    }
+  }
+
   .pad-count {
     position: absolute;
     top: 0.25rem;
     right: 0.4rem;
     color: var(--text-faint);
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
   }
 
   .marks {
@@ -1144,6 +1317,7 @@
     color: var(--text-muted);
     font: inherit;
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
   /*
@@ -1164,7 +1338,7 @@
   }
 
   .mark-letter {
-    font-size: 1.15rem;
+    font-size: var(--text-md);
     font-weight: 700;
   }
 
@@ -1173,6 +1347,17 @@
     border-width: 2px;
     background: var(--note-accent-soft);
     color: var(--text);
+  }
+
+  .mark-key:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .mark-key:hover {
+      background: var(--surface-hover);
+    }
   }
 
   .actions {
@@ -1186,23 +1371,35 @@
     flex-direction: column;
     gap: 0.2rem;
     align-items: center;
-    min-height: 3rem;
+    min-height: var(--tap-lg);
     padding: var(--space-2) 0.3rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
-  .action:hover:not(:disabled) {
-    background: var(--surface-hover);
-  }
-
+  /*
+    Désactivé : la teinte baisse, le curseur reste ordinaire. `not-allowed` est
+    un curseur hostile, et il n'existe pas au doigt.
+  */
   .action:disabled {
     color: var(--text-faint);
-    cursor: not-allowed;
+    cursor: default;
+  }
+
+  .action:active:not(:disabled) {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .action:hover:not(:disabled) {
+      background: var(--surface-hover);
+    }
   }
 
   .action.active {
@@ -1213,7 +1410,7 @@
   kbd {
     color: var(--text-faint);
     font-family: inherit;
-    font-size: 0.68rem;
+    font-size: var(--text-xs);
   }
 
   .hint-button {
@@ -1221,7 +1418,7 @@
     gap: var(--space-2);
     justify-content: center;
     align-items: center;
-    min-height: 2.9rem;
+    min-height: var(--tap-lg);
     border: 1px solid var(--hint-border);
     border-radius: var(--radius-md);
     background: var(--hint-bg);
@@ -1229,16 +1426,29 @@
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    transition: box-shadow var(--dur-quick) var(--ease);
   }
 
   .hint-button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /* Le fond ambré porte déjà un sens : l'appui se dit par un liseré intérieur. */
+  .hint-button:active:not(:disabled) {
+    box-shadow: inset 0 0 0 2px var(--hint-border);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hint-button:hover:not(:disabled) {
+      box-shadow: inset 0 0 0 1px var(--hint-border);
+    }
   }
 
   .tier {
     color: var(--text-muted);
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
   }
 
@@ -1247,34 +1457,52 @@
     flex-direction: column;
     gap: 0.6rem;
     margin: 0;
-    padding: 0.9rem var(--space-4) 1.1rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-  }
-
-  /*
-    Les aides, repliées sous un résumé qui porte leur état. La cible tactile est
-    la ligne entière, libellé compris : la case à cocher seule serait trop petite
-    pour un doigt.
-  */
-  .assists {
-    padding: 0 var(--space-4);
+    padding: var(--space-4) var(--space-4) var(--space-5);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
   }
 
-  .assists[open] {
-    padding-bottom: var(--space-2);
+  .assists {
+    display: grid;
+    margin: 0;
+    padding: var(--space-2) var(--space-4) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
   }
 
-  .assists summary {
-    padding-block: var(--space-3);
+  .assists-link {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: space-between;
+    align-items: center;
+    min-height: var(--tap);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
     font-weight: 600;
+    text-align: left;
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
+  }
+
+  .assists-link:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .assists-link:hover {
+      background: var(--surface-hover);
+    }
   }
 
   .assists-count {
     color: var(--text-muted);
+    font-size: var(--text-sm);
     font-weight: 400;
     font-variant-numeric: tabular-nums;
   }
@@ -1299,7 +1527,7 @@
 
   legend {
     padding: 0 0.35rem;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     font-weight: 600;
   }
 
@@ -1308,14 +1536,14 @@
     flex-direction: column;
     gap: var(--space-1);
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
   }
 
   select {
     min-height: var(--tap);
     padding: 0.35rem var(--space-2);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
@@ -1324,8 +1552,8 @@
   .level-description {
     margin: -0.2rem 0 0.2rem;
     color: var(--text-faint);
-    font-size: 0.8rem;
-    line-height: 1.45;
+    font-size: var(--text-sm);
+    line-height: var(--leading-prose);
   }
 
   .primary {
@@ -1338,6 +1566,7 @@
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
   .secondary {
@@ -1348,6 +1577,7 @@
     color: var(--text);
     font: inherit;
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
   .secondary:disabled {
@@ -1355,18 +1585,39 @@
     cursor: default;
   }
 
+  /* Le curseur d'attente est informatif ici : la génération est en cours. */
   .primary:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: progress;
   }
 
+  .primary:active:not(:disabled) {
+    background: var(--accent-active);
+    transition-duration: 0s;
+  }
+
+  .secondary:active:not(:disabled) {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .secondary:hover:not(:disabled) {
+      background: var(--surface-hover);
+    }
+  }
+
   .verdict {
-    padding: var(--space-3) 0.9rem;
+    padding: var(--space-4);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     background: var(--surface-sunken);
-    font-size: 0.87rem;
-    line-height: 1.5;
+    font-size: var(--text-sm);
+    line-height: var(--leading-prose);
   }
 
   .verdict p {
@@ -1380,15 +1631,15 @@
   .second-dimension {
     margin: 0.35rem 0 0;
     color: var(--text-muted);
-    font-size: 0.88rem;
-    line-height: 1.45;
+    font-size: var(--text-sm);
+    line-height: var(--leading-prose);
   }
 
   .provenance {
     margin-top: var(--space-2);
     color: var(--text-faint);
-    font-size: 0.82rem;
-    line-height: 1.5;
+    font-size: var(--text-sm);
+    line-height: var(--leading-prose);
   }
 
   .provenance summary {
@@ -1407,7 +1658,7 @@
     border-radius: var(--radius-pill);
     background: var(--surface);
     color: var(--text-muted);
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
   }
 
@@ -1462,7 +1713,7 @@
 
     .thumb-bar > * {
       width: 100%;
-      max-width: 34rem;
+      max-width: var(--board-max);
       margin-inline: auto;
     }
 
@@ -1472,8 +1723,8 @@
     }
 
     .pad-key {
-      min-height: 3rem;
-      font-size: 1.15rem;
+      min-height: var(--tap-lg);
+      font-size: var(--text-md);
     }
 
     /*
@@ -1499,7 +1750,7 @@
     }
 
     h1 {
-      font-size: 1.35rem;
+      font-size: var(--text-lg);
     }
 
     .tagline {
@@ -1513,32 +1764,8 @@
 
     .tabs button {
       padding: 0.6rem var(--space-2);
-      font-size: 0.82rem;
+      font-size: var(--text-sm);
     }
 
-    /*
-      Les réglages se resserrent pour tenir sur la ligne du titre.
-
-      Sans cela ils occupaient une rangée à eux seuls, et le cinquième onglet en
-      ajoutait une seconde : la grille commençait à 226 px au lieu de 178 px, sur
-      un écran qui n'en offre que 667. Les cibles restent à 44 px — c'est le
-      cadre décoratif autour des groupes qui disparaît, pas la zone touchable.
-    */
-    .preferences {
-      gap: 0.35rem;
-    }
-
-    .text-size,
-    .theme {
-      padding: 0;
-      border: none;
-      background: none;
-    }
-
-    .size-option,
-    .theme-option {
-      min-width: var(--tap);
-      padding-inline: 0.15rem;
-    }
   }
 </style>
