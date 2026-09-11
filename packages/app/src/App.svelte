@@ -7,6 +7,7 @@
   import PrintStudio from './print/PrintStudio.svelte';
   import { THEME_OPTIONS, theme } from './lib/theme.svelte.js';
   import { TEXT_SIZE_OPTIONS, textSize } from './lib/textSize.svelte.js';
+  import { ASSIST_OPTIONS, assists } from './lib/assists.svelte.js';
   import { MARKS } from './lib/marks.js';
   import LearnPanel from './lib/LearnPanel.svelte';
   import { buildExercise, loadLessonCorpus } from './lib/learn.js';
@@ -450,7 +451,7 @@
             -->
             Grille terminée{game.mistakes === 0 ? ' sans une seule erreur' : ''}.
           {:else}
-            {game.filledCount} / 81 cases remplies{game.conflicts.size > 0
+            {game.filledCount} / 81 cases remplies{assists.conflicts && game.conflicts.size > 0
               ? ` — ${String(game.conflicts.size)} en conflit`
               : ''}
           {/if}
@@ -473,10 +474,12 @@
                 : ''}
             </span>
           {/if}
-          {#if game.mistakes > 0}
+          {#if assists.mistakes && game.mistakes > 0}
             <!--
               Constaté, jamais reproché : il n'y a aucune limite d'erreurs dans
-              ce jeu, et ce compteur n'en est pas le début.
+              ce jeu, et ce compteur n'en est pas le début. C'est aussi une aide —
+              il révèle une erreur même sans conflit visible —, donc on peut
+              l'éteindre ; la partie continue de compter pour les statistiques.
             -->
             <span class="muted-inline"
               >{game.mistakes} valeur{game.mistakes > 1 ? 's' : ''} fausse{game.mistakes > 1
@@ -592,6 +595,30 @@
             <span class="tier">{game.hintTier} / 3</span>
           {/if}
         </button>
+
+        <!--
+          Les aides visuelles, éteignables une à une : voir `assists.svelte.ts`.
+          Repliées par défaut pour ne pas allonger la colonne ; le résumé dit
+          combien sont actives sans qu'on ait à l'ouvrir.
+        -->
+        <details class="assists">
+          <summary>
+            Aides pendant la partie
+            <span class="assists-count">· {assists.enabledCount} sur {ASSIST_OPTIONS.length}</span>
+          </summary>
+          {#each ASSIST_OPTIONS as option (option.id)}
+            <label class="assist">
+              <input
+                type="checkbox"
+                checked={assists[option.id]}
+                onchange={(event) => {
+                  assists.set(option.id, event.currentTarget.checked);
+                }}
+              />
+              {option.label}
+            </label>
+          {/each}
+        </details>
 
         <fieldset class="settings">
           <legend>Nouvelle grille</legend>
@@ -1223,6 +1250,51 @@
     padding: 0.9rem var(--space-4) 1.1rem;
     border: 1px solid var(--border);
     border-radius: 10px;
+  }
+
+  /*
+    Les aides, repliées sous un résumé qui porte leur état. La cible tactile est
+    la ligne entière, libellé compris : la case à cocher seule serait trop petite
+    pour un doigt.
+  */
+  .assists {
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  .assists[open] {
+    padding-bottom: var(--space-2);
+  }
+
+  .assists summary {
+    padding-block: var(--space-3);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .assists-count {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .assist {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--tap);
+    color: var(--text);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .assist input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--accent);
   }
 
   legend {

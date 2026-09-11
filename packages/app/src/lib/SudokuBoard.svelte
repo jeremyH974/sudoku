@@ -2,6 +2,7 @@
   import { EMPTY, SIZE, UNITS, digitsOf, hasDigit } from '@sudoku/engine';
   import type { Game } from './game.svelte.js';
   import { MARKS, markOf, markedDigits } from './marks.js';
+  import { assists } from './assists.svelte.js';
 
   interface Props {
     game: Game;
@@ -65,7 +66,7 @@
 
   /** Case partageant une unité avec la sélection : surlignage d'aide. */
   function isPeer(cell: number): boolean {
-    if (!interactive) return false;
+    if (!interactive || !assists.peers) return false;
     const s = game.selected;
     if (cell === s) return false;
     return (
@@ -78,7 +79,7 @@
 
   /** Même chiffre que la sélection : repérage visuel réclamé par les joueurs. */
   function isSameValue(cell: number): boolean {
-    if (!interactive) return false;
+    if (!interactive || !assists.sameValue) return false;
     const selectedValue = values[game.selected];
     return selectedValue !== EMPTY && values[cell] === selectedValue && cell !== game.selected;
   }
@@ -92,7 +93,14 @@
    * d'écran l'annonçait. `isPeer` et `isSameValue` s'arrêtaient déjà sur
    * `!interactive` ; ceux-ci avaient été oubliés.
    */
-  const conflicts = $derived(interactive ? game.conflicts : new Set<number>());
+  /*
+    L'aide éteinte retire aussi l'annonce « en conflit » : l'écran et le lecteur
+    d'écran doivent dire la même chose. La partie, elle, garde ses conflits —
+    c'est ce qui décide qu'une grille est terminée.
+  */
+  const conflicts = $derived(
+    interactive && assists.conflicts ? game.conflicts : new Set<number>(),
+  );
 
   /** Notes du joueur, ou candidats calculés en mode analyse. */
   function notesOf(cell: number): number[] {
@@ -388,6 +396,16 @@
   .cell.conflict {
     color: var(--value-conflict);
     background: var(--cell-conflict);
+  }
+
+  /*
+    Un chiffre imprimé garde son encre, même en conflit. Passé à l'orange du
+    joueur, il semblait écrit par l'application : c'est exactement ce qu'a cru
+    le premier regard extérieur, à la mise en ligne. Le conflit reste porté par
+    le fond, la barre et le libellé lu à voix haute.
+  */
+  .cell.given.conflict {
+    color: var(--value-given);
   }
 
   .cell.conflict::after {
