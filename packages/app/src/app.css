@@ -302,13 +302,14 @@
   --tap-lg: 3rem;
 
   /*
-    Deux largeurs de même valeur, et pourtant deux jetons : ce sont deux
-    décisions qui peuvent diverger. La largeur maximale de la grille, sur
-    laquelle la barre du pouce doit s'aligner ; et la mesure de lecture, environ
-    68 caractères à la taille de base.
+    Deux jetons, deux décisions. La largeur maximale de la grille, sur laquelle
+    la barre du pouce doit s'aligner ; et la mesure de lecture, qui a d'abord
+    valu la même chose — jusqu'à ce qu'on la mesure : à 34 rem, la police
+    système donnait 79 caractères par ligne (6,9 px par caractère à 16 px).
+    30 rem en donnent 69, au cœur de la plage de 45 à 75 qu'on lit sans fatigue.
   */
   --board-max: 34rem;
-  --measure: 34rem;
+  --measure: 30rem;
 
   /* La voix du papier, déclarée : Georgia, et une chasse fixe pour les codes. */
   --font-paper: Georgia, 'Times New Roman', serif;

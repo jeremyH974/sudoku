@@ -215,14 +215,14 @@
 
 <style>
   .empty {
-    max-width: 42rem;
+    max-width: var(--measure);
     color: var(--text-muted);
-    line-height: 1.55;
+    line-height: var(--leading-prose);
   }
 
   .empty .muted {
     color: var(--text-faint);
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
   }
 
   .analysis {
@@ -249,7 +249,7 @@
   .transport {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: var(--space-2);
     align-items: center;
   }
 
@@ -257,26 +257,39 @@
     min-height: var(--tap);
     padding: 0.4rem 0.7rem;
     border: 1px solid var(--border);
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
-  .transport button:hover:not(:disabled) {
-    background: var(--surface-hover);
-  }
-
+  /* Désactivé : la teinte baisse ; `not-allowed` est hostile, et n'existe pas au doigt. */
   .transport button:disabled {
     color: var(--text-faint);
-    cursor: not-allowed;
+    cursor: default;
+  }
+
+  .transport button:active:not(:disabled) {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  /*
+    Le survol n'existe qu'avec un pointeur qui survole : sans cette garde, un
+    navigateur mobile l'émule au toucher et le laisse collé.
+  */
+  @media (hover: hover) and (pointer: fine) {
+    .transport button:hover:not(:disabled) {
+      background: var(--surface-hover);
+    }
   }
 
   .counter {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
   }
 
@@ -301,7 +314,7 @@
     gap: 0.6rem;
     align-items: baseline;
     margin: 0 0 var(--space-2);
-    font-size: 1.15rem;
+    font-size: var(--text-md);
   }
 
   .score {
@@ -309,13 +322,13 @@
     border-radius: var(--radius-pill);
     background: var(--surface-sunken);
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
   }
 
   .explanation {
     margin: 0 0 0.9rem;
-    line-height: 1.55;
+    line-height: var(--leading-prose);
   }
 
   .conclusion {
@@ -327,7 +340,7 @@
   .conclusion li {
     padding: 0.35rem 0.6rem;
     border-left: 3px solid var(--border);
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
   }
 
   .conclusion .place {
@@ -344,14 +357,14 @@
     gap: 0.9rem;
     margin-bottom: 1.2rem;
     color: var(--text-faint);
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
   }
 
   .swatch {
     display: inline-block;
     width: 0.85rem;
     height: 0.85rem;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     vertical-align: -1px;
   }
 
@@ -370,9 +383,14 @@
     border: 2px solid var(--hint-target-border);
   }
 
+  /*
+    Un sous-titre à 0,9 rem au-dessus d'une explication à 1 rem : le titre
+    était plus petit que son propre texte. Il prend la taille courante, et se
+    distingue par sa graisse.
+  */
   h3 {
     margin: 0 0 var(--space-2);
-    font-size: 0.9rem;
+    font-size: var(--text-base);
   }
 
   .alternatives {
@@ -386,11 +404,11 @@
     margin: 0.4rem 0 0.6rem;
     padding: 0;
     list-style: none;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
   }
 
   .alternatives li.played {
-    font-weight: 620;
+    font-weight: 600;
   }
 
   .tag {
@@ -398,7 +416,7 @@
     border-radius: var(--radius-pill);
     background: var(--accent-soft);
     color: var(--text);
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
   }
 
   .breakdown {
@@ -413,7 +431,7 @@
     align-items: center;
     padding: 0.3rem 0;
     border-bottom: 1px solid var(--border);
-    font-size: 0.88rem;
+    font-size: var(--text-sm);
   }
 
   .badge {

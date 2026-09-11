@@ -145,23 +145,29 @@
 </div>
 
 <style>
+  /*
+    La colonne entière à la mesure de lecture : 46 rem faisaient 106 caractères
+    par ligne sur l'onglet le plus riche en prose — mesuré avec la police
+    système —, bien au-delà des 45 à 75 qu'on lit sans fatigue. La mesure en
+    donne 69 : voir `--measure` dans `app.css`.
+  */
   .learn {
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
-    max-width: 46rem;
+    gap: var(--space-6);
+    max-width: var(--measure);
   }
 
   .intro,
   .chapter-intro {
     margin: 0;
     color: var(--text-muted);
-    line-height: 1.55;
+    line-height: var(--leading-prose);
   }
 
   .notice {
     margin: 0;
-    padding: 0.7rem 0.9rem;
+    padding: var(--space-3) var(--space-4);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface-sunken);
@@ -176,14 +182,14 @@
 
   h2 {
     margin: 0;
-    font-size: 1.05rem;
-    font-weight: 650;
+    font-size: var(--text-md);
+    font-weight: 600;
   }
 
   .techniques {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: var(--space-3);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -193,9 +199,9 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    padding: 0.85rem 0.95rem;
+    padding: var(--space-4);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     background: var(--surface);
   }
 
@@ -219,24 +225,24 @@
     border-radius: var(--radius-pill);
     background: var(--surface-sunken);
     color: var(--text-muted);
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
   }
 
   .name {
-    font-weight: 620;
+    font-weight: 600;
   }
 
   .state {
     margin-left: auto;
     color: var(--text-faint);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
   }
 
   .summary {
     margin: 0;
     color: var(--text-muted);
-    line-height: 1.5;
+    line-height: var(--leading-prose);
   }
 
   .row {
@@ -250,8 +256,11 @@
     padding: 0.4rem 0.9rem;
     border-radius: var(--radius-md);
     font: inherit;
-    font-size: 0.9rem;
+    font-size: var(--text-base);
     cursor: pointer;
+    transition:
+      background-color var(--dur-quick) var(--ease),
+      border-color var(--dur-quick) var(--ease);
   }
 
   .primary {
@@ -267,15 +276,37 @@
     color: var(--text);
   }
 
-  .ghost:hover {
-    background: var(--surface-hover);
+  .primary:active {
+    border-color: var(--accent-active);
+    background: var(--accent-active);
+    transition-duration: 0s;
+  }
+
+  .ghost:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  /*
+    Le survol n'existe qu'avec un pointeur qui survole : sans cette garde, un
+    navigateur mobile l'émule au toucher et le laisse collé.
+  */
+  @media (hover: hover) and (pointer: fine) {
+    .primary:hover {
+      border-color: var(--accent-hover);
+      background: var(--accent-hover);
+    }
+
+    .ghost:hover {
+      background: var(--surface-hover);
+    }
   }
 
   .body {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    padding-top: 0.4rem;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
     border-top: 1px solid var(--border);
     line-height: var(--leading-prose);
   }
@@ -286,7 +317,7 @@
 
   .aside {
     color: var(--text-muted);
-    font-size: 0.92rem;
+    font-size: var(--text-base);
   }
 
   .aside.warn {
