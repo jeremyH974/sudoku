@@ -19,7 +19,8 @@
     "calibrate": "tsx packages/cli/src/main.ts",
     "diagnose": "tsx packages/cli/src/diagnose.ts",
     "dailies": "tsx packages/cli/src/dailies.ts",
-    "lessons": "tsx packages/cli/src/lessons.ts"
+    "lessons": "tsx packages/cli/src/lessons.ts",
+    "portraits": "tsx packages/cli/src/portraits.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -30,6 +31,7 @@
     "eslint": "^10.10.0",
     "fast-check": "^4.9.0",
     "jsdom": "^30.0.1",
+    "sharp": "^0.35.4",
     "svelte": "^5.57.0",
     "svelte-check": "^4.7.6",
     "tsx": "^4.23.13",
