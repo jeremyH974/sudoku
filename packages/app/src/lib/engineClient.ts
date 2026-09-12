@@ -1,4 +1,5 @@
 import type { GenerateAtLevelOptions, LeveledPuzzle, Rating } from '@sudoku/engine';
+import type { CaseFile, ComposeOptions } from '@sudoku/engine/investigation';
 import type { WorkerRequest, WorkerResponse } from './engine.worker.js';
 
 /**
@@ -68,6 +69,18 @@ class EngineClient {
 
   rate(puzzle: Uint8Array): Promise<Rating> {
     return this.#send<Rating>({ type: 'rate', puzzle });
+  }
+
+  /**
+   * Une affaire du mode Enquête, ou `null` si la graine n'en a pas donné.
+   *
+   * Le `null` remonte tel quel jusqu'à l'écran, qui doit savoir le dire. Le
+   * masquer derrière une nouvelle tentative silencieuse ferait attendre le
+   * joueur sans rien lui montrer — c'est le défaut que l'application se refuse
+   * déjà pour la génération de grilles.
+   */
+  composeCase(seed: string, options: ComposeOptions = {}): Promise<CaseFile | null> {
+    return this.#send<CaseFile | null>({ type: 'compose-case', seed, options });
   }
 }
 

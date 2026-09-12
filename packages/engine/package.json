@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./rng": "./src/rng/index.ts",
     "./grid": "./src/grid/index.ts",
-    "./solver": "./src/solver/index.ts"
+    "./solver": "./src/solver/index.ts",
+    "./investigation": "./src/investigation/index.ts"
   },
   "sideEffects": false
 }

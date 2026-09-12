@@ -1,5 +1,7 @@
 import { generateAtLevel, generatePuzzle, rate } from '@sudoku/engine';
 import type { GenerateAtLevelOptions, GenerateOptions } from '@sudoku/engine';
+import { composeCase } from '@sudoku/engine/investigation';
+import type { ComposeOptions } from '@sudoku/engine/investigation';
 
 /**
  * Le moteur, déporté hors du fil principal.
@@ -18,7 +20,13 @@ import type { GenerateAtLevelOptions, GenerateOptions } from '@sudoku/engine';
 export type WorkerRequest =
   | { readonly id: number; readonly type: 'generate-at-level'; readonly options: GenerateAtLevelOptions }
   | { readonly id: number; readonly type: 'generate'; readonly options: GenerateOptions }
-  | { readonly id: number; readonly type: 'rate'; readonly puzzle: Uint8Array };
+  | { readonly id: number; readonly type: 'rate'; readonly puzzle: Uint8Array }
+  | {
+      readonly id: number;
+      readonly type: 'compose-case';
+      readonly seed: string;
+      readonly options: ComposeOptions;
+    };
 
 export type WorkerResponse =
   | { readonly id: number; readonly ok: true; readonly payload: unknown }
@@ -32,6 +40,11 @@ function handle(request: WorkerRequest): unknown {
       return generatePuzzle(request.options);
     case 'rate':
       return rate(request.puzzle);
+    // Une affaire coûte 122 ms à la médiane et jusqu'à 470 ms au pire : moins
+    // qu'une grille Expert, mais bien plus qu'une image à trente par seconde.
+    // Elle passe donc par ici comme le reste.
+    case 'compose-case':
+      return composeCase(request.seed, request.options);
   }
 }
 

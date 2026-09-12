@@ -109,6 +109,48 @@
   --shadow-raised: 0 1px 2px rgb(0 0 0 / 12%);
   --shadow-floating: 0 2px 12px rgb(0 0 0 / 22%);
 
+  /*
+    La palette de la scène — l'écart assumé de l'incrément 11.
+
+    La direction artistique de l'incrément 10 dit « le plateau est une surface
+    d'information, pas une scène ». Le mode Enquête en fait une scène dessinée,
+    et c'est un choix, pas un oubli : le plan des pièces **est** le sujet des
+    indices, et un plan qui ne se voit pas ne se raisonne pas.
+
+    Ce que cet écart ne coûte pas : la scène ne reçoit **aucune exemption** au
+    test des jetons. Elle reçoit une palette, bornée et déclarée ici comme le
+    reste. Une dispense aurait été plus rapide ; une palette se relit, se mesure
+    et suit le thème.
+
+    Six teintes de pièce, et pas davantage : au-delà, deux pièces voisines
+    cessent d'être distinguables. Ce n'est de toute façon jamais la couleur qui
+    porte — une pièce se dit par son **nom imprimé sur le plan**, par ses
+    **murs**, et par le nom accessible de chacune de ses cases.
+
+    Contrastes **mesurés**, chacun contre la pire des six teintes de la série.
+
+      clair  — mur 11,4:1 · encre 7,5:1 · nom 5,7:1 · croix 4,6:1 · lettre 8,3:1
+      sombre — mur  3,8:1 · encre 5,5:1 · nom 6,3:1 · croix 4,5:1 · lettre 4,9:1
+
+    Le mur sombre valait d'abord `--grid-strong`, soit 2,87:1 — sous le seuil de
+    3:1 que WCAG demande d'un objet graphique porteur d'information, et les murs
+    sont exactement cela : c'est par eux qu'une pièce se lit. Il est donc éclairci
+    ici, et ne suit plus le trait du sudoku. Le défaut n'a été vu qu'en mesurant ;
+    à l'œil, les murs semblaient parfaitement nets.
+  */
+  --scene-wall: #2f2e2b;
+  --scene-ink: #4a4a45;
+  --scene-label: #5c5b56;
+  --scene-cross: #6b6a64;
+  --scene-token: #1f4e8c;
+  --scene-token-ink: #ffffff;
+  --scene-zone-1: #e8eef7;
+  --scene-zone-2: #f2ece2;
+  --scene-zone-3: #e6f0ea;
+  --scene-zone-4: #f0e9f2;
+  --scene-zone-5: #eef1e6;
+  --scene-zone-6: #f5e9e6;
+
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -161,6 +203,21 @@
     --accent-hover: #5b8ed6;
     --accent-active: #6b99da;
     --surface-pressed: #34383e;
+
+
+    /* La scène en sombre : les teintes descendent, l'encre monte. */
+    --scene-wall: #7e848d;
+    --scene-ink: #9aa0a8;
+    --scene-label: #a8abb1;
+    --scene-cross: #8b9099;
+    --scene-token: #4b82cf;
+    --scene-token-ink: #0e1013;
+    --scene-zone-1: #232a33;
+    --scene-zone-2: #2b2823;
+    --scene-zone-3: #222b26;
+    --scene-zone-4: #2a2430;
+    --scene-zone-5: #272a22;
+    --scene-zone-6: #2f2623;
 
     /*
       Sur fond sombre, une ombre portée est invisible : l'élévation se dit par
@@ -222,6 +279,21 @@
   --accent-hover: #5b8ed6;
   --accent-active: #6b99da;
   --surface-pressed: #34383e;
+
+
+  /* La scène en sombre : les teintes descendent, l'encre monte. */
+  --scene-wall: #7e848d;
+  --scene-ink: #9aa0a8;
+  --scene-label: #a8abb1;
+  --scene-cross: #8b9099;
+  --scene-token: #4b82cf;
+  --scene-token-ink: #0e1013;
+  --scene-zone-1: #232a33;
+  --scene-zone-2: #2b2823;
+  --scene-zone-3: #222b26;
+  --scene-zone-4: #2a2430;
+  --scene-zone-5: #272a22;
+  --scene-zone-6: #2f2623;
 
   /*
     Sur fond sombre, une ombre portée est invisible : l'élévation se dit par un
