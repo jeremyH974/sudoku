@@ -19,7 +19,8 @@ pièces, si. C'est aussi ce qui rend le dix-septième personnage gratuit.
 | **Aucune étude ne chiffre** le lien entre nombre de couches et distinctivité perçue | — | On ne prétendra pas le contraire. La combinatoire trompe : les Mii atteignent 10¹⁰ combinaisons pour des visages qui se ressemblent |
 | **Le trait effilé n'existe pas en SVG.** Proposé en 2002, suivi depuis 2009, écarté de SVG2, toujours un brouillon non implémenté | W3C SVG WG | La ligne d'encre expressive est un **chemin rempli**, jamais un `stroke` |
 | **Le cel shading est du SVG plat par nature** — un cel peint était déjà des aplats superposés | Praticiens animation | 1 aplat + 2 blocs d'ombre + 1 ligne. 20 à 40 tracés, 5 à 12 ko par portrait |
-| **Une sortie d'IA pure n'est pas protégeable** — tranché aux États-Unis (certiorari refusé, mars 2026), même principe en France | USCO, Thaler v. Perlmutter, CSPLA | Les images engendrées servent de **direction artistique**, jamais de livrable. C'est la repasse à la main qui rend l'asset protégeable |
+| **Une sortie d'IA pure n'est pas protégeable.** Aux États-Unis : *Thaler v. Perlmutter*, certiorari **refusé le 2 mars 2026** (dossier 25-449), ce qui laisse debout l'arrêt de la D.C. Circuit du 18 mars 2025 — « all eligible work [must be] authored in the first instance by a human being » | USCO, *Copyright and AI, Part 2: Copyrightability*, 29 janvier 2025 ; D.C. Cir. n° 23-5233 | Les images engendrées servent de **direction artistique**, jamais de livrable. C'est la repasse à la main qui rend l'asset protégeable |
+| **Même principe en France, et formulé plus finement.** Le rapport de mission Bensamoun/Groffe-Charrier **présenté au CSPLA le 9 juillet 2026** distingue la « création hybride » — direction créative humaine identifiable, protégeable — de la « production synthétique », qui tombe dans le domaine public. L'originalité peut se loger **en amont, pendant ou en aval** : un seul de ces trois moments suffit | Rapport de mission remis au CSPLA, juillet 2026 (rapport, pas avis adopté) | La sélection et la repasse comptent comme des choix créatifs. Le prompt seul, non — des deux côtés de l'Atlantique |
 | **Écrire les décors thématiques à la main est la norme du marché**, pas un pis-aller | Observation du secteur | On continue. Le procédural est réservé à la variété de fond |
 | **BSP en pavage complet** : la pièce est connexe par construction | Littérature PCG | C'est l'algorithme du jour où l'on engendrera des plans — mais la connexité se **revérifie** au flood-fill, jamais ne se déclare |
 
@@ -110,3 +111,85 @@ viendra, **rejettera** un plan hors bornes au lieu de le corriger.
 - le poids du jeu de portraits reste dans le budget, mesuré et non estimé ;
 - les contrastes des teintes de peau et de cheveux mesurés contre les fonds de carte, dans les
   deux thèmes.
+
+---
+
+# 15b — Ce que la recherche a tranché, et ce qu'on écrit
+
+## Le résultat le plus utile est négatif
+
+La recherche a balayé la littérature PCG (Nystrom, Adonaac, BSP, WFC, grammaires de graphes,
+HouseGAN/Graph2Plan/HouseDiffusion), la conception de puzzles (Gilbert, Falstein, Nikoli), la
+Space Syntax (Hillier & Hanson, 1984) et les papiers 2024-2026 sur l'entropie de puzzle. Verdict :
+
+> **Aucune source ne chiffre une seule des bornes qu'on voulait écrire.** Ni le rapport d'aire
+> acceptable entre pièces, ni la densité de mobilier, ni un diamètre ou un degré de connexion
+> transposable à un plan de cinq à huit pièces. Tout ce que la Space Syntax fournit se lit
+> **relativement à un corpus de bâtiments comparables**, jamais contre un seuil absolu.
+
+Et surtout, rien ne relie empiriquement une **forme** de pièce à une richesse déductive mesurée :
+la littérature de donjons parle de rythme d'action, celle de Gilbert de jeux d'aventure narratifs.
+Murdoku, Clues by Sam et LinkedIn Queens sont des boîtes noires commerciales sans post-mortem.
+
+C'est exactement la situation que le projet a déjà rencontrée avec l'effort du chemin et sa largeur
+au moment le plus dur. La règle est écrite et s'applique ici sans changement :
+
+> **Une dimension sans oracle se présente comme un compte, jamais comme une note.**
+
+Donc : `measureScene()` **compte** et ne juge pas. Les seuils vivent à côté, sont **calibrés contre
+le générateur** et non contre une source, et chacun porte en commentaire la mesure qui l'a fixé.
+
+## L'erreur qu'on ne commettra pas
+
+La recherche signale un piège que je n'avais pas vu : la **connexité globale du plan par les
+portes** n'a aucun effet sur la logique du jeu. « À côté » se définit par l'adjacence orthogonale
+**dans la même pièce** ; il n'existe pas de porte dans le modèle. Une borne de connexité globale
+mesurerait donc la *plausibilité d'un appartement*, pas la richesse déductive — et la ranger avec
+les autres ferait croire qu'elle sert au jeu. `buildScene()` vérifie déjà la connexité **par
+pièce**, et c'est la seule qui compte.
+
+## Ce que la géométrie change réellement, et qui se raisonne
+
+Un seul mécanisme relie la forme au jeu, et il est assez net pour être écrit :
+
+> **Une pièce longue ou coudée crée des paires « même pièce, mais pas à côté ».**
+
+Dans une pièce compacte de quatre cases, presque toute paire est adjacente : « il était dans le
+salon » et « il était à côté d'elle » disent presque la même chose. Dans un couloir de six cases en
+ligne, les deux extrémités partagent la pièce sans jamais se toucher : les deux indices se
+séparent. C'est **le** levier structurel, et les trois décors livrés l'exploitent différemment.
+
+## Les trois décors, et le quatrième qui sert de repoussoir
+
+Le manoir livré mesure : 5 pièces, de 4 à 10 cases (rapport 2,50), la plus grande à 28 % du plan,
+19 cases meublées (53 %), 6 sortes de meubles dont 0 unique, 8 paires de pièces mitoyennes.
+
+| Décor | Structure | Ce qu'il fait varier |
+|---|---|---|
+| **Manoir** (livré) | 5 pièces compactes, rapport 2,5 | La référence |
+| **Le couloir** | Une pièce élancée qui traverse et touche toutes les autres | Beaucoup de paires « même pièce, non adjacentes » ; pivot **élancé** |
+| **L'atelier** | Une grande salle en L (≈ 12 cases) contre de petites alcôves | Rapport d'aire élevé ; la forme en L éloigne deux coins d'une même pièce |
+| **La rotonde** | Un pivot **compact** au centre, quatre pièces qui ne se touchent jamais entre elles | Diamètre minimal ; l'indice de pièce est fort, l'indice de voisinage faible |
+| **L'enfilade** (*non livrée*) | Six bandes verticales en chaîne, diamètre 5 | **Cas pathologique**, gardé en fixture : les bornes doivent le **rejeter** |
+
+L'enfilade est la preuve que les bornes servent à quelque chose. Une borne qu'aucun décor ne viole
+n'est pas une borne, c'est un commentaire.
+
+## Ce qu'on écrit maintenant pour le jour du procédural
+
+`measureScene()` est déjà écrit et pur. S'y ajoutent :
+
+- **`decorFaults(metrics)`** : la liste des bornes violées, vide si tout passe. Un générateur futur
+  **rejettera** sur cette liste au lieu de corriger — c'est le contrat.
+- **un test qui exige que chaque décor livré produise des affaires**, sur un corpus de graines,
+  avec `{ decorId }` explicite. Aucun test ne le fait aujourd'hui : tout est épinglé sur `manor`.
+- **un garde sur l'unicité des identifiants** : `loadDecor()` fait un `.find()`, donc un `id`
+  dupliqué masquerait silencieusement le second décor.
+
+## Vérification
+
+`pnpm check`, plus :
+
+- chaque décor livré produit des affaires **sur un corpus de graines**, pas sur un exemple ;
+- l'enfilade est bien **rejetée** par les bornes, et pour la raison attendue ;
+- les mesures des quatre décors sont affichées par `pnpm measure`, pas devinées.

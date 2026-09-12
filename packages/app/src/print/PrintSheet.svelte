@@ -112,7 +112,20 @@
     color: #000;
     /* Rien ne doit déborder d'une feuille sur la suivante. */
     overflow: hidden;
-    font-family: Georgia, 'Times New Roman', serif;
+    /*
+      Le papier a sa voix, et elle est **citée**, plus recopiée.
+
+      `--font-paper` et `--font-mono` existaient depuis l'incrément 12, décrits
+      comme « la voix du papier », et n'étaient référencés nulle part : les mêmes
+      valeurs étaient réécrites ici en dur. Deux sources de vérité dans un projet
+      dont la règle écrite est qu'il n'y en a jamais deux — modifier le jeton ne
+      changeait rien à ce qui sortait de l'imprimante.
+
+      L'exemption du papier porte sur les **couleurs** (`var(--text)` y
+      imprimerait du gris clair) et sur les rayons. Elle n'a jamais porté sur la
+      typographie, qui ne dépend d'aucun thème.
+    */
+    font-family: var(--font-paper);
   }
 
   .summary {
@@ -123,9 +136,39 @@
     text-align: center;
   }
 
+  /*
+    Les deux seuls textes manuscrits du cahier, et le périmètre est mesuré.
+
+    Quatre sources indépendantes proscrivent les scriptes pour du texte
+    **porteur d'information** — Section 508 / ADA (« not italic, oblique,
+    *script*, highly decorative »), RNIB Clear Print 2023, British Dyslexia
+    Association 2023, et les règles FALC (« un seul type d'écriture »). GOV.UK,
+    mis à jour le 17 juin 2026, pose un plancher de 16 pt pour l'imprimé en
+    basse vision.
+
+    Ne restent éligibles que des titres courts qu'on ne lit pas pour retrouver
+    quelque chose, et au-dessus du plancher : le titre du cahier (9 mm =
+    25,5 pt) et le titre des corrigés (6 mm = 17,0 pt).
+
+    « Grille N » est exclue pour deux raisons cumulées : c'est l'étiquette qu'on
+    lit **pour retrouver** une grille, et elle est en graisse 700 — or Patrick
+    Hand n'existe qu'en `usWeightClass 400`, mesuré sur le fichier livré. Ce
+    serait un gras synthétique sur un tracé monolinéaire.
+  */
   .summary h2 {
     margin: 0 0 0.4rem;
+    font-family: var(--font-hand);
     font-size: 9mm;
+    /*
+      Graisse écrite, et non héritée. `h2` vaut 700 par défaut chez le
+      navigateur, or Patrick Hand n'existe qu'en 400 : le titre sortait donc en
+      **gras synthétique**, celui que le moteur fabrique en épaississant les
+      contours. Sur un tracé monolinéaire, c'est précisément la bouillie pour
+      laquelle « Grille N » a été exclue de la manuscrite deux règles plus haut.
+      Trouvé en lisant la graisse calculée dans l'aperçu, pas en relisant le
+      fichier.
+    */
+    font-weight: 400;
     letter-spacing: -0.01em;
   }
 
@@ -194,7 +237,7 @@
 
   .label {
     color: #555;
-    font-family: ui-monospace, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 3.2mm;
     letter-spacing: 0.08em;
   }
@@ -225,7 +268,7 @@
 
   .code {
     margin: 0;
-    font-family: ui-monospace, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 3mm;
     letter-spacing: 0.04em;
     word-break: break-all;
@@ -233,7 +276,18 @@
 
   .solutions-title {
     margin: 0 0 6mm;
+    font-family: var(--font-hand);
     font-size: 6mm;
+    /*
+      Graisse écrite, et non héritée. `h2` vaut 700 par défaut chez le
+      navigateur, or Patrick Hand n'existe qu'en 400 : le titre sortait donc en
+      **gras synthétique**, celui que le moteur fabrique en épaississant les
+      contours. Sur un tracé monolinéaire, c'est précisément la bouillie pour
+      laquelle « Grille N » a été exclue de la manuscrite deux règles plus haut.
+      Trouvé en lisant la graisse calculée dans l'aperçu, pas en relisant le
+      fichier.
+    */
+    font-weight: 400;
   }
 
   /*

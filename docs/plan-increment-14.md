@@ -120,3 +120,87 @@ qu'on ne verrait pas**.
 - les tests d'accessibilité existants des cinq écrans, inchangés ;
 - une vérification **sur papier réel** si quoi que ce soit touche `print/` — une capture d'écran
   ne vaut pas mesure, et les filets sont calibrés à 0,5 pt.
+
+---
+
+# 14b — Ce que la recherche a tranché, et ce qu'on écrit
+
+La décision « pas de couleur sur le papier » est **validée** ; ce qui suit ne concerne plus que la
+manuscrite. Sept faits nouveaux, tous sourcés, dont deux changent l'approche.
+
+## Les deux faits qui changent l'approche
+
+1. **Une police chargée paresseusement ne part pas à l'imprimante.** Une `@font-face` n'est
+   téléchargée que lorsque le navigateur juge la police *employée* par quelque chose qu'il rend
+   (web.dev, chargement paresseux des polices). Une police qui ne sert que sous `@media print`
+   **commence donc son téléchargement au moment où l'impression démarre** : le premier « Imprimer »
+   sur cache froid sort en police de repli, et ça ne se voit jamais en développement, où le cache
+   est chaud.
+   → **`<link rel="preload" as="font" crossorigin>`, sans attribut `media`,** avec une URL
+   strictement identique à celle du `src` (sinon double téléchargement silencieux, signalé en
+   console par « preloaded but not used »).
+
+2. **`font-display` ne garantit rien à l'impression.** Aucune de ses cinq valeurs ne promet que la
+   police custom soit ce qui part sur le papier si l'impression tombe pendant le chargement
+   (MDN / CSS Fonts 4). Le mécanisme fiable est un **verrou explicite** :
+   `await document.fonts.load(…)` avant `window.print()`. Ce n'est pas une préférence — c'est
+   littéralement le correctif que Puppeteer a dû s'appliquer à lui-même
+   ([commit 59bffce](https://github.com/puppeteer/puppeteer/commit/59bffce9720b4d5e5204b26b335735e0a5ca9cc1)).
+   Le verrou va dans le gestionnaire du bouton, **pas** dans `beforeprint`, qui se déclenche trop
+   tard pour bloquer quoi que ce soit.
+
+## Ce que l'accessibilité impose, et qui resserre le périmètre
+
+Quatre sources indépendantes proscrivent les scriptes pour du texte **porteur d'information** :
+Section 508 / ADA (« not italic, oblique, **script**, highly decorative »), RNIB *Clear Print* 2023,
+British Dyslexia Association *Style Guide* 2023, et les règles FALC (« un seul type d'écriture »).
+GOV.UK, mis à jour le 17 juin 2026, pose un plancher de **16 pt** pour l'imprimé en basse vision.
+
+La revue systématique JVIB (Russell-Minda et al., 2007, 18 études) confirme 16–18 pt et reconnaît
+n'avoir trouvé **aucune littérature normative** sur les manuscrites elles-mêmes. On ne prétendra
+donc pas qu'une étude valide ce choix : on prend le seul périmètre que toutes les sources
+tolèrent — **titre court, non essentiel, au-dessus du plancher**.
+
+### Les deux seuls textes qui reçoivent la manuscrite
+
+| Texte | Taille | Converti | Pourquoi il est éligible |
+|---|---|---|---|
+| Titre du cahier | 9 mm | **25,5 pt** | Texte de l'utilisateur, décoratif, ne sert à rien retrouver |
+| « Corrigés » | 6 mm | **17,0 pt** | Titre de section, au-dessus du plancher GOV.UK |
+
+### Les onze qui ne la reçoivent pas, et pourquoi
+
+« Grille N » (5 mm) **identifie** une grille — c'est ce qu'on lit pour la retrouver — et porte
+`font-weight: 700`, alors que Patrick Hand n'existe qu'en `usWeightClass 400` : ce serait un gras
+synthétique sur un tracé monolinéaire, c'est-à-dire une bouillie. Le sommaire, la promesse, les
+légendes, les numéros de page sont tous informatifs et sous 16 pt. Les étiquettes et le code
+restent en chasse fixe — c'est là qu'on recopie des caractères à la main.
+
+## Ce qu'on ne fera pas, contre la recette recommandée
+
+- **Pas de `unicode-range`.** La recette standard le prescrit pour éviter un téléchargement inutile
+  — mais on précharge de toute façon, donc il n'apporte rien, et il **retire** : une plage plus
+  étroite que la couverture réelle empêcherait la police de servir pour un caractère qu'elle
+  possède. Le titre est **du texte saisi par l'utilisateur** ; le pari ne vaut pas la mise.
+  Mesuré sur le fichier livré : **220 points de code**, tous les accents français présents, œ Œ æ Æ
+  « » … – — ’ “ ” € ° présents ; seuls † et ‡ manquent.
+- **Pas de repli à métriques ajustées** (`size-adjust`, `ascent-override`…) dans cet incrément.
+  Avec le préchargement **et** le verrou, le repli ne rend pratiquement jamais sur le papier. Et le
+  support WebKit de ces descripteurs n'a été activé par défaut qu'en **août 2026**
+  ([WebKit #219735](https://bugs.webkit.org/show_bug.cgi?id=219735)) : trop frais pour qu'on compte
+  dessus. À reprendre pour l'**écran**, où le repli rend vraiment.
+
+## Le défaut trouvé en chemin
+
+`--font-paper` et `--font-mono` sont déclarés dans `app.css` comme « la voix du papier » et
+**référencés nulle part** : `PrintSheet.svelte` réécrit les mêmes valeurs en dur. Deux sources de
+vérité, dans un projet dont la règle écrite est qu'il n'y en a jamais deux. On les branche.
+
+## Vérification
+
+`pnpm check`, plus ce qu'aucune CI ne peut voir :
+
+- **une vraie feuille imprimée** — la corruption WebKit documentée ne se manifeste ni à l'écran ni
+  dans l'aperçu, seulement sur la sortie réelle ;
+- `document.fonts.check("1em 'Patrick Hand'")` au moment de l'impression, cache vidé ;
+- l'onglet Réseau : le woff2 apparaît **une fois**, pas deux.

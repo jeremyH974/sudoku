@@ -18,6 +18,27 @@
     <meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!--
+      La manuscrite est préchargée, et c'est ce qui la fait arriver sur le
+      papier. Une police n'est téléchargée que lorsque le navigateur la juge
+      employée ; celle du cahier ne sert qu'à l'impression, donc son
+      téléchargement ne commençait qu'au moment où l'impression démarrait.
+
+      Sans attribut `media`, et avec une URL **strictement identique** à celle du
+      `src` de la règle `@font-face` : une URL qui diffère d'un caractère
+      provoque un second téléchargement, signalé en console par « preloaded but
+      not used ».
+
+      L'accueil ne la précharge pas : il ne l'emploie pas encore, et précharger
+      une police inutilisée est exactement le même avertissement, à l'envers.
+    -->
+    <link
+      rel="preload"
+      href="/fonts/patrick-hand-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <meta
       name="description"
       content="Générateur et jeu de Sudoku. Aucune installation, aucune publicité, aucun compte."

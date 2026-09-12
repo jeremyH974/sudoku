@@ -146,6 +146,7 @@ function values(css: string, declaration: RegExp): string[] {
 const RADIUS = /(?<![\w-])border-radius\s*:\s*([^;{}]+)/g;
 const FONT_SIZE = /(?<![\w-])font-size\s*:\s*([^;{}]+)/g;
 const FONT_WEIGHT = /(?<![\w-])font-weight\s*:\s*([^;{}]+)/g;
+const FONT_FAMILY = /(?<![\w-])font-family\s*:\s*([^;{}]+)/g;
 const DURATION = /(?<![\w-])(?:transition|animation|--dur-[a-z]+)(?:-duration)?\s*:\s*([^;{}]+)/g;
 
 interface Rule {
@@ -234,6 +235,30 @@ describe('discipline des jetons', () => {
         .filter((value) => !WEIGHTS.has(value))
         .map((value) => `${path} : font-weight: ${value}`),
     );
+    expect(offenders).toEqual([]);
+  });
+
+  it('cite ses polices au lieu de recopier leurs piles', () => {
+    /*
+      Ce garde vient d'un défaut vivant, pas d'un principe.
+
+      `--font-paper` et `--font-mono` étaient déclarés dans `app.css` comme « la
+      voix du papier » et référencés nulle part : `PrintSheet.svelte` réécrivait
+      les mêmes valeurs en dur. Le jeton était mort — le modifier ne changeait
+      rien à ce qui sortait de l'imprimante — et rien ne le signalait.
+
+      Le papier n'est **pas** exempté ici, contrairement aux couleurs et aux
+      rayons : une pile de polices n'a pas de variante sombre, donc rien ne
+      justifie qu'elle vive à part. Seul `app.css` écrit des noms de police, et
+      c'est là que la règle `@font-face` les déclare.
+    */
+    const offenders = sheets
+      .filter((sheet) => sheet.path !== 'app.css')
+      .flatMap(({ path, css }) =>
+        values(css, FONT_FAMILY)
+          .filter((value) => !value.startsWith('var(--font-') && value !== 'inherit')
+          .map((value) => `${path} : font-family: ${value}`),
+      );
     expect(offenders).toEqual([]);
   });
 

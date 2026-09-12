@@ -77,7 +77,30 @@
     }
   }
 
-  const print = (): void => {
+  /*
+    On attend la police **avant** d'ouvrir la boîte d'impression.
+
+    Une `@font-face` n'est téléchargée que lorsque le navigateur juge la police
+    employée par ce qu'il rend. La manuscrite ne sert qu'au cahier : sur un cache
+    froid, le premier « Imprimer » partait donc en police de repli — un défaut
+    invisible en développement, où le cache est toujours chaud.
+
+    `font-display` ne répare pas ça : aucune de ses valeurs ne promet que la
+    police custom soit ce qui part sur le papier si l'impression tombe pendant
+    le chargement. Le seul mécanisme fiable est ce verrou, et ce n'est pas une
+    préférence — c'est le correctif que Puppeteer a dû s'appliquer à lui-même
+    (commit 59bffce, « fix: wait for fonts before pdf printing »).
+
+    Il vit dans le gestionnaire du bouton et **pas** dans `beforeprint`, qui se
+    déclenche trop tard pour bloquer quoi que ce soit. Et s'il échoue, on
+    imprime quand même : un repli sur le titre vaut mieux qu'un bouton mort.
+  */
+  const print = async (): Promise<void> => {
+    try {
+      await document.fonts.load("400 1em 'Patrick Hand'");
+    } catch {
+      // Police indisponible : le cahier sort dans la pile de repli.
+    }
     window.print();
   };
 </script>
