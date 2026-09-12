@@ -46,17 +46,27 @@ const forEachCase = (check: (file: CaseFile) => void): void => {
 };
 
 describe('composeCase', () => {
-  it('rend une affaire pour toute graine tirée au hasard', () => {
-    // Un `null` n'est pas un bug — l'appelant doit savoir le traiter — mais il
-    // doit rester exceptionnel : une fabrique qui échoue souvent ferait
-    // attendre le joueur sans rien lui dire.
-    fc.assert(
-      fc.property(fc.integer({ min: 0, max: 20_000 }), (seed) => {
-        expect(composeCase(`libre-${String(seed)}`)).not.toBeNull();
-      }),
-      { numRuns: 8 },
-    );
-  });
+  it(
+    'rend une affaire pour toute graine tirée au hasard',
+    () => {
+      // Un `null` n'est pas un bug — l'appelant doit savoir le traiter — mais il
+      // doit rester exceptionnel : une fabrique qui échoue souvent ferait
+      // attendre le joueur sans rien lui dire.
+      fc.assert(
+        fc.property(fc.integer({ min: 0, max: 20_000 }), (seed) => {
+          expect(composeCase(`libre-${String(seed)}`)).not.toBeNull();
+        }),
+        { numRuns: 8 },
+      );
+    },
+    // Le délai est **mesuré**, pas choisi : sur 1 500 graines, zéro échec, mais
+    // un pire cas à 3 979 ms. Huit tirages peuvent donc légitimement demander
+    // une trentaine de secondes, là où le défaut de vitest en accorde cinq —
+    // et ce test tombait au hasard, dans la suite complète seulement, quand les
+    // travailleurs se disputent le processeur. Le symptôme ressemblait à un
+    // `null`, la cause était le chronomètre.
+    60_000,
+  );
 
   it('rejoue exactement la même affaire pour la même graine', () => {
     // Sans cela, une affaire partagée par lien ne serait pas la même chez le

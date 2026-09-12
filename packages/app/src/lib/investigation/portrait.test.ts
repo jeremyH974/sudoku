@@ -64,6 +64,37 @@ describe('les seize identités', () => {
     }
   });
 
+  it('habillent les seize sans jamais répéter un couple coiffure–vêtement', () => {
+    /*
+      Le vêtement est le seul accent franc du portrait, et le deuxième axe qu'on
+      voit après la silhouette. Deux suspects qui partageraient **les deux** se
+      liraient comme le même personnage, quoi que disent la peau ou les lunettes.
+
+      Cette borne n'est pas gratuite : elle a été trouvée par recherche, et la
+      borne voisine — jamais le même ton de cheveux **et** le même vêtement — est
+      au contraire **impossible** ici, et c'est arithmétique. Cinq suspects
+      partagent le ton 1 pour quatre vêtements disponibles. On ne l'exige donc
+      pas, on l'a seulement minimisée : il reste une collision, entre deux
+      identités par ailleurs distantes de trois axes.
+    */
+    const seen = new Set<string>();
+    for (const face of FACES) {
+      const couple = `${face.hair}/${String(face.garment)}`;
+      expect(seen.has(couple), couple).toBe(false);
+      seen.add(couple);
+    }
+  });
+
+  it('répartissent les quatre accents à parts égales', () => {
+    // Quatre vêtements pour seize personnes : exactement quatre chacun. Un
+    // accent employé une fois ne distingue personne, et le reste devient du
+    // décor.
+    const counts = new Map<number, number>();
+    for (const face of FACES) counts.set(face.garment, (counts.get(face.garment) ?? 0) + 1);
+    expect([...counts.keys()].sort()).toEqual([1, 2, 3, 4]);
+    for (const [garment, count] of counts) expect(count, String(garment)).toBe(4);
+  });
+
   it('gardent l’accessoire minoritaire', () => {
     // Les lunettes lèvent une ambiguïté ; si la moitié de la distribution en
     // porte, elles cessent de distinguer quoi que ce soit.

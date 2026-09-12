@@ -272,6 +272,55 @@
     pas pensé. C'est le même raisonnement que le vrai noir du papier.
   */
   --portrait-light: #ffffff;
+  /*
+    L'ombre du portrait, et pourquoi elle ne suit pas le thème.
+  
+    Elle suivait `--ink`, et le thème sombre l'a démentie : `--ink` y passe au gris
+    clair, donc toutes les ombres du visage devenaient des **éclaircies** — une
+    bande pâle en travers du front, un col lumineux, des sourcils et une bouche
+    effacés. Un défaut qui ne se voit qu'en regardant, jamais en relisant.
+  
+    La règle qui en sort, et qui vaut pour tout le dessin : **l'encre du contour
+    suit le thème, l'encre du dessin non**. Le contour a pour tâche de séparer la
+    silhouette de la plaque — sur fond sombre il doit donc s'éclaircir. Les traits
+    posés sur le visage, eux, sont posés sur des peaux et des chevelures qui ne
+    changent pas d'un thème à l'autre : les faire changer serait changer de
+    personne à minuit.
+  */
+  --portrait-shade: #2b2a27;
+  /*
+    Le regard, en quatre valeurs — le poste le plus rentable du dessin.
+
+    La sclère est **teintée**, pas blanche : un blanc pur creuse un trou dans un
+    visage en aplats. L'iris est **coloré et distinct de la pupille** — un disque
+    noir uni est l'un des traits qui datent une illustration plate, au même titre
+    qu'un œil réduit à un point. Mesuré : l'iris tient 3,60:1 sur la sclère et
+    3,74:1 sur la pupille, et la pupille 13,5:1 sur la sclère — les trois valeurs
+    se distinguent encore à 56 px.
+
+    Les vêtements sont le cinquième axe de distinction, et le seul qui soit une
+    couleur franche. Quatre accents **échelonnés en valeur**, parce que le projet
+    ne laisse jamais la teinte porter seule : un sarcelle, une ardoise, une
+    argile, un sable, aux gris 101, 137, 172 et 207. L'écart minimal entre
+    voisins est de 35 niveaux ; un premier jeu, choisi à l'œil, tombait à 16
+    entre l'argile et le sable — les deux se rejoignaient à l'impression.
+
+    Le tout premier essai avait fait pire : quatre teintes choisies pour se
+    distinguer **en couleur**, dont trois sur le même gris. L'échelle de valeur
+    se vérifie, la distinction perçue non.
+
+    Et aucun dégradé indigo-violet, devenu la signature par défaut de tout
+    produit qui n'a pas choisi sa couleur.
+
+    Aucun de ces jetons ne suit le thème : un œil ne change pas de couleur la
+    nuit, et un pull non plus.
+  */
+  --eye-sclera: #fbf7f2;
+  --eye-iris: #5a8a90;
+  --garment-1: #3f7671;
+  --garment-2: #7b89ae;
+  --garment-3: #d59d8e;
+  --garment-4: #eccd8f;
   --skin-1: #f4d9c3;
   --skin-2: #dca87d;
   --skin-3: #a2683f;
@@ -385,16 +434,29 @@
 
 
     /*
-      Les portraits en sombre : seule la plaque change.
+      Les portraits en sombre : la plaque se pose, elle ne s'inverse pas.
 
-      Les peaux et les chevelures ne suivent pas le thème — une peau n'a pas de
-      variante nocturne, et en inventer une reviendrait à changer de personne
-      d'un réglage à l'autre. C'est la plaque qui s'adapte, et l'encre qui
-      sépare.
+      Elle a été sombre, et le dessin s'est retourné avec elle : il fallait
+      alors une encre claire pour séparer les masses de la plaque, et cette
+      encre cernait aussi le visage, le cou et le buste. Un liseré blanc
+      partout, contre une lumière posée en haut à gauche — le portrait se
+      lisait, mais délavé.
+
+      Un portrait est une **image**, et une image ne change pas la nuit. La
+      plaque reste donc claire dans les deux thèmes ; elle descend seulement
+      d'un cran en sombre, parce qu'un papier de bureau à minuit éblouit. Tout
+      le reste du dessin, encre comprise, est désormais identique d'un thème à
+      l'autre : c'est le seul état où il n'y a plus qu'une vérité à tenir.
     */
-    --portrait-plate: #2c2f36;
-  --portrait-light: #ffffff;
+    --portrait-plate: #efe9e0;
     --portrait-light: #ffffff;
+    --portrait-shade: #2b2a27;
+    --eye-sclera: #fbf7f2;
+    --eye-iris: #5a8a90;
+    --garment-1: #3f7671;
+    --garment-2: #7b89ae;
+    --garment-3: #d59d8e;
+    --garment-4: #eccd8f;
 
     /*
       Sur fond sombre, une ombre portée est invisible : l'élévation se dit par
@@ -508,15 +570,29 @@
 
 
   /*
-    Les portraits en sombre : seule la plaque change.
+    Les portraits en sombre : la plaque se pose, elle ne s'inverse pas.
 
-    Les peaux et les chevelures ne suivent pas le thème — une peau n'a pas de
-    variante nocturne, et en inventer une reviendrait à changer de personne
-    d'un réglage à l'autre. C'est la plaque qui s'adapte, et l'encre qui
-    sépare.
+    Elle a été sombre, et le dessin s'est retourné avec elle : il fallait
+    alors une encre claire pour séparer les masses de la plaque, et cette
+    encre cernait aussi le visage, le cou et le buste. Un liseré blanc
+    partout, contre une lumière posée en haut à gauche — le portrait se
+    lisait, mais délavé.
+
+    Un portrait est une **image**, et une image ne change pas la nuit. La
+    plaque reste donc claire dans les deux thèmes ; elle descend seulement
+    d'un cran en sombre, parce qu'un papier de bureau à minuit éblouit. Tout
+    le reste du dessin, encre comprise, est désormais identique d'un thème à
+    l'autre : c'est le seul état où il n'y a plus qu'une vérité à tenir.
   */
-  --portrait-plate: #2c2f36;
+  --portrait-plate: #efe9e0;
   --portrait-light: #ffffff;
+  --portrait-shade: #2b2a27;
+  --eye-sclera: #fbf7f2;
+  --eye-iris: #5a8a90;
+  --garment-1: #3f7671;
+  --garment-2: #7b89ae;
+  --garment-3: #d59d8e;
+  --garment-4: #eccd8f;
 
   /*
     Sur fond sombre, une ombre portée est invisible : l'élévation se dit par un
