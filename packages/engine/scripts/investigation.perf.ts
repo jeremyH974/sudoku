@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { openCase } from '../src/investigation/case.js';
+import { CAST } from '../src/investigation/cast.js';
 import { composeCase } from '../src/investigation/compose/generate.js';
 import { deduce } from '../src/investigation/deduce/deduce.js';
 import { openDomains, solveExact } from '../src/investigation/exact/solver.js';
@@ -74,5 +75,64 @@ describe('performance du mode Enquête', () => {
       touchant le budget `attempts` — et en récupérant des graines stériles.
     */
     expect(timings[timings.length - 1]).toBeLessThan(6000);
+  });
+});
+
+/**
+ * La culpabilité est-elle également répartie ?
+ *
+ * La question n'est pas cosmétique. Les guides de conception de personnages
+ * nomment un piège précis et documenté : coder le méchant sur un trait physique
+ * — cicatrice, asymétrie, traits « durs ». Ici il deviendrait littéral, puisque
+ * le jeu attache une culpabilité **factuelle** à un visage. Si un suspect était
+ * coupable plus souvent que les autres, son portrait deviendrait un indice.
+ *
+ * Par construction, ça ne devrait pas arriver : le coupable n'est assigné à
+ * personne, il **émerge** du placement — c'est le seul autre occupant de la
+ * pièce de la victime. Mais « ça ne devrait pas » est exactement le genre de
+ * phrase que ce projet refuse de laisser non vérifiée.
+ *
+ * Mesuré sur 400 affaires, les quatre décors mêlés :
+ *   victime   A 69  B 70  C 66  D 71  E 62  F 62   (χ² = 1,19)
+ *   coupable  A 72  B 71  C 64  D 65  E 68  F 60   (χ² = 1,55)
+ * Pour 5 degrés de liberté, le seuil à 5 % est 11,07. On en est très loin : la
+ * répartition est indiscernable de l'uniforme.
+ */
+describe('équité du mode Enquête', () => {
+  it('ne rend personne coupable plus souvent qu’un autre', () => {
+    const runs = 400;
+    const victim = new Array<number>(CAST.length).fill(0);
+    const murderer = new Array<number>(CAST.length).fill(0);
+    let cases = 0;
+    for (let seed = 0; seed < runs; seed++) {
+      const file = composeCase(`equite-${String(seed)}`);
+      if (file === null) continue;
+      cases++;
+      victim[file.victim]++;
+      murderer[file.murderer]++;
+    }
+
+    const suspects = 6;
+    const chi = (tally: number[]): number => {
+      const expected = cases / suspects;
+      let sum = 0;
+      for (let i = 0; i < suspects; i++) sum += (tally[i] - expected) ** 2 / expected;
+      return sum;
+    };
+    const show = (label: string, tally: number[]): void => {
+      console.log(
+        `${label.padEnd(10)}${tally
+          .slice(0, suspects)
+          .map((v, i) => `${CAST[i].letter} ${String(v).padStart(3)}`)
+          .join('  ')}   χ² ${chi(tally).toFixed(2)}`,
+      );
+    };
+    show('victime', victim);
+    show('coupable', murderer);
+
+    // Seuil à 0,1 % pour 5 degrés de liberté : 20,5. Large exprès — ce garde
+    // doit attraper un biais grossier, jamais clignoter sur du bruit.
+    expect(chi(murderer)).toBeLessThan(20.5);
+    expect(chi(victim)).toBeLessThan(20.5);
   });
 });
