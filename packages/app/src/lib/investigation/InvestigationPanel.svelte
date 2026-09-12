@@ -2,6 +2,7 @@
   import { cellsOf } from '@sudoku/engine/investigation';
   import type { Step } from '@sudoku/engine/investigation';
   import { CaseGame } from './caseGame.svelte.js';
+  import Portrait from './Portrait.svelte';
   import SceneBoard from './SceneBoard.svelte';
 
   interface Props {
@@ -205,11 +206,24 @@
             }}
           >
             <span class="who">
-              <span class="letter" aria-hidden="true">{person.letter}</span>
-              <span class="name">{person.name}</span>
-              {#if isVictim}<span class="tag">Victime</span>{/if}
-              {#if broken}<span class="tag">Indice contredit</span>{/if}
-              {#if game.cellOf(person.index) !== -1}<span class="tag placed">Placée</span>{/if}
+              <!--
+                Le portrait et la lettre, ensemble et pas l'un à la place de
+                l'autre. Le portrait aide à reconnaître ; c'est la **lettre**
+                qui identifie — c'est elle qu'on pose sur le plateau, et elle
+                seule survit au noir et blanc comme au daltonisme.
+              -->
+              <span class="face">
+                <Portrait suspect={person} />
+                <span class="letter" aria-hidden="true">{person.letter}</span>
+              </span>
+              <span class="identity">
+                <span class="name">{person.name}</span>
+                <span class="tags">
+                  {#if isVictim}<span class="tag">Victime</span>{/if}
+                  {#if broken}<span class="tag">Indice contredit</span>{/if}
+                  {#if game.cellOf(person.index) !== -1}<span class="tag placed">Placée</span>{/if}
+                </span>
+              </span>
             </span>
             <span class="said">
               {#each cards as clue (clue)}
@@ -441,7 +455,7 @@
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
     gap: var(--space-2);
     margin: 0;
     padding: 0;
@@ -498,22 +512,51 @@
 
   .who {
     display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  /*
+    56 px, et c'est une mesure et non un cadrage.
+
+    Le détail d'un visage se perd sous ~60 px, et un style plat à formes
+    franches ne tient que jusqu'à ~48. Les 40 px d'un premier jet étaient donc
+    sous le plancher : le dessin y était présent et illisible, ce qui est le
+    pire des deux mondes.
+  */
+  .face {
+    position: relative;
+    flex: none;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .identity {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .tags {
+    display: flex;
     flex-wrap: wrap;
-    align-items: center;
     gap: var(--space-2);
   }
 
   /* La même pastille que sur le plan : c'est ce qui relie une carte à un jeton. */
   .letter {
+    position: absolute;
+    right: calc(var(--space-1) * -1);
+    bottom: calc(var(--space-1) * -1);
     display: grid;
     place-items: center;
-    width: var(--space-6);
-    height: var(--space-6);
+    width: var(--space-5);
+    height: var(--space-5);
     border: 2px solid var(--ink);
     border-radius: var(--radius-pill);
     background: var(--scene-token);
     color: var(--scene-token-ink);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     font-weight: 700;
   }
 

@@ -42,7 +42,23 @@ const SOLUTION_CAP = 12;
 
 export interface ComposeOptions {
   readonly decorId?: string;
-  /** Nombre de dispositions différentes essayées avant d'abandonner. */
+  /**
+   * Nombre de dispositions différentes essayées avant d'abandonner.
+   *
+   * ⚠ Une tentative ne coûte que lorsqu'elle sert : la boucle sort à la
+   * première disposition qui donne une affaire. Un budget large est donc
+   * gratuit pour les graines qui réussissent tout de suite, et c'est la seule
+   * chose qui sauve les autres.
+   *
+   * Mesuré : à 40, **0,8 % des graines ne rendaient rien** — et toutes
+   * réussissaient à 120. Le défaut n'était pas le hasard, c'était le budget.
+   *
+   * Le prix est dans la queue, et il est assumé : sur 400 graines, le pire cas
+   * passe de 0,5 à 2,8 secondes, parce qu'une graine difficile insiste au lieu
+   * d'abandonner. La médiane, elle, ne bouge pas (135 ms) — et une affaire se
+   * compose dans un Worker, sous un libellé qui dit « Composition… ».
+   * Faire attendre trois secondes vaut mieux que ne rien rendre.
+   */
   readonly attempts?: number;
   /**
    * Nombre maximal de répliques par suspect.
@@ -64,7 +80,7 @@ export interface ComposeOptions {
  */
 export function composeCase(seed: string, options: ComposeOptions = {}): CaseFile | null {
   const decorId = options.decorId ?? 'manor';
-  const attempts = options.attempts ?? 40;
+  const attempts = options.attempts ?? 200;
   const maxCards = options.maxCards ?? 2;
 
   const rng = createRng(seed);

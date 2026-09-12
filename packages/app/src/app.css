@@ -158,6 +158,23 @@
     porte — une pièce se dit par son **nom imprimé sur le plan**, par ses
     **murs**, et par le nom accessible de chacune de ses cases.
 
+    ⚠ **Les six teintes claires forment une échelle de luminance, pas un
+    nuancier.** Ce qui décide de la lisibilité en niveaux de gris n'est pas
+    l'écart de teinte mais l'écart de **luminance** : deux couleurs franchement
+    différentes peuvent converger vers le même gris. Le premier réglage le
+    faisait — le Salon et le Couloir tombaient tous deux sur le gris 217, et les
+    six teintes tenaient dans treize niveaux sur 255. À l'impression, et sous le
+    mode « économie » qui est le **défaut** des navigateurs, les cinq pièces
+    n'en formaient plus qu'une.
+
+    Elles s'échelonnent donc de 235 à 190, huit niveaux au moins entre deux
+    voisines. Le plancher est fixé par le nom manuscrit de la pièce, qui est du
+    texte : l'encre douce y tient 4,80:1 sur la plus foncée.
+
+    Le thème sombre, lui, **ne reçoit pas cette échelle** — mesuré : l'étaler
+    ferait tomber le nom de pièce à 1,84:1. Il n'en a pas besoin : on n'imprime
+    jamais depuis le thème sombre, la feuille d'impression forçant le clair.
+
     Contrastes **mesurés**, chacun contre la pire des six teintes de la série.
 
       clair  — mur 11,4:1 · encre 7,5:1 · nom 5,7:1 · croix 4,6:1 · lettre 8,3:1
@@ -175,12 +192,12 @@
   --scene-cross: #6b6a64;
   --scene-token: #1f4e8c;
   --scene-token-ink: #ffffff;
-  --scene-zone-1: #e8eef7;
-  --scene-zone-2: #f6e6d0;
-  --scene-zone-3: #e6f0ea;
-  --scene-zone-4: #f0e9f2;
-  --scene-zone-5: #f3efdc;
-  --scene-zone-6: #f5e9e6;
+  --scene-zone-1: #eff7ff;
+  --scene-zone-2: #fff1d8;
+  --scene-zone-3: #dff2e6;
+  --scene-zone-4: #f3e5fb;
+  --scene-zone-5: #eae5cc;
+  --scene-zone-6: #eedcda;
 
   /*
     Le langage illustré — incrément 13.
@@ -226,6 +243,33 @@
   --mat-stone-light: #e2ded6;
   --mat-stone: #c2bcb0;
   --mat-stone-dark: #948d80;
+
+  /*
+    Les portraits — incrément 15.
+
+    Quatre peaux et quatre chevelures, choisies pour s'échelonner en **valeur**
+    et pas seulement en teinte : écart de gris minimal de 32 niveaux entre deux
+    peaux, 16 entre deux chevelures. C'est ce qui les garde distinctes en noir
+    et blanc, à l'impression comme pour une vision des couleurs atypique.
+
+    ⚠ Aucun de ces tons ne contraste avec le fond d'une carte — mesuré : une
+    peau claire tombe à 1,35:1 sur blanc, une chevelure sombre à 1,03:1 sur la
+    surface sombre. C'est normal, et ce n'est pas à eux de porter la silhouette :
+    elle est portée par **l'encre**, comme pour le mobilier, et comme le fait la
+    grammaire du manga où la ligne vient avant la couleur.
+
+    La plaque donne au portrait un fond qu'on maîtrise, indépendant du thème de
+    la carte qui l'accueille.
+  */
+  --portrait-plate: #faf6f0;
+  --skin-1: #f4d9c3;
+  --skin-2: #dca87d;
+  --skin-3: #a2683f;
+  --skin-4: #5f3a24;
+  --hair-1: #26242a;
+  --hair-2: #6d4a30;
+  --hair-3: #c19553;
+  --hair-4: #c3bdb6;
 
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -328,6 +372,17 @@
     --mat-stone-light: #a19b90;
     --mat-stone: #89847a;
     --mat-stone-dark: #605c54;
+
+
+    /*
+      Les portraits en sombre : seule la plaque change.
+
+      Les peaux et les chevelures ne suivent pas le thème — une peau n'a pas de
+      variante nocturne, et en inventer une reviendrait à changer de personne
+      d'un réglage à l'autre. C'est la plaque qui s'adapte, et l'encre qui
+      sépare.
+    */
+    --portrait-plate: #2c2f36;
 
     /*
       Sur fond sombre, une ombre portée est invisible : l'élévation se dit par
@@ -438,6 +493,17 @@
   --mat-stone-light: #a19b90;
   --mat-stone: #89847a;
   --mat-stone-dark: #605c54;
+
+
+  /*
+    Les portraits en sombre : seule la plaque change.
+
+    Les peaux et les chevelures ne suivent pas le thème — une peau n'a pas de
+    variante nocturne, et en inventer une reviendrait à changer de personne
+    d'un réglage à l'autre. C'est la plaque qui s'adapte, et l'encre qui
+    sépare.
+  */
+  --portrait-plate: #2c2f36;
 
   /*
     Sur fond sombre, une ombre portée est invisible : l'élévation se dit par un
