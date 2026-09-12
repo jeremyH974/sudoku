@@ -877,9 +877,21 @@
     sinon à 142 px du haut, seul sur sa rangée. Ouvert, le panneau occupe toute
     la seconde rangée.
   */
+  /*
+    Trois colonnes, et non deux : le titre, le retour à l'accueil, les réglages.
+
+    La grille en comptait deux, et l'incrément 12 y a ajouté le lien d'accueil
+    sans l'élargir. Le troisième enfant retombait donc sur une deuxième rangée,
+    dans une colonne en `1fr` — un bouton « Réglages » étiré sur toute la
+    largeur. Le défaut existait depuis, invisible tant que le bouton n'avait
+    qu'un liseré fin ; le trait d'encre et l'ombre l'ont rendu criant.
+
+    Le panneau déplié, lui, garde `grid-column: 1 / -1` et suit donc
+    l'élargissement sans qu'on y touche.
+  */
   header {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     gap: var(--space-4);
     align-items: start;
     margin-bottom: 1.25rem;

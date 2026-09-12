@@ -262,6 +262,16 @@
     la carte qui l'accueille.
   */
   --portrait-plate: #faf6f0;
+  /*
+    Le blanc du regard, et le reflet des cheveux.
+
+    Même valeur dans les trois blocs de palette, et c'est le propos : un blanc
+    d'œil est blanc quel que soit le thème. Le recopier plutôt que de le ranger
+    avec les échelles dit qu'il a été **examiné** pour chaque thème et trouvé
+    identique — là où une valeur rangée ailleurs dirait seulement qu'on n'y a
+    pas pensé. C'est le même raisonnement que le vrai noir du papier.
+  */
+  --portrait-light: #ffffff;
   --skin-1: #f4d9c3;
   --skin-2: #dca87d;
   --skin-3: #a2683f;
@@ -383,6 +393,8 @@
       sépare.
     */
     --portrait-plate: #2c2f36;
+  --portrait-light: #ffffff;
+    --portrait-light: #ffffff;
 
     /*
       Sur fond sombre, une ombre portée est invisible : l'élévation se dit par
@@ -504,6 +516,7 @@
     sépare.
   */
   --portrait-plate: #2c2f36;
+  --portrait-light: #ffffff;
 
   /*
     Sur fond sombre, une ombre portée est invisible : l'élévation se dit par un

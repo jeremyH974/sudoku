@@ -133,16 +133,66 @@ export const FACE = 'M12.5 23a11.5 12.5 0 1 0 23 0a11.5 12.5 0 1 0-23 0z';
 export const FACE_SHADE =
   'M13.8 19.4c6 2.4 14.4 2.4 20.4 0-.6 2.6-1.4 3.9-2.2 4.5-4.8 1.4-11.2 1.4-16 0-.8-.6-1.6-1.9-2.2-4.5z';
 
-/** Les yeux, les sourcils, la bouche — figés : à cette taille ils ne varient pas utilement. */
-export const EYES = [
-  'M17.6 24.6a2.1 2.7 0 1 0 4.2 0a2.1 2.7 0 1 0-4.2 0z',
-  'M26.2 24.6a2.1 2.7 0 1 0 4.2 0a2.1 2.7 0 1 0-4.2 0z',
+/**
+ * Le regard — le poste où l'on investit en premier.
+ *
+ * Un ovale plein n'a pas de regard : il a une tache. Quatre formes par œil en
+ * donnent un, et c'est le meilleur rapport entre le nombre de tracés et ce que
+ * le visage gagne :
+ *
+ *   · le **blanc** de l'œil, qui creuse l'orbite ;
+ *   · la **ligne de paupière**, épaissie vers l'extérieur — c'est elle qui
+ *     signe le trait japonais, et elle seule fait plus que l'iris ;
+ *   · l'**iris**, sombre, qui porte la direction du regard ;
+ *   · le **reflet**, un point clair en haut à gauche. Sans lui l'œil est mort,
+ *     et il ne coûte qu'un cercle.
+ *
+ * Les yeux ne varient pas d'un suspect à l'autre, et c'est délibéré : à 56 px
+ * la variation d'un œil ne se voit pas, là où une silhouette de cheveux se voit
+ * de loin. Faire varier ce qui ne se lit pas, c'est payer sans recevoir.
+ */
+export interface EyePart {
+  readonly d: string;
+  readonly role: 'sclera' | 'lid' | 'iris' | 'light';
+}
+
+export const EYES: readonly EyePart[] = [
+  // Œil gauche.
+  { d: 'M16.9 24.7a2.8 3.2 0 1 0 5.6 0a2.8 3.2 0 1 0-5.6 0z', role: 'sclera' },
+  {
+    d: 'M16.7 24.4c0-2.4 1.4-3.9 3-3.9s3 1.5 3 3.9c-.5-1.7-1.6-2.5-3-2.5-1.1 0-2 .5-2.6 1.4l-1.5-1.1z',
+    role: 'lid',
+  },
+  { d: 'M18.1 24.9a1.6 1.85 0 1 0 3.2 0a1.6 1.85 0 1 0-3.2 0z', role: 'iris' },
+  { d: 'M18.4 23.5a.8 .8 0 1 0 1.6 0a.8 .8 0 1 0-1.6 0z', role: 'light' },
+
+  // Œil droit, miroir autour de x = 24.
+  { d: 'M25.5 24.7a2.8 3.2 0 1 0 5.6 0a2.8 3.2 0 1 0-5.6 0z', role: 'sclera' },
+  {
+    d: 'M31.3 24.4c0-2.4-1.4-3.9-3-3.9s-3 1.5-3 3.9c.5-1.7 1.6-2.5 3-2.5 1.1 0 2 .5 2.6 1.4l1.5-1.1z',
+    role: 'lid',
+  },
+  { d: 'M26.7 24.9a1.6 1.85 0 1 0 3.2 0a1.6 1.85 0 1 0-3.2 0z', role: 'iris' },
+  { d: 'M27 23.5a.8 .8 0 1 0 1.6 0a.8 .8 0 1 0-1.6 0z', role: 'light' },
 ];
+
+/**
+ * Les sourcils : légèrement courbes et décalés vers l'extérieur.
+ *
+ * C'est le trait qui pèse le plus après le regard — plus que l'œil lui-même,
+ * selon les travaux sur la reconnaissance des visages. Deux traits droits
+ * donnaient un visage inexpressif ; une courbe suffit à le détendre.
+ */
 export const BROWS = [
-  'M16.6 21l5.2-1.5.5 1.7-5.2 1.5z',
-  'M31.4 21l-5.2-1.5-.5 1.7 5.2 1.5z',
+  'M16.3 20.6c1.2-1.5 3.6-2.1 5.6-1.5l-.2 1.7c-1.6-.5-3.5 0-4.6 1.1z',
+  'M31.7 20.6c-1.2-1.5-3.6-2.1-5.6-1.5l.2 1.7c1.6-.5 3.5 0 4.6 1.1z',
 ];
-export const MOUTH = 'M22.2 29.6h3.6v1.3h-3.6z';
+
+/** Le nez : une virgule, à peine posée. Plus serait du bruit à cette taille. */
+export const NOSE = 'M23.4 27.1l1.3 1.1-1.3.5z';
+
+/** La bouche : une courbe, jamais un rectangle. */
+export const MOUTH = 'M22.1 30c.8 1 3 1 3.8 0-.2 1.6-3.6 1.6-3.8 0z';
 
 /** Les lunettes : deux verres et un pont. */
 export const GLASSES =
@@ -154,39 +204,51 @@ export const GLASSES =
  * `back` passe **sous** le visage et donne la silhouette — c'est elle qu'on lit
  * de loin. `front` passe **par-dessus** et donne la frange, qui distingue de
  * près sans jamais être seule à le faire.
+ *
+ * `shine` est le reflet de la chevelure, en croissant clair. C'est la
+ * convention du dessin japonais, et elle fait beaucoup pour un seul tracé : sans
+ * elle une masse de cheveux est une silhouette, avec elle c'est une matière.
  */
-export const HAIR: Readonly<Record<HairShape, { back: string; front: string }>> = {
+export const HAIR: Readonly<Record<HairShape, { back: string; front: string; shine: string }>> = {
   court: {
     back: 'M11.8 22a12.2 12.2 0 0 1 24.4 0v2.4h-1.8v-4.2H13.6v4.2h-1.8z',
     front: 'M13.4 21.6c.6-6.4 5.2-10.6 10.6-10.6s10 4.2 10.6 10.6c-1-3.2-2.4-4.4-2.4-4.4-5.2 2.6-11.2 2.6-16.4 0 0 0-1.4 1.2-2.4 4.4z',
+    shine: 'M15.6 16.6c1.5-2.6 4.5-4.2 8.4-4.2s6.9 1.6 8.4 4.2c-2.1-1.4-4.9-2.1-8.4-2.1s-6.3.7-8.4 2.1z',
   },
   carre: {
     back: 'M11.8 22a12.2 12.2 0 0 1 24.4 0v13.6c0 1.4-1 2.2-2.6 2.2s-2.6-.8-2.6-2.2V26H17v9.6c0 1.4-1 2.2-2.6 2.2s-2.6-.8-2.6-2.2z',
     front: 'M13.4 21.6c.6-6.4 5.2-10.6 10.6-10.6s10 4.2 10.6 10.6c-1-3.6-2.6-5-2.6-5-5.2 2.8-11.4 2.8-16.4.2 0 0-1.6 1.2-2.2 4.8z',
+    shine: 'M15.6 16.6c1.5-2.6 4.5-4.2 8.4-4.2s6.9 1.6 8.4 4.2c-2.1-1.4-4.9-2.1-8.4-2.1s-6.3.7-8.4 2.1z',
   },
   long: {
     back: 'M10.2 22a13.8 13.8 0 0 1 27.6 0v24c0 1-.8 1.6-2.2 1.6s-2.2-.6-2.2-1.6V26H14.6v20c0 1-.8 1.6-2.2 1.6s-2.2-.6-2.2-1.6z',
     front: 'M13.2 21.6c.6-6.4 5.2-10.6 10.8-10.6s10.2 4.2 10.8 10.6c-1.2-4-3-5.6-3-5.6-4.2 3.2-11.8 3.6-16.4 1.2 0 0-1.6 1.4-2.2 4.4z',
+    shine: 'M14.6 16.2c1.7-2.7 5-4.4 9.4-4.4s7.7 1.7 9.4 4.4c-2.4-1.5-5.5-2.3-9.4-2.3s-7 .8-9.4 2.3z',
   },
   queue: {
     back: 'M11.8 22a12.2 12.2 0 0 1 24.4 0v2.4h-1.8v-4.2H13.6v4.2h-1.8zM34.2 18.8c4.4 1.6 6.8 6.4 6.8 12.4s-2.4 10.6-6 12l-3-3.6c2.4-1.6 3.8-4.8 3.8-8.4s-1.4-7-3.8-8.8z',
     front: 'M13.4 21.6c.6-6.4 5.2-10.6 10.6-10.6s10 4.2 10.6 10.6c-1-3.2-2.4-4.4-2.4-4.4-5.2 2.6-11.2 2.6-16.4 0 0 0-1.4 1.2-2.4 4.4z',
+    shine: 'M15.6 16.6c1.5-2.6 4.5-4.2 8.4-4.2s6.9 1.6 8.4 4.2c-2.1-1.4-4.9-2.1-8.4-2.1s-6.3.7-8.4 2.1z',
   },
   boucle: {
     back: 'M10.4 20.4a13.6 13.6 0 1 0 27.2 0a13.6 13.6 0 1 0-27.2 0zM7.4 25.6a5.4 5.4 0 1 0 10.8 0a5.4 5.4 0 1 0-10.8 0zM29.8 25.6a5.4 5.4 0 1 0 10.8 0a5.4 5.4 0 1 0-10.8 0z',
     front: 'M13 21.8c.4-6.6 5.2-11 11-11s10.6 4.4 11 11c-1.4-3.4-3.2-4.6-3.2-4.6-5.2 2.4-10.4 2.4-15.6 0 0 0-1.8 1.2-3.2 4.6z',
+    shine: 'M14 14.4c1.8-3 5.4-4.9 10-4.9s8.2 1.9 10 4.9c-2.6-1.7-6-2.6-10-2.6s-7.4.9-10 2.6z',
   },
   chignon: {
     back: 'M11.8 22a12.2 12.2 0 0 1 24.4 0v2.4h-1.8v-4.2H13.6v4.2h-1.8zM18.4 8a5.6 5.6 0 1 0 11.2 0a5.6 5.6 0 1 0-11.2 0z',
     front: 'M13.6 21.4c.8-6.2 5.2-10.4 10.4-10.4s9.6 4.2 10.4 10.4c-1.6-4.4-4-6-4-6-4 2-9 2-13 0 0 0-2.2 1.6-3.8 6z',
+    shine: 'M15.8 16.8c1.5-2.5 4.4-4 8.2-4s6.7 1.5 8.2 4c-2-1.3-4.8-2-8.2-2s-6.2.7-8.2 2z',
   },
   'mi-long': {
     back: 'M11.4 22a12.6 12.6 0 0 1 25.2 0v9.4c0 2.6 1.2 3.6 1.2 6.2H33c0-2.6-1.2-3.6-1.2-6.2V26H16.2v5.4c0 2.6-1.2 3.6-1.2 6.2h-4.8c0-2.6 1.2-3.6 1.2-6.2z',
     front: 'M13.2 21.6c.6-6.4 5.2-10.6 10.8-10.6s10.2 4.2 10.8 10.6c-1.2-4-3-5.4-3-5.4-4.2 3.4-11.6 4-16.2 1.6 0 0-1.8 1.2-2.4 3.8z',
+    shine: 'M15.2 16.4c1.6-2.6 4.7-4.3 8.8-4.3s7.2 1.7 8.8 4.3c-2.2-1.4-5.2-2.2-8.8-2.2s-6.6.8-8.8 2.2z',
   },
   couettes: {
     back: 'M11.8 22a12.2 12.2 0 0 1 24.4 0v2.4h-1.8v-4.2H13.6v4.2h-1.8zM5.6 28.4a6 6 0 1 0 12 0a6 6 0 1 0-12 0zM30.4 28.4a6 6 0 1 0 12 0a6 6 0 1 0-12 0z',
     front: 'M13.4 21.6c.6-6.4 5.2-10.6 10.6-10.6s10 4.2 10.6 10.6c-1-3.2-2.4-4.4-2.4-4.4-2.4 1.2-4.4 1.8-8.2 1.8s-5.8-.6-8.2-1.8c0 0-1.4 1.2-2.4 4.4z',
+    shine: 'M15.6 16.6c1.5-2.6 4.5-4.2 8.4-4.2s6.9 1.6 8.4 4.2c-2.1-1.4-4.9-2.1-8.4-2.1s-6.3.7-8.4 2.1z',
   },
 };
 
