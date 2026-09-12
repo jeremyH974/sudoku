@@ -257,15 +257,20 @@
     font-weight: 600;
   }
 
+  /*
+    Une surface au sens de l'enquête (investigation/InvestigationPanel.svelte) :
+    trait d'encre à 2px et ombre décalée sans flou, au lieu du simple filet.
+  */
   .intro {
     max-width: var(--measure);
     margin: 0;
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface-sunken);
     color: var(--text-muted);
     line-height: var(--leading-prose);
+    box-shadow: var(--shadow-hard);
   }
 
   /*
@@ -290,9 +295,10 @@
     flex-direction: column;
     gap: var(--space-1);
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface-sunken);
+    box-shadow: var(--shadow-hard);
   }
 
   .value {
@@ -329,14 +335,21 @@
     color: var(--text-muted);
   }
 
+  /*
+    Même trait d'encre que le bouton « Jouer » juste à côté, pour qu'ils
+    lisent comme un seul contrôle. Pas de retour à l'appui en revanche : un
+    <select> natif ouvre son propre menu au clic, un translate + ombre nulle
+    miment un bouton qu'il n'est pas.
+  */
   select {
     min-height: var(--tap);
     padding: 0.4rem 0.6rem;
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
+    box-shadow: var(--shadow-hard);
   }
 
   button {
@@ -350,28 +363,42 @@
       border-color var(--dur-quick) var(--ease);
   }
 
+  /*
+    Le trait d'encre et l'ombre dure se posent sur .primary et .ghost, pas sur
+    le sélecteur `button` ci-dessus : celui-ci s'applique aussi aux cases du
+    calendrier (.day), hors périmètre de cette passe. Une ombre posée au
+    niveau générique s'y serait invitée sans qu'aucune règle de `.day` ne
+    l'arrête.
+  */
   .primary {
-    border: none;
+    border: 2px solid var(--accent);
     background: var(--accent);
     color: var(--accent-text);
     font-weight: 600;
+    box-shadow: var(--shadow-hard);
   }
 
   .ghost {
     min-width: var(--tap);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     background: none;
     color: var(--text);
+    box-shadow: var(--shadow-hard);
   }
 
+  /* À l'appui, le bouton s'enfonce pour de bon : il se déplace de la valeur de son ombre et la perd. */
   .primary:active {
     background: var(--accent-active);
     transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .ghost:active {
     background: var(--surface-pressed);
     transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .hint,
@@ -493,10 +520,16 @@
     stroke-width: 3;
   }
 
+  /*
+    Le cadre défilant est une surface comme les autres. Les diviseurs internes
+    (`th`, `td`, `thead th`) ne changent pas : ce sont des repères de lecture
+    du tableau, pas la bordure d'un panneau.
+  */
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-hard);
   }
 
   table {

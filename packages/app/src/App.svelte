@@ -890,30 +890,45 @@
     navigation — au-dessus des onglets, sur les cinq écrans — ; ils sont repliés
     dans un panneau qui prend toute la largeur de l'en-tête quand on l'ouvre.
   */
+  /*
+    Bouton de page : trait d'encre à 2px et ombre dure, comme `.settings-toggle`
+    et `.home` dans enquete/Enquete.svelte — le même bouton, pas encore
+    fusionné dans un composant commun (voir le commentaire à ce sujet dans
+    DisplaySettings.svelte). Les transitions de couleur disparaissent avec la
+    bordure fine qu'elles accompagnaient : aucun bouton de ce langage n'anime
+    plus ni l'appui ni le relâchement, les deux sont immédiats.
+  */
   .settings-toggle {
     min-height: var(--tap);
     padding: 0 var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
-    transition:
-      background-color var(--dur-quick) var(--ease),
-      border-color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
-  /* Ouvert, le bouton le dit aussi par sa bordure, pas seulement par le panneau. */
+  /*
+    Ouvert, le bouton le dit par un liseré qui s'ajoute à l'ombre sans la
+    remplacer — même convention que l'état choisi de `.size-option` et
+    `.theme-option` plus bas, et que `.tool.active` dans InvestigationPanel.
+    L'ancien traitement (fond teinté) aplatissait le bouton au lieu de le
+    garder en relief.
+  */
   .settings-toggle[aria-expanded='true'] {
     border-color: var(--accent);
-    background: var(--accent-soft);
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      var(--shadow-hard);
   }
 
   .settings-toggle:active {
     background: var(--surface-pressed);
-    transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -922,14 +937,20 @@
     }
   }
 
+  /*
+    Panneau : même traitement que `.settings-panel` dans enquete/Enquete.svelte
+    (trait d'encre, ombre dure, fond enfoncé) — c'est le même panneau de
+    réglages, pas encore extrait en composant partagé.
+  */
   .settings-panel {
     display: grid;
     grid-column: 1 / -1;
     gap: var(--space-4);
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
-    background: var(--surface);
+    background: var(--surface-sunken);
+    box-shadow: var(--shadow-hard);
   }
 
   /* `display: grid` l'emporterait sinon sur l'attribut `hidden`. */
@@ -950,17 +971,15 @@
   }
 
   /*
-    Enveloppe et pastilles concentriques : 12 px de rayon autour, 8 px dedans,
-    4 px d'écart — 12 = 8 + 4. Les deux valeurs d'avant, 9 et 7, étaient
-    devinées.
+    Le puits (bordure fine + fond enfoncé) a disparu : chaque option est
+    désormais un objet encré et ombré à part entière (voir `.size-option`
+    juste en dessous), comme `.option` dans DisplaySettings.svelte — le même
+    réglage, décrit là comme la version que ce panneau rejoindra. Garder le
+    puits aurait empilé un cadre autour de boutons déjà cadrés.
   */
   .text-size {
     display: flex;
-    gap: var(--space-1);
-    padding: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--surface-sunken);
+    gap: var(--space-2);
   }
 
   .size-option {
@@ -969,48 +988,45 @@
     justify-content: center;
     min-width: var(--tap);
     min-height: var(--tap);
-    border: none;
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
-    background: none;
-    color: var(--text-muted);
+    background: var(--surface);
+    color: var(--text);
     font: inherit;
     cursor: pointer;
-    transition:
-      background-color var(--dur-quick) var(--ease),
-      color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
   /*
-    L'élévation passe par un jeton : en thème sombre, l'ombre portée était
-    invisible et la pastille active ne se détachait du fond qu'à 1,06:1. Le
-    liseré qui la remplace y monte à 1,53:1, et la graisse porte l'état sans la
-    couleur.
+    Liseré d'accent qui s'ajoute à l'ombre sans la remplacer, comme
+    `.option.active` dans DisplaySettings.svelte. `--shadow-raised` et la
+    graisse portaient autrefois cet état ; ils disparaissent avec le puits qui
+    les justifiait. `aria-pressed` porte l'état pour la technologie
+    d'assistance, le liseré à l'œil — la couleur n'est jamais seule.
   */
   .size-option.active {
-    background: var(--surface);
-    color: var(--text);
-    font-weight: 600;
-    box-shadow: var(--shadow-raised);
+    border-color: var(--accent);
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      var(--shadow-hard);
   }
 
   .size-option:active {
     background: var(--surface-pressed);
-    transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .size-option:hover {
-      color: var(--text);
+      background: var(--surface-hover);
     }
   }
 
+  /* Même raison que `.text-size` plus haut : le puits disparaît, chaque option porte désormais son propre trait et sa propre ombre. */
   .theme {
     display: flex;
-    gap: var(--space-1);
-    padding: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--surface-sunken);
+    gap: var(--space-2);
   }
 
   .theme-option {
@@ -1025,40 +1041,41 @@
     min-width: var(--tap);
     justify-content: center;
     padding: var(--space-1) var(--space-3);
-    border: none;
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
-    background: none;
-    color: var(--text-muted);
+    background: var(--surface);
+    color: var(--text);
     font: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
-    transition:
-      background-color var(--dur-quick) var(--ease),
-      color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
   /*
-    L'état actif ne repose pas sur la seule couleur : le bouton reçoit un fond
-    plein et un texte plus gras, lisibles même sans perception des teintes. Le
-    libellé reste toujours affiché : il était masqué sous 30 rem, et le glyphe —
-    celui dont la couverture varie le plus d'un système à l'autre — devenait
-    alors le seul porteur visuel de l'option. Le panneau des réglages a la place.
+    L'état actif ne repose pas sur la seule couleur : liseré d'accent qui
+    s'ajoute à l'ombre sans la remplacer (même convention que `.size-option`
+    juste au-dessus), et `aria-pressed` pour la technologie d'assistance. Le
+    libellé, lui, reste affiché dans tous les cas : il était masqué sous 30 rem,
+    et le glyphe — celui dont la couverture varie le plus d'un système à
+    l'autre — devenait alors le seul porteur visuel de l'option. Le panneau des
+    réglages a la place.
   */
   .theme-option.active {
-    background: var(--surface);
-    color: var(--text);
-    font-weight: 600;
-    box-shadow: var(--shadow-raised);
+    border-color: var(--accent);
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      var(--shadow-hard);
   }
 
   .theme-option:active {
     background: var(--surface-pressed);
-    transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .theme-option:hover {
-      color: var(--text);
+      background: var(--surface-hover);
     }
   }
 
@@ -1209,13 +1226,15 @@
     font-weight: 600;
   }
 
+  /* Surface : trait d'encre et ombre dure, comme `.hint` dans InvestigationPanel — la couleur reste portée par le fond, pas par le trait. */
   .hint {
     padding: var(--space-4);
-    border: 1px solid var(--hint-border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--hint-bg);
     color: var(--text);
     line-height: var(--leading-prose);
+    box-shadow: var(--shadow-hard);
   }
 
   .hint p {
@@ -1436,25 +1455,36 @@
     font-size: var(--text-xs);
   }
 
+  /*
+    Trait d'encre et ombre dure au repos, comme les autres boutons de page —
+    mais l'appui et le survol restent un liseré intérieur ambré, inchangés :
+    ce sont des porteurs sémantiques (« ce bouton concerne l'indice en
+    cours »), pas une élévation, et la consigne du projet est de ne jamais y
+    toucher. Ajouter un décalage à l'appui aurait fait concurrence à ce liseré
+    sans rien dire de plus.
+  */
   .hint-button {
     display: flex;
     gap: var(--space-2);
     justify-content: center;
     align-items: center;
     min-height: var(--tap-lg);
-    border: 1px solid var(--hint-border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--hint-bg);
     color: var(--text);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    box-shadow: var(--shadow-hard);
     transition: box-shadow var(--dur-quick) var(--ease);
   }
 
+  /* Désactivé : l'ombre disparaît aussi, comme `.action:disabled` dans InvestigationPanel — un objet inerte ne reste pas soulevé. */
   .hint-button:disabled {
     opacity: 0.5;
     cursor: default;
+    box-shadow: none;
   }
 
   /* Le fond ambré porte déjà un sens : l'appui se dit par un liseré intérieur. */
@@ -1475,16 +1505,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Surface : même trait et même ombre que `.measured` dans InvestigationPanel. */
   .settings {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
     margin: 0;
     padding: var(--space-4) var(--space-4) var(--space-5);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-hard);
   }
 
+  /*
+    Ce filet reste fin, à dessein : il vit désormais **dans** `.settings-panel`,
+    déjà cerclé d'encre et ombré. Lui donner le même trait aurait empilé deux
+    cadres l'un dans l'autre ; la légende du fieldset suffit à dire où
+    commence le groupe.
+  */
   .assists {
     display: grid;
     margin: 0;
@@ -1493,6 +1531,7 @@
     border-radius: var(--radius-lg);
   }
 
+  /* Bouton de page : trait d'encre, ombre dure, et le radius `md` des boutons plutôt que le `lg` hérité d'un rang de carte. */
   .assists-link {
     display: flex;
     flex-wrap: wrap;
@@ -1501,20 +1540,21 @@
     align-items: center;
     min-height: var(--tap);
     padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     font-weight: 600;
     text-align: left;
     cursor: pointer;
-    transition: background-color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
   .assists-link:active {
     background: var(--surface-pressed);
-    transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -1562,14 +1602,23 @@
     font-size: var(--text-sm);
   }
 
+  /*
+    Le menu déroulant prend le trait et l'ombre, mais **pas** le retour d'appui :
+    il ouvre sa propre liste, et lui faire mimer l'enfoncement d'un bouton
+    promettrait un geste qu'il ne fait pas.
+
+    Il les prend parce que la Progression les lui donne déjà : deux menus du même
+    site rendus différemment se lisent comme un défaut, pas comme une nuance.
+  */
   select {
     min-height: var(--tap);
     padding: 0.35rem var(--space-2);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
+    box-shadow: var(--shadow-hard);
   }
 
   .level-description {
@@ -1579,49 +1628,59 @@
     line-height: var(--leading-prose);
   }
 
+  /*
+    Les deux boutons de la fabrique : même grammaire que `.action.primary` dans
+    InvestigationPanel — un rempli à l'accent, un tracé à l'encre, tous deux
+    avec l'ombre dure et l'enfoncement à l'appui.
+  */
   .primary {
     min-height: var(--tap);
     margin-top: 0.2rem;
-    border: none;
+    border: 2px solid var(--accent);
     border-radius: var(--radius-md);
     background: var(--accent);
     color: var(--accent-text);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
   .secondary {
     min-height: var(--tap);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     cursor: pointer;
-    transition: background-color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
+  /* Désactivé : l'ombre disparaît aussi, comme `.action:disabled` dans InvestigationPanel — un objet inerte ne reste pas soulevé. */
   .secondary:disabled {
     opacity: 0.5;
     cursor: default;
+    box-shadow: none;
   }
 
   /* Le curseur d'attente est informatif ici : la génération est en cours. */
   .primary:disabled {
     opacity: 0.5;
     cursor: progress;
+    box-shadow: none;
   }
 
   .primary:active:not(:disabled) {
     background: var(--accent-active);
-    transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .secondary:active:not(:disabled) {
     background: var(--surface-pressed);
-    transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -1634,13 +1693,15 @@
     }
   }
 
+  /* Surface : même trait et même ombre que `.measured` dans InvestigationPanel. */
   .verdict {
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface-sunken);
     font-size: var(--text-sm);
     line-height: var(--leading-prose);
+    box-shadow: var(--shadow-hard);
   }
 
   .verdict p {

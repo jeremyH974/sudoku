@@ -290,15 +290,45 @@
     margin-inline: auto;
     container-type: inline-size;
     aspect-ratio: 1;
-    border: 3px solid var(--grid-strong);
-    border-radius: var(--radius-sm);
+    /*
+      ─── Ce que la direction artistique illustrée prend ici, et ce qu'elle ne
+          prend pas ─────────────────────────────────────────────────────────
+
+      Le **cadre** seulement : trait d'encre et ombre décalée, comme toute
+      surface qu'on regarde. À l'intérieur, rien ne change, et ce n'est pas une
+      timidité — trois décisions mesurées l'interdisent :
+
+        · le quadrillage garde `--grid-strong`, qui est un jeton distinct de
+          `--ink`. Ce sont les traits de la grille, pas le bord d'un objet ;
+        · le tramage des blocs de 3×3 dépend de `border-box` pour que toutes
+          les cases gardent exactement la même taille (voir plus bas) ; une
+          bordure par case romprait cette égalité ;
+        · les liserés `inset` des cases — chiffre identique, zone d'indice,
+          motif, conclusion — **portent de l'information**. Un liseré d'encre
+          autour de chaque case entrerait en concurrence avec eux, et le
+          cerclage du chiffre identique cesserait de se distinguer de la case
+          qu'on vient de jouer, ce qu'il avait justement fallu corriger.
+
+      La règle générale, écrite une fois pour tout le site : le langage
+      s'applique à ce qu'on regarde et qu'on presse délibérément, jamais à une
+      grille dense d'information.
+    */
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-md);
     background: var(--grid-strong);
+    box-shadow: var(--shadow-hard);
     gap: 1px;
     touch-action: manipulation;
   }
 
+  /*
+    Le plateau d'analyse garde le cadre et perd l'ombre : il vit **dans** un
+    panneau qui en porte déjà une, et deux reliefs emboîtés se lisent comme une
+    erreur de mise en page plutôt que comme une hiérarchie.
+  */
   .board.passive {
     max-width: 27rem;
+    box-shadow: none;
   }
 
   /*

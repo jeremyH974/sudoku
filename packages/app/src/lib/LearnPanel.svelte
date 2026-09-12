@@ -165,6 +165,11 @@
     line-height: var(--leading-prose);
   }
 
+  /*
+    Volontairement laissé au liseré fin : ce bandeau joue le même rôle que
+    `.warning`/`.waiting` de l'enquête — un état transitoire, pas un contenu
+    principal —, qui restent eux aussi à 1 px sans ombre portée.
+  */
   .notice {
     margin: 0;
     padding: var(--space-3) var(--space-4);
@@ -195,19 +200,27 @@
     list-style: none;
   }
 
+  /* Une carte de technique : même grammaire que les fiches de suspect de l'enquête. */
   .technique {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface);
+    box-shadow: var(--shadow-hard);
   }
 
   /*
     Une technique déjà pratiquée se distingue par un liseré à gauche **et** par
     le texte de son état. La couleur n'est jamais seule à le dire.
+
+    Le bord d'encre qui entoure désormais la carte ne fait pas disparaître ce
+    liseré : `border-left` ne remplace qu'un seul côté, les trois autres
+    restent à l'encre. Le signal reste directionnel — un simple bord gauche —
+    et ne se confond pas avec le liseré complet qui marque un état actif
+    ailleurs dans l'application.
   */
   .technique.done {
     border-left: 3px solid var(--success);
@@ -220,6 +233,7 @@
     align-items: baseline;
   }
 
+  /* Même pastille que dans le panneau d'analyse : un chiffre, pas une surface — voir la justification là-bas. */
   .badge {
     padding: 0.1rem 0.45rem;
     border-radius: var(--radius-pill);
@@ -251,40 +265,46 @@
     gap: var(--space-2);
   }
 
+  /*
+    Même grammaire que les boutons de l'enquête et du panneau d'analyse :
+    trait d'encre et ombre décalée, qui se résorbe net à l'appui. Le fondu de
+    bordure et de fond n'a plus lieu d'être — c'est la disparition de l'ombre
+    qui donne le retour d'appui, pas une transition de teinte.
+  */
   .row button {
     min-height: var(--tap);
     padding: 0.4rem 0.9rem;
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     font: inherit;
     font-size: var(--text-base);
     cursor: pointer;
-    transition:
-      background-color var(--dur-quick) var(--ease),
-      border-color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
   .primary {
-    border: 1px solid var(--accent);
+    border-color: var(--accent);
     background: var(--accent);
     color: var(--accent-text);
     font-weight: 600;
   }
 
   .ghost {
-    border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
   }
 
+  .row button:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+  }
+
   .primary:active {
-    border-color: var(--accent-active);
     background: var(--accent-active);
-    transition-duration: 0s;
   }
 
   .ghost:active {
     background: var(--surface-pressed);
-    transition-duration: 0s;
   }
 
   /*
@@ -293,7 +313,6 @@
   */
   @media (hover: hover) and (pointer: fine) {
     .primary:hover {
-      border-color: var(--accent-hover);
       background: var(--accent-hover);
     }
 
@@ -320,8 +339,15 @@
     font-size: var(--text-base);
   }
 
+  /*
+    Même liseré fin que `.notice` plus haut et que les encarts d'attente de
+    l'enquête : cet aside précise un cas particulier au sein d'une carte qui
+    porte déjà le trait d'encre et l'ombre — lui donner la même grammaire
+    empilerait deux reliefs et brouillerait la hiérarchie.
+  */
   .aside.warn {
     padding: 0.6rem var(--space-3);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface-sunken);
   }

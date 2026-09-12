@@ -264,28 +264,36 @@
     align-items: center;
   }
 
+  /*
+    Même grammaire que les boutons de l'enquête : trait d'encre et ombre
+    décalée, qui se résorbe net à l'appui. Le fondu de fond n'a plus lieu
+    d'être — c'est la disparition de l'ombre qui donne le retour d'appui, pas
+    une transition de teinte.
+  */
   .transport button {
     min-height: var(--tap);
     padding: 0.4rem 0.7rem;
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
-    transition: background-color var(--dur-quick) var(--ease);
+    box-shadow: var(--shadow-hard);
   }
 
-  /* Désactivé : la teinte baisse ; `not-allowed` est hostile, et n'existe pas au doigt. */
+  /* Désactivé : la teinte baisse et l'ombre s'efface ; `not-allowed` est hostile, et n'existe pas au doigt. */
   .transport button:disabled {
     color: var(--text-faint);
     cursor: default;
+    box-shadow: none;
   }
 
   .transport button:active:not(:disabled) {
     background: var(--surface-pressed);
-    transition-duration: 0s;
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   /*
@@ -328,6 +336,12 @@
     font-size: var(--text-md);
   }
 
+  /*
+    Laissé sans bord ni ombre : ce chiffre reprend le motif de `.verdict
+    .score` de l'écran principal, une pastille discrète. Le trait d'encre et
+    l'ombre portée sont la grammaire des surfaces et des boutons, pas celle
+    d'un chiffre inline.
+  */
   .score {
     padding: 0.1rem 0.45rem;
     border-radius: var(--radius-pill);
@@ -348,6 +362,12 @@
     list-style: none;
   }
 
+  /*
+    Une ligne de liste, pas une carte : elle ne reçoit donc pas le bord
+    d'encre des surfaces, ce qui laisserait le liseré coloré ci-dessous seul
+    et sans concurrence sur son bord gauche plutôt que noyé dans un second
+    tracé.
+  */
   .conclusion li {
     padding: 0.35rem 0.6rem;
     border-left: 3px solid var(--border);
@@ -422,8 +442,14 @@
     font-weight: 600;
   }
 
+  /*
+    Liseré fin assorti au remplissage, comme le badge de réglages déjà migré
+    sur le même aplat d'accent : une pastille de ce gabarit n'est ni une
+    surface ni un bouton, la bordure d'encre à 2 px l'écraserait.
+  */
   .tag {
     padding: 0.05rem 0.4rem;
+    border: 1px solid var(--accent);
     border-radius: var(--radius-pill);
     background: var(--accent-soft);
     color: var(--text);
@@ -445,6 +471,7 @@
     font-size: var(--text-sm);
   }
 
+  /* Même famille que `.score` plus haut : un chiffre, pas une surface — voir la justification là-bas. */
   .badge {
     min-width: 2.2rem;
     padding: 0.08rem 0.35rem;

@@ -53,6 +53,10 @@
 {/if}
 
 <style>
+  /*
+    Une surface au sens de l'enquête (investigation/InvestigationPanel.svelte) :
+    trait d'encre à 2px et ombre décalée sans flou, au lieu du simple filet.
+  */
   .banner {
     display: flex;
     flex-wrap: wrap;
@@ -61,14 +65,23 @@
     align-items: center;
     margin-bottom: var(--space-4);
     padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface-sunken);
     font-size: var(--text-sm);
+    box-shadow: var(--shadow-hard);
   }
 
+  /*
+    La variante « mise à jour » ajoute un liseré d'accent sans remplacer
+    l'ombre — même motif que .tool.active dans l'enquête. Un aplat aurait
+    rendu cette bannière plus plate que celle qu'elle doit distinguer.
+  */
   .banner.update {
     border-color: var(--accent);
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      var(--shadow-hard);
   }
 
   p {
@@ -80,27 +93,40 @@
     gap: var(--space-2);
   }
 
+  /*
+    Même grammaire que les boutons de l'enquête : trait d'encre à 2px et
+    ombre dure, qui se rétracte à l'appui (button:active, plus bas). Les deux
+    boutons de cette bannière la partagent, il n'y a pas de case du calendrier
+    ici pour s'en trouver affectée par ricochet.
+  */
   button {
     min-height: var(--tap);
     padding: 0.35rem 0.8rem;
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     font: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
+    box-shadow: var(--shadow-hard);
     transition: background-color var(--dur-quick) var(--ease);
   }
 
   .primary {
-    border: none;
+    border-color: var(--accent);
     background: var(--accent);
     color: var(--accent-text);
     font-weight: 600;
   }
 
   .ghost {
-    border: 1px solid var(--border);
     background: none;
     color: var(--text-muted);
+  }
+
+  /* À l'appui, le bouton s'enfonce pour de bon : il se déplace de la valeur de son ombre et la perd. */
+  button:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .primary:active {
