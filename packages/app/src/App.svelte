@@ -385,7 +385,13 @@
 
   <header>
     <div class="title">
-      <h1>Sudoku</h1>
+      <!--
+        La marque de l'application : le damier du favicon et de l'icône
+        installée. En `currentColor` et dimensionnée en `em`, elle suit le thème
+        et le réglage de taille du texte — ce qu'un logotype dessiné ne saurait
+        pas faire.
+      -->
+      <h1><span class="brand" aria-hidden="true"><Icon name="brand" /></span>Sudoku</h1>
       <p class="tagline">Rien à installer. Aucune publicité, aucun compte, aucun suivi.</p>
     </div>
 
@@ -1054,9 +1060,18 @@
     de taille du texte entre 640 et 880 px, pour un bénéfice esthétique nul.
   */
   h1 {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
     margin: 0;
     font-size: var(--text-xl);
     letter-spacing: -0.02em;
+  }
+
+  .brand {
+    display: inline-flex;
+    color: var(--accent);
+    font-size: 0.8em;
   }
 
   .tagline {

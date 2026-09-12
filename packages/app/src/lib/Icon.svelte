@@ -12,7 +12,12 @@
 
 <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
   {#each ICONS[name] as part (part.d)}
-    <path d={part.d} class:fill={part.fill === true} />
+    <path
+      d={part.d}
+      class:fill={part.paint === 'fill'}
+      class:soft={part.paint === 'soft'}
+      class:thin={part.paint === 'thin'}
+    />
   {/each}
 </svg>
 
@@ -31,5 +36,16 @@
 
   .fill {
     fill: currentColor;
+  }
+
+  /* Une teinte, et non un contour : ces surfaces-là ne sont pas cerclées. */
+  .soft {
+    fill: currentColor;
+    fill-opacity: 0.35;
+    stroke: none;
+  }
+
+  .thin {
+    stroke-width: 1.4;
   }
 </style>
