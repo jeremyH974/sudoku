@@ -83,6 +83,13 @@ export default defineConfig({
           face aux concurrents, dont le quotidien vient d'un serveur.
         */
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
+        /*
+          Une exception, et une seule : l'image d'aperçu des liens partagés. Elle
+          pèse quarante-sept kilo-octets, ne s'affiche jamais dans
+          l'application — seuls les robots des réseaux sociaux l'ouvrent — et
+          `png` la ferait entrer dans le cache de chaque visiteur.
+        */
+        globIgnores: ['**/og-image.png'],
         cleanupOutdatedCaches: true,
         /*
           Runtime Workbox intégré au service worker plutôt que chargé à part.

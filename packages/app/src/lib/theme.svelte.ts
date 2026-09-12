@@ -53,6 +53,44 @@ function apply(preference: ThemePreference): void {
   else root.setAttribute('data-theme', preference);
 }
 
+/**
+ * Accorde la barre d'adresse au thème, choix explicite compris.
+ *
+ * `index.html` déclare deux `<meta name="theme-color">`, chacune sous son
+ * `media` : elles suivent le système, ce qui est juste tant que le système
+ * décide. Mais le sélecteur a **trois** états, et un choix explicite ne déplace
+ * aucun `media` — un thème sombre choisi à la main sur une machine en clair
+ * laissait la barre d'adresse bleue au-dessus d'une page noire.
+ *
+ * Le navigateur retient la première balise dont le `media` correspond. Une
+ * balise sans `media`, insérée devant les deux autres, l'emporte donc, et la
+ * retirer rend la main au système — même logique que l'attribut qu'on retire
+ * plutôt que d'y écrire « système ». Sa couleur est lue sur les balises
+ * existantes : les deux valeurs ne sont écrites qu'une fois, dans `index.html`,
+ * où elles servent aussi sans JavaScript.
+ */
+const OVERRIDE_ID = 'theme-color-choice';
+
+function applyThemeColor(preference: ThemePreference): void {
+  const override = document.getElementById(OVERRIDE_ID);
+  if (preference === 'system') {
+    override?.remove();
+    return;
+  }
+
+  const source = document.querySelector<HTMLMetaElement>(
+    `meta[name="theme-color"][media*="${preference}"]`,
+  );
+  const first = document.querySelector('meta[name="theme-color"]');
+  if (source === null || first === null) return;
+
+  const meta = override ?? document.createElement('meta');
+  meta.id = OVERRIDE_ID;
+  meta.setAttribute('name', 'theme-color');
+  meta.setAttribute('content', source.content);
+  if (override === null) first.before(meta);
+}
+
 class ThemeStore {
   preference = $state<ThemePreference>('system');
 
@@ -60,11 +98,13 @@ class ThemeStore {
     // Le script d'amorçage de `index.html` a déjà posé l'attribut pour éviter
     // le flash ; on se contente ici de reprendre la même valeur.
     this.preference = readStored();
+    applyThemeColor(this.preference);
   }
 
   set(preference: ThemePreference): void {
     this.preference = preference;
     apply(preference);
+    applyThemeColor(preference);
     persist(preference);
   }
 }

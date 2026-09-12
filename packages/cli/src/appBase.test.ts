@@ -114,6 +114,25 @@ describe('adresses de l’application sous son sous-chemin', () => {
     expect(missing).toEqual([]);
   });
 
+  it('sert l’image de partage depuis l’adresse publique', () => {
+    // C'est la seule adresse absolue du produit, et elle ne peut pas être
+    // relative : les robots des réseaux sociaux ne la résolvent pas tous. D'où
+    // le même garde-fou que pour la base — sans quoi elle dériverait en
+    // silence, l'aperçu tombant sur un 404 que rien dans l'application ne
+    // montre.
+    const html = withoutComments(readFileSync(join(APP, 'index.html'), 'utf8'));
+    const image = /<meta property="og:image" content="([^"]+)"/.exec(html)?.[1];
+    expect(image, 'index.html doit déclarer une og:image').toBeDefined();
+
+    const readme = readFileSync(README, 'utf8');
+    const address = /https:\/\/[\w-]+\.github\.io\/[^\s)`>*]*/.exec(readme)?.[0];
+    expect(address, 'le README doit donner l’adresse publique').toBeDefined();
+    expect(image!.startsWith(address!), `${image!} hors de ${address!}`).toBe(true);
+
+    const file = image!.slice(address!.length);
+    expect(existsSync(join(APP, 'public', file)), file).toBe(true);
+  });
+
   it('garde relatives l’adresse de démarrage et la portée de l’application installée', () => {
     // Résolues contre l'adresse du manifeste, elles suivent le sous-chemin. Une
     // valeur absolue ouvrirait l'application installée à la racine du domaine :
