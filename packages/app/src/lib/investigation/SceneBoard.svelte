@@ -1,7 +1,8 @@
 <script lang="ts">
   import { propsOfCell } from '@sudoku/engine/investigation';
+  import type { PropId } from '@sudoku/engine/investigation';
   import type { CaseGame } from './caseGame.svelte.js';
-  import { FURNITURE, FURNITURE_LABEL } from './furniture.js';
+  import { FILL, FURNITURE, FURNITURE_LABEL, LAYER_ORDER } from './furniture.js';
 
   interface Props {
     game: CaseGame;
@@ -52,6 +53,22 @@
       return row === size - 1 || scene.zoneOf[cell + size] !== scene.zoneOf[cell];
     if (side === 'left') return column === 0 || scene.zoneOf[cell - 1] !== scene.zoneOf[cell];
     return column === size - 1 || scene.zoneOf[cell + 1] !== scene.zoneOf[cell];
+  }
+
+  /**
+   * Les meubles d'une case, dans l'ordre où on les dessine.
+   *
+   * Un tapis se pose au sol, ce qu'on met dessus se pose dessus — et se dessine
+   * plus petit, sinon les deux silhouettes se recouvrent et aucune ne se lit.
+   */
+  function furnitureOf(cell: number): { prop: PropId; onRug: boolean }[] {
+    if (scene === null) return [];
+    const here = new Set(propsOfCell(scene, cell));
+    const hasRug = here.has('rug');
+    return LAYER_ORDER.filter((prop) => here.has(prop)).map((prop) => ({
+      prop,
+      onRug: hasRug && prop !== 'rug',
+    }));
   }
 
   /** Les suspects notés au crayon dans une case. */
@@ -203,19 +220,17 @@
               onkeydown={onKeyDown}
             >
               <svg class="decor" viewBox="0 0 24 24" aria-hidden="true">
-                {#each propsOfCell(scene, cell) as prop (prop)}
-                  <!--
-                    Clé par position, et non par tracé : un meuble dessine
-                    souvent la même forme deux fois — une fois teintée, une fois
-                    cerclée. Le tracé n'est donc pas une identité.
-                  -->
-                  {#each FURNITURE[prop] as part, part_index (part_index)}
-                    <path
-                      d={part.d}
-                      class:soft={part.paint === 'soft'}
-                      class:thin={part.paint === 'thin'}
-                    />
-                  {/each}
+                {#each furnitureOf(cell) as piece (piece.prop)}
+                  <g transform={piece.onRug ? 'translate(3.6 3.6) scale(0.7)' : undefined}>
+                    <!--
+                      Clé par position, et non par tracé : un meuble dessine
+                      parfois deux fois la même forme, une fois en encre et une
+                      fois en matière. Le tracé n'est donc pas une identité.
+                    -->
+                    {#each FURNITURE[piece.prop] as part, part_index (part_index)}
+                      <path d={part.d} fill={FILL[part.fill]} />
+                    {/each}
+                  </g>
                 {/each}
               </svg>
 
@@ -265,12 +280,18 @@
     container-type: inline-size;
   }
 
+  /*
+    Le plan est cerclé d'encre et posé en relief — l'ombre **décalée sans flou**
+    du genre, pas une ombre douce. C'est elle qui fait qu'un plateau ressemble à
+    un objet posé plutôt qu'à une zone de la page.
+  */
   .board {
     display: grid;
     aspect-ratio: 1;
-    border: 3px solid var(--scene-wall);
-    border-radius: var(--radius-sm);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-md);
     background: var(--scene-wall);
+    box-shadow: var(--shadow-hard);
     touch-action: manipulation;
   }
 
@@ -374,46 +395,40 @@
     z-index: 1;
   }
 
-  /* Le mobilier occupe la case ; le jeton d'un suspect se pose par-dessus. */
+  /*
+    Le mobilier occupe la case ; le jeton d'un suspect se pose par-dessus.
+
+    Aucun contour : la silhouette est une **forme pleine** d'encre, dessinée sous
+    l'objet. C'est la grammaire du genre, et c'est aussi ce que la mesure
+    imposait — les tons de matière plafonnent à 3:1 contre les teintes de pièce.
+  */
   .decor {
     position: absolute;
-    inset: 12%;
-    width: 76%;
-    height: 76%;
-    fill: none;
-    stroke: var(--scene-ink);
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .decor .soft {
-    fill: var(--scene-ink);
-    fill-opacity: 0.14;
-    stroke: none;
-  }
-
-  .decor .thin {
-    stroke-width: 1;
+    inset: 8%;
+    width: 84%;
+    height: 84%;
   }
 
   /*
-    Le jeton d'un suspect : un disque et **sa lettre**. La lettre n'est pas une
-    décoration du disque, c'est l'information — elle survit au noir et blanc, au
-    daltonisme et à l'impression, ce qu'une pastille de couleur ne fait pas.
+    Le jeton d'un suspect : une pastille cerclée d'encre, posée en relief, et
+    **sa lettre**. La lettre n'est pas une décoration de la pastille, c'est
+    l'information — elle survit au noir et blanc, au daltonisme et à
+    l'impression, ce qu'une couleur ne fait pas.
   */
   .token {
     position: relative;
     z-index: 1;
     display: grid;
     place-items: center;
-    width: 76%;
-    height: 76%;
+    width: 74%;
+    height: 74%;
+    border: 2px solid var(--ink);
     border-radius: var(--radius-pill);
     background: var(--scene-token);
     color: var(--scene-token-ink);
     font-weight: 700;
     line-height: var(--leading-tight);
+    box-shadow: var(--shadow-hard);
   }
 
   /*
@@ -457,14 +472,20 @@
     pointer-events: none;
   }
 
+  /*
+    Les noms de pièce, **écrits à la main** sur le plan.
+
+    C'est le seul endroit du plateau où la manuscrite sert : une pièce annotée
+    à la main sur un plan, ce qui est exactement ce qu'est ce plateau. Les
+    capitales sont retirées avec elle — une écriture manuscrite en capitales ne
+    ressemble plus à une écriture.
+  */
   .room {
     position: absolute;
     padding: 0 var(--space-1);
-    color: var(--scene-label);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-family: var(--font-hand);
+    font-size: var(--text-sm);
     white-space: nowrap;
   }
 </style>

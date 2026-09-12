@@ -152,6 +152,43 @@ ordre est le nôtre et n'est calibré contre rien. Ce qui est garanti, en revanc
 n'admet qu'une solution, et le registre sait la trouver **sans jamais essayer une case au hasard** —
 une affaire qu'il ne termine pas n'est pas étiquetée « experte », elle n'est pas produite.
 
+### L'habillage : reprendre un style, dessiner sa propre expression
+
+Enquête emprunte la **grammaire visuelle** du genre — relevée sur `murdoku.com`, pas devinée :
+ombre portée **décalée sans flou**, trait d'encre de 2 px, rayon de 12 px, **aplats sans dégradé
+ni contour**, et une **manuscrite** sur les noms.
+
+Ce qui n'est pas emprunté : leurs tracés, leurs portraits, leur logo, leurs plans, leurs textes,
+leur police. C'est la frontière du droit d'auteur — le style n'est pas protégeable, *la combinaison
+originale de costume, palette, proportions et traits distinctifs* l'est —, et c'est la même que ce
+projet tient entre **algorithme publié** et **code copié**. Un sosie serait d'ailleurs une mauvaise
+stratégie : un produit qui se confond avec un autre n'a pas d'identité à défendre. L'objectif est
+« du même monde », pas « du même auteur ».
+
+**Le système, et pourquoi c'en est un.** Cinq **matières** — bois, tissu, feuillage, métal,
+pierre —, trois tons chacune, plus deux encres. Un meuble se dessine dans cette palette, jamais
+avec une couleur à lui : il suit le thème sans retouche et se convertira en gris pour le papier.
+Et comme des aplats n'ont pas de contour, la silhouette est une **forme pleine d'encre** posée
+sous l'objet. Ce n'était pas un choix esthétique mais une mesure : les tons de matière plafonnent
+à 3:1 contre les teintes de pièce, là où l'encre douce tient 5,2:1.
+
+**La règle qui a bougé, et de combien.** `plan.md` disait « aucune webfont », et donnait sa
+raison : *« 25 à 40 ko pour des chiffres tabulaires qu'on a déjà gratuitement »*. Aucune pile
+système ne contient une écriture manuscrite, et c'est elle qui fait qu'une carte de suspect
+ressemble à un dossier. Quatre candidates ont été **pesées** puis jugées à l'écran — Architects
+Daughter 12 ko mais trop pâle, Kalam 43 ko, Shantell Sans 154 ko — et **Patrick Hand** l'emporte à
+**23,4 ko**, une seule graisse, sous le plancher que la règle citait elle-même. Elle est servie par
+nous, précachée, jamais par un tiers, et sa licence OFL l'accompagne comme l'OFL l'exige. Trois
+tests le tiennent, dont un qui interdit le retour en arrière le plus tentant : une ligne d'import
+Google Fonts collée « juste pour essayer ».
+
+**Deux défauts trouvés en mesurant, pas en regardant.** L'encre douce à 4,28:1 sur la teinte de
+pièce la plus claire — suffisant pour une silhouette, insuffisant pour le **nom manuscrit d'une
+pièce**, qui est du texte et demande 4,5. Et l'ombre dure, invisible en thème sombre : un décalage
+noir à 32 % n'existe pas sur un fond sombre. Elle y prend donc une **encre claire**, ce qui garde
+la silhouette décalée sans compter sur une obscurité qui n'est pas là. La référence, elle, n'a pas
+de thème sombre et n'a pas eu à trancher.
+
 ### Le plateau est dessiné, et cela ne coûte aucune règle
 
 C'est un écart assumé à la direction artistique de l'incrément 10, qui disait « le plateau est une

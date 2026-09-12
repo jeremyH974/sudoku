@@ -98,8 +98,10 @@
     flex: 1 1 12rem;
   }
 
+  /* Le titre de la section, de la même main que les noms sur les cartes. */
   h1 {
     margin: 0;
+    font-family: var(--font-hand);
     font-size: var(--text-xl);
     line-height: var(--leading-tight);
   }
@@ -116,12 +118,13 @@
     gap: var(--space-2);
     min-height: var(--tap);
     padding: 0 var(--space-3);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font-size: var(--text-sm);
     text-decoration: none;
+    box-shadow: var(--shadow-hard);
   }
 
   .mark {
@@ -132,13 +135,14 @@
   .settings-toggle {
     min-height: var(--tap);
     padding: 0 var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
+    box-shadow: var(--shadow-hard);
   }
 
   @media (hover: hover) {
@@ -151,12 +155,15 @@
   .home:active,
   .settings-toggle:active {
     background: var(--surface-pressed);
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .settings-panel {
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface-sunken);
+    box-shadow: var(--shadow-hard);
   }
 </style>

@@ -94,20 +94,23 @@
     min-width: var(--tap);
     min-height: var(--tap);
     padding: 0 var(--space-3);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
+    box-shadow: var(--shadow-hard);
   }
 
   /* L'état actif se dit par un liseré **et** par `aria-pressed`, jamais par la
-     seule couleur. */
+     seule couleur. Le liseré s'ajoute à l'ombre au lieu de la remplacer. */
   .option.active {
     border-color: var(--accent);
-    box-shadow: inset 0 0 0 2px var(--accent);
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      var(--shadow-hard);
   }
 
   @media (hover: hover) {
@@ -118,6 +121,8 @@
 
   .option:active {
     background: var(--surface-pressed);
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .sr-only {

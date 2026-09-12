@@ -29,6 +29,37 @@
       le pire choix possible pour les formes courantes de daltonisme.
 */
 
+/*
+  La manuscrite — la seule fonte du produit, et la règle qu'elle fait bouger.
+
+  `docs/plan.md` disait « aucune webfont », et donnait sa raison : « 25 à 40 ko
+  sur 79, pour des chiffres tabulaires qu'on a déjà gratuitement ». La raison
+  vaut toujours, et ne s'applique pas ici : aucune pile système ne contient une
+  écriture manuscrite, et c'est elle qui fait qu'une carte de suspect ressemble
+  à un dossier plutôt qu'à un formulaire.
+
+  Quatre candidates ont été pesées puis jugées à l'écran (voir
+  `docs/plan-increment-13.md`). Patrick Hand est retenue : 23,4 ko pour le
+  sous-ensemble latin, une seule graisse, lisible à 16 comme à 40 px. C'est
+  **sous** le plancher que la règle citait comme son objection.
+
+  Trois conditions, tenues par des tests : servie par nous — jamais un tiers, ce
+  qui préserve « aucune requête réseau après le chargement » ; précachée par le
+  service worker ; et sa licence OFL distribuée à côté d'elle, comme l'OFL
+  l'exige.
+
+  `swap` : le texte s'affiche tout de suite dans la pile système et bascule à
+  l'arrivée. Un nom de suspect invisible pendant trois secondes serait pire
+  qu'un nom qui change d'allure.
+*/
+@font-face {
+  font-family: 'Patrick Hand';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/patrick-hand-latin.woff2') format('woff2');
+}
+
 :root {
   color-scheme: light dark;
 
@@ -145,11 +176,56 @@
   --scene-token: #1f4e8c;
   --scene-token-ink: #ffffff;
   --scene-zone-1: #e8eef7;
-  --scene-zone-2: #f2ece2;
+  --scene-zone-2: #f6e6d0;
   --scene-zone-3: #e6f0ea;
   --scene-zone-4: #f0e9f2;
-  --scene-zone-5: #eef1e6;
+  --scene-zone-5: #f3efdc;
   --scene-zone-6: #f5e9e6;
+
+  /*
+    Le langage illustré — incrément 13.
+
+    Trois choses, et pas une de plus : le **trait**, l'**ombre dure**, et cinq
+    **matières**. C'est la grammaire relevée sur la référence du genre — aplats
+    sans dégradé ni contour, deux ou trois tons par objet, silhouette décalée
+    sans flou — reprise pour elle-même, avec nos propres dessins.
+
+    Les matières sont ce qui distingue un *système* d'une bibliothèque d'images :
+    un meuble nouveau se dessine dans la palette existante, suit le thème sans
+    retouche, et se convertit en gris pour le papier. Une couleur propre à un
+    objet serait une couleur de plus à auditer à chaque thème.
+
+    Contrastes **mesurés**, contre la pire des six teintes de pièce :
+    l'encre 12,1:1 en clair et 8,9:1 en sombre ; l'encre douce 5,2:1 et 5,1:1.
+
+    L'encre douce porte deux choses à la fois — la silhouette des meubles, qui
+    demande 3:1, et le **nom manuscrit des pièces**, qui est du texte et en
+    demande 4,5. C'est la seconde qui a fixé sa valeur : le premier réglage
+    tombait à 4,28:1, et seul le calcul l'a dit.
+  */
+  --ink: #2b2a27;
+  --ink-soft: #635f59;
+  /*
+    L'ombre décalée, sans flou — la signature du genre. En clair, un noir
+    translucide, comme chez la référence.
+  */
+  --shadow-hard: 3px 3px 0 0 rgb(0 0 0 / 32%);
+
+  --mat-wood-light: #e0c39c;
+  --mat-wood: #c39a6b;
+  --mat-wood-dark: #9a7148;
+  --mat-fabric-light: #cfd8e8;
+  --mat-fabric: #a8b8d4;
+  --mat-fabric-dark: #7e90b0;
+  --mat-leaf-light: #bcd9a8;
+  --mat-leaf: #8fb87a;
+  --mat-leaf-dark: #658f52;
+  --mat-metal-light: #dfe2e6;
+  --mat-metal: #b3b9c0;
+  --mat-metal-dark: #868d96;
+  --mat-stone-light: #e2ded6;
+  --mat-stone: #c2bcb0;
+  --mat-stone-dark: #948d80;
 
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -213,11 +289,45 @@
     --scene-token: #4b82cf;
     --scene-token-ink: #0e1013;
     --scene-zone-1: #232a33;
-    --scene-zone-2: #2b2823;
+    --scene-zone-2: #302719;
     --scene-zone-3: #222b26;
     --scene-zone-4: #2a2430;
-    --scene-zone-5: #272a22;
+    --scene-zone-5: #2b291d;
     --scene-zone-6: #2f2623;
+
+
+    /*
+      Le langage illustré en sombre.
+
+      ⚠ L'ombre dure ne survit pas telle quelle : un décalage noir à 32 % est
+      invisible sur un fond sombre. `--shadow-raised` avait déjà rencontré
+      exactement cela et y répondait par un liseré ; la référence, elle, n'a pas
+      de thème sombre et n'a pas eu à trancher. Ici le décalage prend une encre
+      **claire** : il garde la silhouette décalée sans compter sur une obscurité
+      qui n'existe pas.
+
+      Les matières descendent en luminosité et en saturation : les mêmes tons
+      qu'en clair paraîtraient fluorescents sur un sol sombre.
+    */
+    --ink: #c8cbd0;
+    --ink-soft: #949aa3;
+    --shadow-hard: 3px 3px 0 0 rgb(151 158 170 / 30%);
+
+    --mat-wood-light: #b3987a;
+    --mat-wood: #9a7e5c;
+    --mat-wood-dark: #6f5941;
+    --mat-fabric-light: #96a1b8;
+    --mat-fabric: #78849e;
+    --mat-fabric-dark: #565f75;
+    --mat-leaf-light: #89a578;
+    --mat-leaf: #6d8a5c;
+    --mat-leaf-dark: #4e6640;
+    --mat-metal-light: #a3a9b1;
+    --mat-metal: #858c95;
+    --mat-metal-dark: #5f656d;
+    --mat-stone-light: #a19b90;
+    --mat-stone: #89847a;
+    --mat-stone-dark: #605c54;
 
     /*
       Sur fond sombre, une ombre portée est invisible : l'élévation se dit par
@@ -289,11 +399,45 @@
   --scene-token: #4b82cf;
   --scene-token-ink: #0e1013;
   --scene-zone-1: #232a33;
-  --scene-zone-2: #2b2823;
+  --scene-zone-2: #302719;
   --scene-zone-3: #222b26;
   --scene-zone-4: #2a2430;
-  --scene-zone-5: #272a22;
+  --scene-zone-5: #2b291d;
   --scene-zone-6: #2f2623;
+
+
+  /*
+    Le langage illustré en sombre.
+
+    ⚠ L'ombre dure ne survit pas telle quelle : un décalage noir à 32 % est
+    invisible sur un fond sombre. `--shadow-raised` avait déjà rencontré
+    exactement cela et y répondait par un liseré ; la référence, elle, n'a pas
+    de thème sombre et n'a pas eu à trancher. Ici le décalage prend une encre
+    **claire** : il garde la silhouette décalée sans compter sur une obscurité
+    qui n'existe pas.
+
+    Les matières descendent en luminosité et en saturation : les mêmes tons
+    qu'en clair paraîtraient fluorescents sur un sol sombre.
+  */
+  --ink: #c8cbd0;
+  --ink-soft: #949aa3;
+  --shadow-hard: 3px 3px 0 0 rgb(151 158 170 / 30%);
+
+  --mat-wood-light: #b3987a;
+  --mat-wood: #9a7e5c;
+  --mat-wood-dark: #6f5941;
+  --mat-fabric-light: #96a1b8;
+  --mat-fabric: #78849e;
+  --mat-fabric-dark: #565f75;
+  --mat-leaf-light: #89a578;
+  --mat-leaf: #6d8a5c;
+  --mat-leaf-dark: #4e6640;
+  --mat-metal-light: #a3a9b1;
+  --mat-metal: #858c95;
+  --mat-metal-dark: #5f656d;
+  --mat-stone-light: #a19b90;
+  --mat-stone: #89847a;
+  --mat-stone-dark: #605c54;
 
   /*
     Sur fond sombre, une ombre portée est invisible : l'élévation se dit par un
@@ -383,7 +527,12 @@
   --board-max: 34rem;
   --measure: 30rem;
 
-  /* La voix du papier, déclarée : Georgia, et une chasse fixe pour les codes. */
+  /*
+    La voix du papier, déclarée : Georgia, et une chasse fixe pour les codes.
+    Et la main qui annote : la manuscrite, avec la pile système derrière elle —
+    ce qui s'affiche si la fonte n'arrive pas reste lisible.
+  */
+  --font-hand: 'Patrick Hand', 'Segoe Print', 'Bradley Hand', cursive;
   --font-paper: Georgia, 'Times New Roman', serif;
   --font-mono: ui-monospace, 'Courier New', monospace;
 }

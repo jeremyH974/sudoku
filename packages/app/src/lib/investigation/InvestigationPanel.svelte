@@ -306,17 +306,25 @@
     gap: var(--space-2);
   }
 
+  /*
+    La grammaire du genre, appliquée à tout ce qui se presse : trait d'encre,
+    et **ombre décalée sans flou**. À l'appui, le bouton se déplace de la valeur
+    de son ombre et la perd — il s'enfonce pour de bon. C'est un retour tactile
+    réel, pas une décoration : sur tactile, `:active` est le seul état qui
+    existe.
+  */
   .tool,
   .action {
     min-height: var(--tap);
     padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
+    box-shadow: var(--shadow-hard);
   }
 
   .tool {
@@ -338,9 +346,18 @@
     L'outil actif se dit par un liseré épais **et** par `aria-pressed`, jamais
     par la seule couleur — même règle que le mode notes du sudoku.
   */
+  /*
+    L'état choisi **ajoute** un liseré, il ne remplace pas l'ombre.
+
+    Écrit d'abord comme un seul `box-shadow`, il effaçait le relief : la carte
+    sélectionnée était la seule à plat, c'est-à-dire l'inverse de ce qu'elle
+    devait dire.
+  */
   .tool.active {
     border-color: var(--accent);
-    box-shadow: inset 0 0 0 2px var(--accent);
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      var(--shadow-hard);
   }
 
   .action.primary {
@@ -369,25 +386,31 @@
   .tool:active,
   .action:active:not(:disabled) {
     background: var(--surface-pressed);
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .action.primary:active:not(:disabled) {
     background: var(--accent-active);
   }
 
+  .action:disabled {
+    box-shadow: none;
+  }
+
   .hint,
   .verdict {
     max-width: var(--measure);
     padding: var(--space-3);
-    border: 1px solid var(--hint-border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-md);
     background: var(--hint-bg);
     font-size: var(--text-sm);
     line-height: var(--leading-prose);
+    box-shadow: var(--shadow-hard);
   }
 
   .verdict.solved {
-    border-color: var(--hint-target-border);
     background: var(--hint-target-bg);
   }
 
@@ -425,24 +448,28 @@
     list-style: none;
   }
 
+  /* Une carte de suspect : une fiche cartonnée, cerclée et posée en relief. */
   .card {
     display: grid;
     gap: var(--space-2);
     width: 100%;
     min-height: var(--tap);
     padding: var(--space-3);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface);
     color: var(--text);
     font: inherit;
     text-align: left;
     cursor: pointer;
+    box-shadow: var(--shadow-hard);
   }
 
   .card.chosen {
     border-color: var(--accent);
-    box-shadow: inset 0 0 0 2px var(--accent);
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      var(--shadow-hard);
   }
 
   /* La victime et la carte contredite portent une étiquette, pas une teinte. */
@@ -452,6 +479,9 @@
 
   .card.broken {
     border-color: var(--hint-border);
+    box-shadow:
+      inset 0 0 0 2px var(--hint-border),
+      var(--shadow-hard);
   }
 
   @media (hover: hover) {
@@ -462,6 +492,8 @@
 
   .card:active {
     background: var(--surface-pressed);
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .who {
@@ -471,11 +503,13 @@
     gap: var(--space-2);
   }
 
+  /* La même pastille que sur le plan : c'est ce qui relie une carte à un jeton. */
   .letter {
     display: grid;
     place-items: center;
-    width: var(--space-5);
-    height: var(--space-5);
+    width: var(--space-6);
+    height: var(--space-6);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-pill);
     background: var(--scene-token);
     color: var(--scene-token-ink);
@@ -483,9 +517,15 @@
     font-weight: 700;
   }
 
+  /*
+    Le nom, **écrit à la main**. C'est ce qui fait qu'une carte ressemble à une
+    fiche de dossier plutôt qu'à une ligne de formulaire — et c'est la seule
+    raison pour laquelle ce produit embarque une fonte.
+  */
   .name {
-    font-size: var(--text-base);
-    font-weight: 600;
+    font-family: var(--font-hand);
+    font-size: var(--text-lg);
+    line-height: var(--leading-tight);
   }
 
   .tag {
@@ -516,9 +556,10 @@
     display: grid;
     gap: var(--space-2);
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface-sunken);
+    box-shadow: var(--shadow-hard);
   }
 
   .measured dl {

@@ -191,6 +191,44 @@ describe('adresses de l’application sous son sous-chemin', () => {
     }
   });
 
+  it('ne va chercher aucune police chez un tiers', () => {
+    /*
+      La règle que la manuscrite a fait bouger, et sa nouvelle forme.
+
+      `plan.md` disait « aucune webfont », et sa raison était le poids. Une
+      manuscrite en vaut la peine — aucune pile système n'en contient — mais
+      **jamais** au prix d'une requête vers un tiers : ce serait renoncer à
+      « aucune requête réseau après le chargement », et faire connaître chaque
+      visiteur à quelqu'un d'autre.
+
+      La fonte est donc servie par nous. Ce test interdit le retour en arrière
+      le plus tentant : une ligne d'import Google Fonts collée « juste pour
+      essayer ».
+    */
+    const THIRD_PARTY = /fonts\.(?:googleapis|gstatic|bunny|cdnfonts)\.com|use\.typekit|typekit\.net/;
+    const suspects = [
+      ...ENTRIES.map((entry) => ({ file: entry, code: readFileSync(join(APP, entry), 'utf8') })),
+      ...sources,
+      { file: 'src/app.css', code: readFileSync(join(APP_SRC, 'app.css'), 'utf8') },
+    ];
+    const offenders = suspects.filter(({ code }) => THIRD_PARTY.test(code)).map((s) => s.file);
+    expect(offenders).toEqual([]);
+  });
+
+  it('sert la manuscrite depuis ses propres fichiers, licence comprise', () => {
+    // L'OFL impose de distribuer sa licence avec la fonte. Ce n'est pas une
+    // politesse : c'est la condition qui rend l'usage légal, et le projet tient
+    // déjà ce genre de compte pour ses dépendances.
+    const css = readFileSync(join(APP_SRC, 'app.css'), 'utf8');
+    const src = /@font-face[\s\S]*?url\('([^']+)'\)/.exec(css)?.[1];
+    expect(src, 'app.css doit déclarer une @font-face').toBeDefined();
+    expect(existsSync(join(APP, 'public', src!)), src!).toBe(true);
+
+    const licence = join(APP, 'public', 'fonts', 'OFL.txt');
+    expect(existsSync(licence), 'la licence OFL doit accompagner la fonte').toBe(true);
+    expect(readFileSync(licence, 'utf8')).toContain('SIL Open Font License');
+  });
+
   it('annonce dans le README l’adresse que la construction sert', () => {
     // Deux sources de vérité finissent toujours par se contredire : un dépôt
     // renommé laisserait la documentation juste et l'application morte.
