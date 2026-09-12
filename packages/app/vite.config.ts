@@ -1,6 +1,10 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { VitePWA } from 'vite-plugin-pwa';
+
+/** Un chemin d'entrée, résolu contre ce fichier plutôt que contre le répertoire courant. */
+const entry = (file: string): string => fileURLToPath(new URL(file, import.meta.url));
 
 export default defineConfig({
   /*
@@ -26,6 +30,28 @@ export default defineConfig({
     `packages/cli/src/appBase.test.ts` vérifie que les deux ne divergent pas.
   */
   base: '/sudoku/',
+  /*
+    Trois entrées, et non une application à routeur.
+
+    Le site a une page d'accueil et deux sections. Les construire séparément
+    donne exactement ce qu'on cherche, et qu'un routeur ne donnerait pas :
+    **un joueur de sudoku ne télécharge jamais le moteur d'Enquête**, et
+    l'accueil ne télécharge ni l'un ni l'autre. Chaque section est aussi libre de
+    son habillage, ce qui est la raison d'être de la séparation.
+
+    Un hébergeur statique sert cela nativement : `…/enquete/` trouve
+    `enquete/index.html` sans aucune réécriture d'URL. C'est la même exigence
+    « zéro backend » que le reste du projet.
+  */
+  build: {
+    rollupOptions: {
+      input: {
+        accueil: entry('index.html'),
+        sudoku: entry('sudoku/index.html'),
+        enquete: entry('enquete/index.html'),
+      },
+    },
+  },
   plugins: [
     svelte(),
     VitePWA({

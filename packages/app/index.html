@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <!--
+      Deux couleurs de barre d'adresse, et non une. Voir `sudoku/index.html`
+      pour le raisonnement complet : il vaut pour les trois entrées du site.
+    -->
+    <meta name="theme-color" content="#1f4e8c" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta
+      name="description"
+      content="Deux jeux de logique : un Sudoku à difficulté mesurée, et Enquête, une déduction sur un plan. Aucune installation, aucune publicité, aucun compte."
+    />
+    <title>Deux jeux de logique</title>
+    <!--
+      L'aperçu des liens partagés. `og:url` reste omis, pour la même raison que
+      partout : les réseaux prennent l'adresse demandée, toujours juste.
+
+      L'image, elle, ne montre encore qu'une grille de Sudoku : c'est la seule
+      qui existe, et elle a été capturée sur une construction de production. Une
+      image qui montre les deux jeux est un travail de l'incrément 15 — d'ici là
+      l'aperçu est incomplet, ce que le README dit plutôt que de le laisser
+      croire complet.
+    -->
+    <meta property="og:title" content="Deux jeux de logique" />
+    <meta
+      property="og:description"
+      content="Un Sudoku à difficulté mesurée, et Enquête : placer six suspects sur un plan à partir de ce qu'ils disent. Sans installation, sans publicité, sans compte."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:image" content="https://jeremyh974.github.io/sudoku/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Une grille de Sudoku, une case mise en évidence, et sous elle l’indice qui nomme la technique et explique le raisonnement."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      /*
+        Le thème et la taille du texte, appliqués AVANT le premier rendu.
+
+        Ce bloc est recopié à l'identique dans les trois entrées du site, et
+        c'est voulu : il doit être inline et synchrone — un fichier séparé
+        serait une requête de plus avant la première peinture, et le flash qu'il
+        évite est précisément ce qu'on paierait. `packages/cli/src/appBase.test.ts`
+        vérifie que les trois copies ne divergent pas.
+      */
+      (function () {
+        try {
+          var stored = localStorage.getItem('sudoku.theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+          var size = localStorage.getItem('sudoku.text-size');
+          if (size === 'large' || size === 'xlarge') {
+            document.documentElement.setAttribute('data-text-size', size);
+          }
+        } catch (e) {
+          /* stockage indisponible : on suivra le système */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/home/main.ts"></script>
+  </body>
+</html>

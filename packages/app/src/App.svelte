@@ -395,6 +395,13 @@
       <p class="tagline">Rien à installer. Aucune publicité, aucun compte, aucun suivi.</p>
     </div>
 
+    <!--
+      Le retour à l'accueil : un vrai lien, parce que c'est une adresse du site.
+      Un bouton piloté au JavaScript perdrait l'ouverture dans un nouvel onglet
+      et la copie de l'adresse, que tout visiteur attend d'un lien.
+    -->
+    <a class="settings-toggle" href={import.meta.env.BASE_URL}>Accueil</a>
+
     <button
       type="button"
       class="settings-toggle"

@@ -28,6 +28,16 @@ const APP = resolve(import.meta.dirname, '../../app');
 const APP_SRC = join(APP, 'src');
 const README = resolve(import.meta.dirname, '../../../README.md');
 
+/**
+ * Les trois entrées du site.
+ *
+ * Écrites ici plutôt que découvertes en parcourant le disque : une entrée
+ * ajoutée sans passer par ce test ne serait vérifiée par rien, et une entrée
+ * supprimée doit casser ici plutôt que de disparaître en silence. La liste est
+ * le contrat, comme celle du papier dans `appStyles.test.ts`.
+ */
+const ENTRIES = ['index.html', 'sudoku/index.html', 'enquete/index.html'];
+
 /** Ce que l'application charge ou référence à l'exécution — pas ses tests. */
 function runtimeSources(directory: string): string[] {
   const found: string[] = [];
@@ -101,17 +111,49 @@ describe('adresses de l’application sous son sous-chemin', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('ne cite dans index.html que des fichiers qui existent', () => {
-    const html = withoutComments(readFileSync(join(APP, 'index.html'), 'utf8'));
-    const paths = [...html.matchAll(/\b(?:href|src)="(\/[^"]*)"/g)].map((match) => match[1]);
-    // Le script d'entrée, l'icône et l'icône Apple : sans eux, la recherche ne
-    // regarde pas au bon endroit.
-    expect(paths.length).toBeGreaterThanOrEqual(3);
+  it('a les trois entrées du site', () => {
+    for (const entry of ENTRIES) expect(existsSync(join(APP, entry)), entry).toBe(true);
+  });
 
-    const missing = paths.filter(
-      (path) => !existsSync(join(APP, 'public', path)) && !existsSync(join(APP, path)),
-    );
-    expect(missing).toEqual([]);
+  it('ne cite dans aucune entrée un fichier qui n’existe pas', () => {
+    for (const entry of ENTRIES) {
+      const html = withoutComments(readFileSync(join(APP, entry), 'utf8'));
+      const paths = [...html.matchAll(/\b(?:href|src)="(\/[^"]*)"/g)].map((match) => match[1]);
+      // Le script d'entrée, l'icône et l'icône Apple : sans eux, la recherche ne
+      // regarde pas au bon endroit.
+      expect(paths.length, entry).toBeGreaterThanOrEqual(3);
+
+      const missing = paths.filter(
+        (path) => !existsSync(join(APP, 'public', path)) && !existsSync(join(APP, path)),
+      );
+      expect(missing, entry).toEqual([]);
+    }
+  });
+
+  it('déclare ses entrées à la construction', () => {
+    // Vite ne construit que ce qu'on lui nomme : une entrée absente d'ici
+    // existerait en développement et manquerait en ligne, sans avertissement.
+    for (const entry of ENTRIES) expect(viteConfig, entry).toContain(`entry('${entry}')`);
+  });
+
+  it('applique le thème avant le premier rendu, dans les trois entrées', () => {
+    /*
+      Le bloc qui lit `localStorage` avant la première peinture est recopié à
+      l'identique dans chaque entrée, et doit l'être : un fichier séparé serait
+      une requête de plus avant le premier pixel, et le flash qu'il évite est
+      exactement ce qu'on paierait.
+
+      Trois copies, c'est trois occasions de diverger — d'où ce test, qui compare
+      le **code** et laisse les commentaires différer.
+    */
+    const scripts = ENTRIES.map((entry) => {
+      const html = readFileSync(join(APP, entry), 'utf8');
+      const script = /<script>([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
+      return withoutComments(script).replace(/\s+/g, ' ').trim();
+    });
+    expect(scripts[0]).toContain('data-theme');
+    expect(scripts[0]).toContain('data-text-size');
+    for (const script of scripts) expect(script).toBe(scripts[0]);
   });
 
   it('sert l’image de partage depuis l’adresse publique', () => {
@@ -120,17 +162,19 @@ describe('adresses de l’application sous son sous-chemin', () => {
     // le même garde-fou que pour la base — sans quoi elle dériverait en
     // silence, l'aperçu tombant sur un 404 que rien dans l'application ne
     // montre.
-    const html = withoutComments(readFileSync(join(APP, 'index.html'), 'utf8'));
-    const image = /<meta property="og:image" content="([^"]+)"/.exec(html)?.[1];
-    expect(image, 'index.html doit déclarer une og:image').toBeDefined();
-
     const readme = readFileSync(README, 'utf8');
     const address = /https:\/\/[\w-]+\.github\.io\/[^\s)`>*]*/.exec(readme)?.[0];
     expect(address, 'le README doit donner l’adresse publique').toBeDefined();
-    expect(image!.startsWith(address!), `${image!} hors de ${address!}`).toBe(true);
 
-    const file = image!.slice(address!.length);
-    expect(existsSync(join(APP, 'public', file)), file).toBe(true);
+    for (const entry of ENTRIES) {
+      const html = withoutComments(readFileSync(join(APP, entry), 'utf8'));
+      const image = /<meta property="og:image" content="([^"]+)"/.exec(html)?.[1];
+      expect(image, `${entry} doit déclarer une og:image`).toBeDefined();
+      expect(image!.startsWith(address!), `${image!} hors de ${address!}`).toBe(true);
+
+      const file = image!.slice(address!.length);
+      expect(existsSync(join(APP, 'public', file)), file).toBe(true);
+    }
   });
 
   it('garde relatives l’adresse de démarrage et la portée de l’application installée', () => {

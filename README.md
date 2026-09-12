@@ -29,12 +29,47 @@ en ligne.
 | `pnpm calibrate` | Compare notre notation à celle de l'oracle (nécessite Java, hors CI) |
 | `pnpm diagnose <grille>` | Chemin de résolution détaillé d'une grille |
 
-Le studio d'impression est dans l'onglet « Imprimer » ; une grille scannée s'ouvre via une adresse
-en `#g=…`.
+Le serveur sert l'accueil sous `/sudoku/`, le Sudoku sous `/sudoku/sudoku/` et Enquête sous
+`/sudoku/enquete/`. Le studio d'impression est dans l'onglet « Imprimer » de la section Sudoku ;
+une grille scannée s'ouvre via une adresse en `#g=…`, que l'accueil sait renvoyer.
+
+## Le site, et ses deux sections
+
+Ce dépôt ne sert plus une application mais un **site à deux sections**, chacune avec sa coquille
+et — à terme — son habillage :
+
+| Adresse | Ce qu'on y trouve | Poids du code de la page |
+|---|---|---|
+| `…/sudoku/` | **L'accueil** : deux jeux, et rien d'autre | 2,4 ko |
+| `…/sudoku/sudoku/` | **Sudoku** | 134 ko |
+| `…/sudoku/enquete/` | **Enquête** | 40 ko |
+
+Ce ne sont pas des onglets d'une même application mais **trois entrées construites séparément**
+(`build.rollupOptions.input`). La conséquence est mesurée dans le tableau : un joueur de sudoku ne
+télécharge jamais le moteur d'Enquête, et l'accueil ne télécharge ni l'un ni l'autre. Un hébergeur
+statique sert cela sans aucune réécriture d'adresse.
+
+**La redondance de `/sudoku/sudoku/` est temporaire, et assumée.** Elle disparaît le jour où le
+site prend un nom de domaine — l'accueil passe à `/`, les sections à `/sudoku/` et `/enquete/`. Le
+choix inverse, un nom de section plus laid pour embellir une adresse provisoire, aurait été le
+mauvais arbitrage.
+
+> ⚠ **La règle qui sauve les cahiers déjà imprimés.** Un QR code imprimé encode `…/sudoku/#g=…` —
+> l'adresse devenue celle de l'accueil, qui ne sait pas jouer une grille. L'accueil **renvoie donc
+> tout `#g=` vers la section Sudoku**, en conservant le code, et `src/home/entry.test.ts` le tient.
+> Le même renvoi couvrira le déménagement vers un domaine, puisque GitHub redirige en conservant le
+> chemin et que le navigateur rattache le fragment.
+
+### Pourquoi un nom de domaine viendra
+
+GitHub Pages **ne redirige pas** l'adresse d'un site de projet quand le dépôt est renommé — c'est
+la seule chose que le renommage n'emporte pas. Le jour où ce dépôt cessera de s'appeler « sudoku »,
+tous les cahiers déjà imprimés cesseraient de s'ouvrir. Un nom de domaine est la prévention que
+GitHub documente lui-même : il rend l'adresse indépendante du nom du dépôt.
 
 ## L'adresse publique
 
-L'application est servie à **<https://jeremyh974.github.io/sudoku/>**, en fichiers statiques :
+Le site est servi à **<https://jeremyh974.github.io/sudoku/>**, en fichiers statiques :
 aucun serveur applicatif, aucun compte, aucune requête réseau une fois la page chargée. Chaque
 push sur la branche principale la republie (`.github/workflows/ci.yml`), et **seulement si** le
 typecheck, le lint et les tests passent. Ce qui part en ligne est le dossier que la CI vient de
@@ -75,6 +110,71 @@ système ; et parce que le sélecteur a **trois** états là où une requête m�
 explicite insère une troisième balise devant les deux autres — le navigateur retient la première
 dont le `media` correspond. Revenir à « système » la retire, comme l'attribut de thème qu'on retire
 plutôt que d'y écrire « système ».
+
+## Enquête — un second type de puzzle
+
+La section **Enquête** n'est pas une variante de sudoku, c'est un autre jeu. Un plan de maison
+découpé en **pièces**, du mobilier posé dessus, et autant de personnes que de rangées — **une par
+rangée et une par colonne**. Chaque suspect porte un indice ; l'un d'eux est la victime, « seule
+avec le meurtrier ». Une règle change toute la géométrie : **« à côté de » veut dire voisin
+orthogonal _et dans la même pièce_**. Les murs bloquent le regard, donc le plan est le sujet.
+
+Le genre a son étalon grand public, [`murdoku.com`](https://murdoku.com) — bestseller *USA Today*,
+seize suspects sur 16×16 au palier le plus dur. Trois faiblesses y ont été **mesurées**, pas
+ressenties, et ce sont elles qui ont dicté ce qui suit.
+
+| Chez la référence | Preuve relevée | Ici |
+|---|---|---|
+| Affaires **et indices d'aide** écrits à la main, un par un | Le JSON d'une affaire ne contient que du texte : cinq `player_hint_N_fr` rédigés | Tout est **engendré** : décor, disposition, indices, unicité, minimisation |
+| Localisation fragile — des avis rapportent des traductions qui rendent une affaire insoluble | Leur propre corpus laisse fuiter `Room 2`, `Salle 6`, `Pièce 4`, `Grotte (copie)` | **Un indice n'est pas du texte, c'est une contrainte typée** ; le français en est un rendu |
+| Plan **inopérable au clavier et invisible au lecteur d'écran** | Sur la page : **0** élément focalisable dans le plan, **0** rôle de grille, **0** région `aria-live`, **225 `<img>` sur 226 sans `alt`**, trois `<canvas>` sans rôle ni nom | Chaque case est un élément réel, focalisable, dont le nom énonce la pièce, le mobilier et l'occupant |
+
+### L'aide ne peut pas se désynchroniser
+
+Elle n'est pas rangée à côté de l'affaire : elle se **recalcule**, et depuis l'état du joueur. Le
+registre repart de ce qui est posé sur le plan, et sa première étape *est* la prochaine déduction
+possible. Les trois paliers sont ceux du sudoku — où regarder, quel raisonnement, puis le coup.
+
+La validation suit la même logique : elle relit les **indices**, pas le corrigé. Comparer au
+corrigé ne saurait dire que « trois erreurs », ce qui n'enseigne rien et laisse deviner la forme de
+la solution. Relire les indices dit **lequel** est contredit.
+
+### Ce qui est affiché, et ce qui ne le sera pas
+
+Le score du sudoku est calibré : `serate` existe, on lui compare grille par grille. **Ce genre de
+puzzle n'a aucun oracle.** La règle du projet s'applique donc telle quelle — *une dimension sans
+oracle se présente comme un compte*.
+
+Une affaire affiche donc deux **comptages** : le nombre de déductions de son chemin, et **la
+technique la plus difficile qu'il exige** — un fait vérifiable sur notre registre, nommé et
+versionné. Aucun score, aucune étoile, aucun palier inventé, et l'écran **dit lui-même** que cet
+ordre est le nôtre et n'est calibré contre rien. Ce qui est garanti, en revanche : l'affaire
+n'admet qu'une solution, et le registre sait la trouver **sans jamais essayer une case au hasard** —
+une affaire qu'il ne termine pas n'est pas étiquetée « experte », elle n'est pas produite.
+
+### Le plateau est dessiné, et cela ne coûte aucune règle
+
+C'est un écart assumé à la direction artistique de l'incrément 10, qui disait « le plateau est une
+surface d'information, pas une scène ». Le plan des pièces **est** le sujet des indices, et un plan
+qui ne se voit pas ne se raisonne pas.
+
+Ce que l'écart ne coûte pas : **aucune exemption** au test des jetons. La scène reçoit une palette
+bornée, déclarée dans `app.css` comme le reste, qui suit le thème. Et le dessin reste une couche de
+présentation : le mobilier est **nommé** dans le nom accessible de chaque case, un suspect porte sa
+**lettre** et pas seulement une pastille, et une case fermée le dit en toutes lettres. Le dessin
+peut disparaître sans que l'affaire devienne injouable.
+
+Les contrastes de cette palette ont été **mesurés**, pas estimés, et la mesure a trouvé un vrai
+défaut : en thème sombre, les murs valaient 2,87:1 contre la teinte de pièce la plus sombre — sous
+le seuil de 3:1 que WCAG demande d'un objet graphique porteur d'information, et un mur est
+exactement cela, puisque c'est par lui qu'une pièce se lit. À l'œil, ils semblaient parfaitement
+nets. Le trait sombre a donc été éclairci (3,8:1) et ne suit plus celui du sudoku.
+
+Mesuré aussi : une affaire 6×6 coûte **122 ms** à la médiane, 471 ms au pire — elle passe par le
+Worker, comme les grilles. La propagation, le solveur exact et le registre valent 0,1 ms chacun. Et
+sur 375 px : plan de 343 px, cases de 56 px, tous les boutons à 44 px ou plus, aucun débordement
+horizontal, et le réglage « gros caractères » fait bien passer les lettres de 24,0 à 30,5 px — le
+levier `--text-scale`, celui qui agit là où la largeur est déjà bornée par l'écran.
 
 ## Le parti pris
 
@@ -748,6 +848,10 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   technique sur un corpus de grilles réelles, pas seulement ceux que le registre retient.
 - **Aucune grille n'est résolue en devinant** : si le raisonnement ne suffit pas, le solveur
   s'arrête au lieu d'appeler le solveur brut.
+- **Aucune affaire d'Enquête n'est distribuée si le registre ne la termine pas** — le dernier
+  filtre du générateur n'est pas l'unicité, c'est la résolubilité. Et aucun de ses indices ne peut
+  être faux : ils sont puisés dans une réserve construite en vérifiant chaque énoncé sur la
+  solution.
 - **Aucune limite d'erreurs**, et une annulation qui rend un geste entier — la valeur, les notes
   et les marques effacées chez les vingt voisines. Bornée à 200 gestes, ce qui est dit plutôt que
   laissé croire.
