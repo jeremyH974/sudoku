@@ -6,8 +6,8 @@ import { deduce } from '../deduce/deduce.js';
 import { REGISTRY_VERSION } from '../deduce/types.js';
 import { solveExact } from '../exact/solver.js';
 import { buildScene } from '../scene/scene.js';
-import { loadDecor } from '../scene/decors.js';
-import type { Scene } from '../scene/types.js';
+import { DECORS, loadDecor } from '../scene/decors.js';
+import type { Decor, Scene } from '../scene/types.js';
 import type { CaseFile, Puzzle } from '../types.js';
 import { candidatesFor, crimeScenes, familyOf, FAMILY_WEIGHT } from './candidates.js';
 
@@ -58,6 +58,13 @@ export interface ComposeOptions {
    * d'abandonner. La médiane, elle, ne bouge pas (135 ms) — et une affaire se
    * compose dans un Worker, sous un libellé qui dit « Composition… ».
    * Faire attendre trois secondes vaut mieux que ne rien rendre.
+   *
+   * ⚠ Remesuré depuis, les quatre décors mêlés : p50 282 ms, p90 931 ms,
+   * p99 3 051 ms, pire **4 352 ms**, toujours zéro graine stérile sur 400. Les
+   * trois décors ajoutés sont plus lents que le manoir — le pavillon surtout,
+   * dont les cinq pièces donnent des indices de force trop voisine pour que le
+   * retrait glouton tranche vite. Le seuil du banc est passé à 6 000 ms en
+   * conséquence, avec la mesure écrite à côté.
    */
   readonly attempts?: number;
   /**
@@ -69,6 +76,34 @@ export interface ComposeOptions {
    * suivante coûte une dizaine de millisecondes.
    */
   readonly maxCards?: number;
+  /**
+   * Un décor fourni directement, plutôt que cherché dans le registre.
+   *
+   * C'est la couture prévue pour le jour où les décors seront **engendrés** : un
+   * générateur produit un objet, pas un identifiant, et n'a aucune raison de
+   * l'inscrire dans un registre global avant de savoir s'il est bon. Prend le
+   * pas sur `decorId` quand les deux sont donnés.
+   *
+   * Elle sert déjà : c'est ainsi qu'un décor volontairement dégénéré est soumis
+   * au générateur dans les tests, sans être livré aux joueurs pour autant.
+   */
+  readonly decor?: Decor;
+}
+
+/**
+ * Le décor d'une graine, quand l'appelant n'en impose pas.
+ *
+ * Trois décors ont été écrits, et aucun joueur ne les aurait vus : `composeCase`
+ * gardait « manoir » en dur et rien, dans l'application, ne passait autre chose.
+ * Un décor livré mais jamais choisi est du poids mort.
+ *
+ * Le tirage a **son propre générateur**, semé sur un dérivé de la graine, pour
+ * ne pas consommer un tour de celui qui place les suspects : les deux décisions
+ * restent indépendantes et lisibles. Il reste entièrement déterministe — même
+ * graine, même décor —, ce que la promesse du lien partagé exige.
+ */
+function decorForSeed(seed: string): string {
+  return DECORS[createRng(`${seed}:décor`).nextInt(DECORS.length)].id;
 }
 
 /**
@@ -79,12 +114,18 @@ export interface ComposeOptions {
  * qui ne rend jamais la main est une fabrique qui fige un onglet.
  */
 export function composeCase(seed: string, options: ComposeOptions = {}): CaseFile | null {
-  const decorId = options.decorId ?? 'manor';
   const attempts = options.attempts ?? 200;
   const maxCards = options.maxCards ?? 2;
 
   const rng = createRng(seed);
-  const scene = buildScene(loadDecor(decorId));
+  const scene = buildScene(options.decor ?? loadDecor(options.decorId ?? decorForSeed(seed)));
+  /*
+    L'identifiant rangé dans l'affaire vient du décor **réellement employé**, pas
+    de l'option reçue : c'est lui que `openCase` rechargera. Une affaire composée
+    sur un décor non enregistré porte donc un identifiant introuvable, et c'est
+    juste — elle n'est ni partageable ni rejouable, seulement mesurable.
+  */
+  const decorId = scene.id;
   const suspects = castOf(scene.size);
 
   for (let attempt = 0; attempt < attempts; attempt++) {

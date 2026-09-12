@@ -59,9 +59,20 @@ describe('performance du mode Enquête', () => {
       deduce(puzzles[Math.abs(i) % puzzles.length]);
     });
 
-    // Un plancher, pas une cible : la mesure dépend de la machine, mais une
-    // fabrique qui dépasserait la seconde au pire cas devrait passer dans un
-    // Worker avant d'atteindre un joueur.
-    expect(timings[timings.length - 1]).toBeLessThan(3000);
+    /*
+      Un plafond, pas une cible : la mesure dépend de la machine.
+
+      Relevé sur 400 graines, les quatre décors mêlés — p50 282 ms, p90 931 ms,
+      p99 3 051 ms, pire 4 352 ms, zéro graine stérile. Le seuil était à 3 000,
+      calibré quand le manoir était seul ; les trois décors ajoutés sont plus
+      lents, et le pavillon le plus lent des quatre. C'est le prix de la
+      variété, pas une régression de code.
+
+      Ce que la queue coûte vraiment : une composition sur quatre cents fait
+      attendre quatre secondes. Elle se fait dans un Worker, sous un libellé qui
+      dit « Composition… ». Si ce seuil devait être abaissé un jour, ce serait en
+      touchant le budget `attempts` — et en récupérant des graines stériles.
+    */
+    expect(timings[timings.length - 1]).toBeLessThan(6000);
   });
 });
