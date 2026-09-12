@@ -105,6 +105,35 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   d'écrire une valeur. Tout accès à `localStorage` est enveloppé dans un `try` : en navigation
   privée, il lève.
 
+## Les styles tiennent par des jetons
+
+`packages/app/src/app.css` porte **toute** l'échelle : les couleurs, 4 rayons, 7 espaces, 6 tailles
+de texte, 3 interlignes, 2 élévations, 3 durées, les cibles tactiles et les mesures de lecture. Un
+fichier de vue n'écrit **aucune** valeur littérale : il cite un jeton.
+
+Ce n'est pas une consigne de style, c'est vérifié — `packages/cli/src/appStyles.test.ts` casse sur
+un `border-radius` littéral, une `font-size` en rem hors jeton, une graisse hors
+{400, 500, 600, 700}, une couleur écrite ailleurs que dans `app.css`, un mouvement de plus de
+200 ms, un `:hover` qui n'est pas sous `@media (hover: hover)`, ou un sélecteur qui a un `:hover`
+sans `:active`. Les deux derniers sont des corrections de défauts vivants : au doigt, un navigateur
+mobile émule le survol au toucher **et le laisse collé**, et sur tactile `:active` est le seul état
+qui existe.
+
+**Une exception, permanente : le papier.** `print/PrintSheet.svelte`, `print/PrintableGrid.svelte`,
+`print/QrCode.svelte` et `print/print.css` vivent en millimètres et n'ont pas de thème —
+`var(--text)` y imprimerait du gris clair. L'exception est **la liste de chemins du test**, pas un
+commentaire : un fichier renommé en sort au lieu d'y entrer en silence.
+
+> ⚠ Deux pièges avant d'y toucher. Les règles de jetons ne lisent que les blocs `<style>`, parce
+> qu'`App.svelte` calcule trois tailles en ligne — **la taille du glyphe *est* le libellé du
+> réglage**. La règle « aucune unité de fenêtre », elle, lit tout le fichier : un `vw` dans un
+> `style=` est tout aussi mauvais. Et `print/PrintStudio.svelte` contient un `{@html '<style>…'}`
+> dans son `<script>`, qui n'est pas une feuille de style du composant.
+
+Une valeur **mesurée** n'entre pas dans une échelle : ni `--thumb-bar-reserve` (10,9 rem, la
+hauteur relevée sous le pouce), ni les points de rupture. Mettre un point de rupture dans une
+échelle d'espacement est la façon canonique de pourrir un design system.
+
 ## Honnêteté envers le joueur
 
 Ne jamais afficher une difficulté qui n'est pas mesurée. Le nombre d'indices ne prédit pas la

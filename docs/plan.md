@@ -224,7 +224,29 @@ Tracées ici pour mémoire, car elles changent des décisions structurantes :
 
 ## Points ouverts (non bloquants)
 
-1. **Licence** — MIT (adoption) vs Apache-2.0 (protection brevets). À trancher au moment de publier.
+1. **Licence** — MIT (adoption) vs Apache-2.0 (protection brevets). **Reste ouvert, et c'est le
+   choix.** Le dépôt est public depuis l'incrément 10, **sans fichier `LICENSE`** : tous droits
+   réservés. Le code est lisible, pas réutilisable ; l'application s'utilise librement. C'est la
+   seule position qui ne ferme aucune porte — on peut encore donner, on ne peut pas reprendre.
 2. **Nombre de niveaux publics** — 6 (norme du marché) ou 12 (sudoku.coach). Le moteur produit un score continu : le découpage est un réglage, pas une décision d'architecture.
 3. **UX de coloration des candidats sur mobile** — sélectionner 1 candidat parmi 9 dans une cellule, sur un écran de 375 px, tout en respectant les cibles de 44×44 px, est un vrai problème de conception que la concurrence résout mal. À traiter comme un sujet de design à part entière au moment de l'incrément 6, pas comme un composant à coder.
-4. **Design visuel** — l'ambition « premium » n'apparaît dans aucun incrément. À arbitrer : une passe de direction artistique avant l'incrément 6, ou un design system minimal assumé.
+4. **Design visuel** — **tranché à l'incrément 10**, et par aucune des deux options proposées ici.
+   Ce n'était pas « un design system minimal assumé » : l'assumer aurait supposé l'avoir écrit. La
+   mesure a montré la troisième situation, celle que personne ne choisit — une couche de couleurs
+   excellente, et tout le reste improvisé fichier par fichier : 10 valeurs de rayon sur 40 sites,
+   22 tailles de texte sur 62, cinq surfaces « carte » différentes, **aucun** `:active` sur une
+   application dont la cible première est tactile, et cinq `:hover` dont aucun n'était protégé par
+   `@media (hover: hover)` — un survol qui restait donc collé au doigt.
+
+   La direction retenue est **« l'encre et la mesure »** : typographique, plate, et qui cite le
+   papier au lieu d'inventer un second monde visuel. Trois règles — rien n'est décoré qui ne soit
+   mesuré ; l'écran cite le papier (`--font-paper`, zéro octet) ; le plateau est une surface
+   d'information, pas une scène. Et quatre refus écrits pour ne pas y revenir : **aucune webfont**
+   (25 à 40 ko sur 79, pour des chiffres tabulaires qu'on a déjà gratuitement), aucun dégradé
+   décoratif, aucune animation d'entrée, et pas de changement de la couleur de marque.
+
+   Elle tient par des jetons — 4 rayons, 7 espaces, 6 tailles, 3 interlignes, 2 élévations,
+   3 durées — et surtout par `packages/cli/src/appStyles.test.ts`, qui refuse en CI un rayon
+   littéral, une taille en rem hors jeton, une graisse que la police ne sait pas rendre, une
+   couleur hors `app.css`, un mouvement de plus de 200 ms, un `:hover` hors `@media (hover: hover)`
+   ou un survol sans son `:active`. Un commentaire se contourne de bonne foi ; un test, non.

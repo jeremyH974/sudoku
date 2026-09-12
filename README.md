@@ -57,6 +57,25 @@ consulter et d'en faire un fork sur GitHub même. Le choix entre MIT et Apache-2
 (`docs/plan.md`, point ouvert n° 1) : le trancher plus tard n'ouvre qu'une porte, le trancher trop
 tôt pourrait en fermer une.
 
+## Partager l'adresse
+
+Un lien envoyé dans une conversation montre un aperçu : `og:title`, `og:description`, et une image
+de 1200 × 630 qui montre **un vrai plateau avec un indice ouvert** — capturée sur la construction
+de production, pas dessinée à côté du produit.
+
+`og:url` est **omis** à dessein : les réseaux prennent alors l'adresse demandée, toujours juste, là
+où une adresse écrite en dur vieillirait au premier déménagement. L'image n'a pas ce luxe — les
+robots ne résolvent pas tous un chemin relatif —, alors `packages/cli/src/appBase.test.ts` la tient
+à l'adresse annoncée ci-dessus, exactement comme il tient déjà la base de Vite. Elle est en
+revanche **exclue du précache** : `png` fait partie des motifs, donc sans cette exclusion 47 ko
+partiraient dans le cache de chaque visiteur pour une image que seuls les robots ouvrent.
+
+Sur Android, la barre d'adresse suit enfin le thème. Deux `theme-color` sous leur `media` pour le
+système ; et parce que le sélecteur a **trois** états là où une requête média en a deux, un choix
+explicite insère une troisième balise devant les deux autres — le navigateur retient la première
+dont le `media` correspond. Revenir à « système » la retire, comme l'attribut de thème qu'on retire
+plutôt que d'y écrire « système ».
+
 ## Le parti pris
 
 La quasi-totalité des applications de Sudoku déduit la difficulté du **nombre d'indices**
@@ -265,6 +284,72 @@ laisse `prefers-color-scheme` reprendre la main et suivre un basculement sans re
 
 La préférence est appliquée par un script inline **avant le premier rendu** : sans cela, la page
 s'afficherait une fraction de seconde en clair avant de basculer — un flash blanc en pleine nuit.
+
+## Les réglages, et les aides qu'on peut éteindre
+
+Les réglages — taille du texte et thème — occupaient la place de la navigation : l'en-tête portait
+le titre, **puis** les préférences, et les onglets venaient après, sur chacun des cinq écrans. Ils
+sont maintenant repliés derrière un bouton « Réglages », dans l'en-tête : un repère de page existe
+déjà, le panneau s'y range sans qu'on en ajoute un.
+
+Le même panneau porte les **aides pendant la partie**, activables une par une :
+
+| Aide | Ce qu'elle fait |
+|---|---|
+| Surligner les chiffres identiques | Entoure d'un liseré les cases qui portent le chiffre de la case choisie |
+| Surligner la ligne, la colonne et le bloc | Teinte les cases que la case choisie voit |
+| Signaler les conflits | Marque les cases en contradiction — par un fond **et** une barre, jamais par la couleur seule |
+| Compter les erreurs de saisie | Affiche le compte dans la ligne d'état |
+
+Elles existent parce qu'un premier regard extérieur s'est arrêté là : « pourquoi quand j'ajoute un
+chiffre dans une case, ça me met les mêmes chiffres dans les autres carrés ? » Le surlignage des
+chiffres identiques avait été lu comme **une saisie de l'application**. D'où deux corrections : le
+liseré a remplacé le fond plein — un cadre ne ressemble pas à un chiffre posé — et les aides
+s'éteignent. Un bouton « Aides pendant la partie · 4 sur 4 · Modifier » les rend trouvables depuis
+l'écran de jeu, puisque c'est là qu'on les cherche.
+
+## L'échelle, et ce qui la tient
+
+Neuf incréments avaient produit une couche de couleurs excellente — nommée par rôle, auditée en
+contraste — et, à côté, un style improvisé fichier par fichier. Compté avant d'y toucher :
+
+| Axe | Avant | Après |
+|---|---|---|
+| `border-radius` | 10 valeurs sur 40 sites (`9px`, `7px`, `6px`, `5px`, `3px`…) | 4 jetons |
+| `font-size` | 22 valeurs en rem sur 62 sites — `0.85`, `0.86`, `0.87` et `0.88` sont quatre tailles dans un demi-pixel | 6 jetons |
+| Espacement | ~38 magnitudes | 7 jetons |
+| `:active` | **aucun**, sur une application dont la cible première est le doigt | partout où l'on presse |
+| `:hover` | 5 règles, **aucune** sous `@media (hover: hover)` | protégées, et étendues |
+
+Les deux dernières lignes sont des **défauts**, pas des inégalités de style : au doigt, un
+navigateur mobile émule le survol au toucher et le laisse collé — on posait un chiffre et la touche
+restait éclairée —, et sur tactile `:active` est le seul état qui existe.
+
+Les graisses `620` et `650` ont disparu après mesure : le même texte rendu en canvas puis comparé
+pixel à pixel donne **zéro** différence entre 620 et 600, **zéro** entre 650 et 700. Les chiffres
+donnés du plateau et les candidats marqués avaient donc déjà la même graisse, sans que personne
+l'ait voulu.
+
+Ce qui tient l'échelle n'est pas ce paragraphe : c'est `packages/cli/src/appStyles.test.ts`, onze
+règles qui refusent un rayon littéral, une taille en rem hors jeton, une graisse hors
+{400, 500, 600, 700}, une couleur hors `app.css`, un mouvement de plus de 200 ms, un `:hover` hors
+`@media (hover: hover)`, un survol sans son `:active`, ou une unité de fenêtre. **Une seule
+exception, permanente : les quatre fichiers du papier**, qui vivent en millimètres et n'ont pas de
+thème ; elle prend la forme d'une liste de chemins, de sorte qu'un fichier renommé en sorte au lieu
+d'y entrer en silence.
+
+Le reste se voit plus qu'il ne se raconte : les huit glyphes Unicode `☀ ☾ ◐ ◀ ▶ ⏮ ⏭ ✓` sont devenus
+des tracés — leur couverture et leur poids optique variaient d'un appareil à l'autre, or la coche
+dit « défi résolu » sans la couleur ; la marque du damier est posée à côté du titre, en
+`currentColor` et dimensionnée en `em`, donc soumise au réglage de taille ; la barre de progression
+du studio d'impression est dessinée, la balise native ignorant la palette en thème sombre.
+
+**Aucune webfont**, et c'est un refus argumenté : un variable woff2 sous-ensemblé coûterait 25 à
+40 ko sur les 79 ko compressés de l'application (61,7 de JavaScript, 8,4 pour le moteur en worker,
+7,1 de CSS, 2,1 de runtime Workbox), pour une application dont l'argument est de peser peu et de
+tourner hors ligne. Le seul gain technique réel — les chiffres tabulaires — est déjà là, et
+gratuit. Toute la passe, jetons, états, icônes, marque et aides comprises, a coûté **1,4 ko
+compressé**.
 
 ## Sur un téléphone, et pour qui en a besoin
 
@@ -678,6 +763,14 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   vérifiée unique, et sa technique la plus difficile comparée à la leçon qu'elle illustre.
 - **Aucune unité de fenêtre dans les styles de l'application** — c'est ce qui rendait le réglage
   de taille du texte inopérant là où il sert le plus.
+- **Aucune valeur de style littérale hors de l'échelle** : rayons, tailles, graisses, couleurs et
+  durées citent un jeton d'`app.css`. Le papier est la seule exemption, et elle est écrite comme
+  une liste de chemins, pas comme un commentaire.
+- **Tout survol est sous `@media (hover: hover)`, et tout sélecteur qui a un survol a un `:active`.**
+  Le premier empêche un survol de rester collé au doigt ; le second garantit qu'un contrôle répond
+  à l'appui — le seul état qui existe sur tactile.
+- **L'adresse de l'image de partage ne peut ni diverger de l'adresse publique** annoncée dans ce
+  fichier, **ni désigner un fichier absent.**
 - **Une position n'a pas de niveau, et n'en reçoit aucun.** Un exercice affiche la technique qu'il
   enseigne, jamais la difficulté de la grille dont il est extrait.
 - **La structure d'accessibilité est vérifiée par axe sur les cinq onglets** — mais ni le
