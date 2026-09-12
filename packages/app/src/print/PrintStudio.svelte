@@ -146,7 +146,18 @@
     </button>
 
     {#if generating}
-      <progress max={count} value={produced}></progress>
+      <!--
+        La barre est l'image d'une information déjà dite — le bouton annonce
+        « Génération… 3 / 6 » —, elle est donc masquée aux lecteurs d'écran. Et
+        dessinée plutôt que native : le `<progress>` natif ignorait la palette,
+        thème sombre compris.
+      -->
+      <div class="progress" aria-hidden="true">
+        <div
+          class="progress-value"
+          style={`width: ${String(Math.min(100, (produced / Math.max(count, 1)) * 100))}%`}
+        ></div>
+      </div>
       <p class="hint">
         Les niveaux élevés demandent une recherche dirigée : quelques secondes par grille sont
         normales.
@@ -206,13 +217,13 @@
     display: flex;
     flex: 0 0 18rem;
     flex-direction: column;
-    gap: 0.7rem;
+    gap: var(--space-3);
     max-width: 20rem;
   }
 
   h2 {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: var(--text-md);
   }
 
   label {
@@ -220,7 +231,7 @@
     flex-direction: column;
     gap: var(--space-1);
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
   }
 
   label.checkbox {
@@ -236,7 +247,7 @@
     min-height: var(--tap);
     padding: 0.35rem var(--space-2);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
     font: inherit;
@@ -245,16 +256,16 @@
   .hint {
     margin: -0.2rem 0 0.2rem;
     color: var(--text-faint);
-    font-size: 0.78rem;
-    line-height: 1.45;
+    font-size: var(--text-sm);
+    line-height: var(--leading-prose);
   }
 
   .notice {
     margin: 0;
-    padding: var(--space-2) 0.7rem;
-    border-radius: 7px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
     background: var(--surface-sunken);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
   }
 
   .primary,
@@ -265,6 +276,7 @@
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
   .primary {
@@ -278,14 +290,48 @@
     color: var(--text);
   }
 
+  /* Le curseur d'attente est informatif ici : la génération est en cours. */
   .primary:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: progress;
   }
 
-  progress {
-    width: 100%;
+  .primary:active:not(:disabled) {
+    background: var(--accent-active);
+    transition-duration: 0s;
+  }
+
+  .secondary:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .secondary:hover {
+      background: var(--surface-hover);
+    }
+  }
+
+  /*
+    Sans transition : elle avance d'une grille à la fois, et un fondu la ferait
+    paraître en retard sur le compteur du bouton.
+  */
+  .progress {
     height: 0.5rem;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--surface-sunken);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  .progress-value {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
   }
 
   .preview {
@@ -294,9 +340,9 @@
   }
 
   .empty {
-    max-width: 30rem;
+    max-width: var(--measure);
     color: var(--text-muted);
-    line-height: 1.55;
+    line-height: var(--leading-prose);
   }
 
   /*
@@ -310,13 +356,13 @@
     gap: var(--space-5);
     align-items: center;
     padding: var(--space-5);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     background: var(--surface-sunken);
     overflow-x: auto;
   }
 
   .sheets :global(.sheet) {
     flex: none;
-    box-shadow: 0 2px 12px rgb(0 0 0 / 22%);
+    box-shadow: var(--shadow-floating);
   }
 </style>

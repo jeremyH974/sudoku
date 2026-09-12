@@ -60,11 +60,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--space-4);
-    padding: 0.7rem 0.9rem;
+    padding: var(--space-3) var(--space-4);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     background: var(--surface-sunken);
-    font-size: 0.88rem;
+    font-size: var(--text-sm);
   }
 
   .banner.update {
@@ -77,16 +77,17 @@
 
   .actions {
     display: flex;
-    gap: 0.4rem;
+    gap: var(--space-2);
   }
 
   button {
     min-height: var(--tap);
     padding: 0.35rem 0.8rem;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     font: inherit;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     cursor: pointer;
+    transition: background-color var(--dur-quick) var(--ease);
   }
 
   .primary {
@@ -100,5 +101,29 @@
     border: 1px solid var(--border);
     background: none;
     color: var(--text-muted);
+  }
+
+  .primary:active {
+    background: var(--accent-active);
+    transition-duration: 0s;
+  }
+
+  .ghost:active {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+
+  /*
+    Le survol n'existe qu'avec un pointeur qui survole : sans cette garde, un
+    navigateur mobile l'émule au toucher et le laisse collé.
+  */
+  @media (hover: hover) and (pointer: fine) {
+    .primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .ghost:hover {
+      background: var(--surface-hover);
+    }
   }
 </style>

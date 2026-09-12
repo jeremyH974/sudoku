@@ -77,9 +77,10 @@ describe('styles de l’application', () => {
  * faute d'une échelle à laquelle se tenir. `app.css` porte désormais cette
  * échelle, et les règles ci-dessous empêchent d'en sortir.
  *
- * Elles ne lisent que les blocs `<style>` (voir `styleOf`), et elles épargnent
- * deux familles de fichiers : le papier, pour toujours, et les fichiers pas
- * encore migrés, le temps de la migration seulement.
+ * Elles ne lisent que les blocs `<style>` (voir `styleOf`), et n'épargnent que
+ * le papier. Pendant la migration, une liste exemptait aussi les fichiers pas
+ * encore repris ; chaque commit en retirait un, et elle a disparu avec le
+ * dernier — un cliquet qui ne retient plus rien est du bruit.
  */
 
 /**
@@ -94,19 +95,6 @@ const PAPER = [
   'print/QrCode.svelte',
   'print/print.css',
 ];
-
-/**
- * Le cliquet de la migration : les fichiers pas encore mis sur les jetons.
- *
- * Chaque commit de migration en retire un, et un fichier qui n'y figure plus
- * obéit aussitôt à toutes les règles — plutôt qu'un total qui baisserait en
- * laissant régresser un fichier déjà migré. Le dernier commit de la migration
- * supprime la liste : un cliquet qui ne retient plus rien est du bruit.
- */
-const NOT_YET_MIGRATED = new Set([
-  'lib/UpdateBanner.svelte',
-  'print/PrintStudio.svelte',
-]);
 
 /** Les graisses qu'une police système statique sait rendre ; les autres s'arrondissent. */
 const WEIGHTS = new Set(['400', '500', '600', '700', 'normal', 'bold', 'inherit']);
@@ -147,10 +135,8 @@ const sheets: Sheet[] = styleFiles(APP_SRC).map((file) => ({
 }));
 const appCss = sheets.find((sheet) => sheet.path === 'app.css')?.css ?? '';
 
-const migrated = (sheet: Sheet): boolean => !NOT_YET_MIGRATED.has(sheet.path);
-/** Tenu aux jetons : ni le fichier qui les déclare, ni le papier, ni un fichier en attente. */
-const onTokens = (sheet: Sheet): boolean =>
-  sheet.path !== 'app.css' && !PAPER.includes(sheet.path) && migrated(sheet);
+/** Tenu aux jetons : tout, sauf le fichier qui les déclare et le papier. */
+const onTokens = (sheet: Sheet): boolean => sheet.path !== 'app.css' && !PAPER.includes(sheet.path);
 
 /** Les valeurs d'une propriété, telles qu'écrites. */
 function values(css: string, declaration: RegExp): string[] {
@@ -202,8 +188,8 @@ const baseOf = (selector: string): string =>
 describe('discipline des jetons', () => {
   it('reconnaît bien ce qu’elle inspecte', () => {
     // Sans ces bornes, une expression devenue fausse rendrait les règles
-    // ci-dessous vertes et muettes. Elles portent sur tous les fichiers, en
-    // attente de migration compris : c'est la mécanique qu'on éprouve.
+    // ci-dessous vertes et muettes. Elles portent sur tous les fichiers, papier
+    // compris : c'est la mécanique qu'on éprouve, pas la discipline.
     expect(sheets.flatMap(({ css }) => values(css, RADIUS)).length).toBeGreaterThan(30);
     expect(sheets.flatMap(({ css }) => values(css, FONT_SIZE)).length).toBeGreaterThan(40);
     expect(
@@ -243,7 +229,7 @@ describe('discipline des jetons', () => {
     // exactement comme 600 et 650 exactement comme 700. Les chiffres donnés du
     // plateau (650) avaient ainsi la graisse des candidats marqués (700), sans
     // que personne l'ait voulu.
-    const offenders = sheets.filter(migrated).flatMap(({ path, css }) =>
+    const offenders = sheets.flatMap(({ path, css }) =>
       values(css, FONT_WEIGHT)
         .filter((value) => !WEIGHTS.has(value))
         .map((value) => `${path} : font-weight: ${value}`),
@@ -284,7 +270,7 @@ describe('discipline des jetons', () => {
     // Au doigt, un navigateur mobile émule le survol au toucher — et le laisse
     // collé jusqu'au toucher suivant : la touche du pavé reste éclairée après
     // qu'on a posé le chiffre. Un survol n'a de sens que sous `(hover: hover)`.
-    const offenders = sheets.filter(migrated).flatMap(({ path, css }) =>
+    const offenders = sheets.flatMap(({ path, css }) =>
       rulesOf(css)
         .filter((rule) => rule.selector.includes(':hover'))
         .filter((rule) => !rule.within.some((at) => /@media[^{]*\(hover:\s*hover\)/.test(at)))
@@ -298,7 +284,7 @@ describe('discipline des jetons', () => {
     // au survol mais pas à l'appui est muet sur la cible visée en premier. On ne
     // peut pas savoir d'un texte CSS ce qui est interactif — mais ce qui a un
     // survol l'est, et c'est lui qu'on apparie.
-    const offenders = sheets.filter(migrated).flatMap(({ path, css }) => {
+    const offenders = sheets.flatMap(({ path, css }) => {
       const rules = rulesOf(css);
       const pressed = new Set(
         rules
@@ -329,9 +315,7 @@ describe('discipline des jetons', () => {
   it('n’exempte que des fichiers qui existent', () => {
     // Un renommage élargirait sinon l'exemption en silence : le fichier renommé
     // échapperait à toutes les règles sans que rien ne le dise.
-    const missing = [...PAPER, ...NOT_YET_MIGRATED].filter(
-      (path) => !existsSync(join(APP_SRC, path)),
-    );
+    const missing = PAPER.filter((path) => !existsSync(join(APP_SRC, path)));
     expect(missing).toEqual([]);
   });
 });
