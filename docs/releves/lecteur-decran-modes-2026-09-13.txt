@@ -1,0 +1,52 @@
+Démarrage de NVDA (muet)…
+
+──────────────────────────────────────────────
+  CLIQUE SUR LA FENÊTRE CHROME « Sudoku ».
+──────────────────────────────────────────────
+
+  …focus ailleurs (8 sondages) : « [autre fenêtre, caviardé] »
+  → « Sudoku - Google Chrome »
+
+→ Ne touche plus à rien.
+
+[tab.1] Tab n°1
+      « bannière région, Accueil, lien »
+[tab.2] Tab n°2
+      « Réglages, bouton, réduit »
+[tab.3] Tab n°3
+      « Sections, navigation région, Jouer, bouton, page courante »
+[tab.4] Tab n°4
+      « Jouer, bouton, page courante »
+[tab.5] Tab n°5
+      « Apprendre, bouton »
+[tab.6] Tab n°6
+      « Progression, bouton »
+[tab.7] Tab n°7
+      « Analyse, bouton »
+[tab.8] Tab n°8
+      « Imprimer, bouton »
+
+── Mode navigation (celui où NVDA arrive) ──
+[A1] NVDA+Tab : où est le focus ?
+      « Imprimer, bouton, focalisé »
+[A2] → flèche droite
+      « m »
+[A3] ↓ flèche bas
+      « principale région, tableau, de 9 lignes et 9 colonnes, Grille de sudoku, 9 lignes sur 9 colonnes »
+
+── Mode formulaire, forcé (NVDA+Espace) ──
+[B0] NVDA+Espace
+      « principale région »
+[B1] NVDA+Tab : où est le focus ?
+      « Grille de sudoku, 9 lignes sur 9 colonnes, tableau, focalisé, de 9 lignes et 9 colonnes »
+[B2] → flèche droite
+      «  »
+[B3] ↓ flèche bas
+      «  »
+[B4] saisir le chiffre 4
+      «  »
+[B5] Tab (sortir du plateau)
+      « ligne 1, colonne 1, vide, ligne 1, colonne 1 »
+
+Arrêt de NVDA…
+Relevé écrit dans modes.json

@@ -96,14 +96,28 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   pour tout ce qui est en `rem`, et `--text-scale` pour les chiffres à l'intérieur d'une grille
   dont la largeur est déjà bornée par l'écran.
 - `role="grid"` est **gardé**, et la raison est mécanique plutôt qu'esthétique : NVDA intercepte
-  les flèches en mode navigation et ne les transmet à la page qu'en mode formulaire, dans lequel
-  c'est ce rôle qui le fait basculer. Un `role="table"` rendrait le plateau inutilisable au clavier
-  pour ceux qu'on cherche à servir. Le raisonnement complet, ses sources et le **protocole de
-  validation** sont dans `docs/lecteur-decran.md`.
+  les flèches en mode navigation et ne les transmet à la page qu'en mode formulaire. Le
+  raisonnement complet, ses sources et le protocole sont dans `docs/lecteur-decran.md`.
 
-  ⚠ La validation elle-même **reste due** : personne n'a encore écouté. Et le W3C mesure que NVDA
-  + Chrome échoue l'assertion « annoncer le rôle grid » sur sa **propre** implémentation de
-  référence — aucune correction de notre côté ne rattraperait cela. **`axe` ne peut pas le
+  ⚠ **La moitié de cet argument a été mesurée fausse** le 13 septembre 2026, NVDA 2026.2 + Chrome
+  152 sur le site publié. Ce qui est confirmé : en mode navigation les flèches appartiennent bien à
+  NVDA — la flèche droite a répondu « m », un caractère du bouton précédent, lu par son curseur
+  virtuel. Ce qui ne l'est pas : **NVDA annonce le plateau « tableau », jamais « grille »**, et la
+  bascule automatique en mode formulaire n'a pas été observée — il a fallu `NVDA+Espace`. Un rôle
+  rendu « tableau » ne déclenche pas le traitement réservé aux grilles, donc `role="grid"` n'achète
+  pas, en pratique, ce qu'on croyait lui devoir.
+
+  C'est l'échec ARIA-AT *Convey role 'grid'* reproduit sur notre plateau, et **rien de notre côté ne
+  le rattraperait**. Ne pas en conclure qu'il faut changer de rôle : la question décisive — une fois
+  une **case** focalisée en mode formulaire, les flèches déplacent-elles le curseur du plateau ? —
+  **n'est pas tranchée**, les deux exécutions ayant focalisé le conteneur et non une case.
+
+  ⚠ La validation a été **exécutée** le 13 septembre 2026 : relevé verbatim et harnais rejouable
+  dans `docs/lecteur-decran.md` et `scripts/lecteur-decran*.mjs`. Elle a confirmé que le nom de
+  chaque case porte seul ce qu'il faut — « ligne 1, colonne 1, vide » est prononcé tel quel — et que
+  le plateau ne consomme **qu'un** arrêt de tabulation sur vingt-six. Elle a aussi trouvé ce que le
+  W3C annonçait, et une hypothèse du projet à corriger : voir le point sur `role="grid"` ci-dessus.
+  Ce qui reste dû est nommé là-bas, et n'est plus « tout ». **`axe` ne peut pas le
   faire** — et plus généralement, un DOM simulé ne calcule aucune mise en page : les tests
   `*.a11y.test.ts` voient les rôles, les noms accessibles et l'ordre des titres, **jamais la
   taille des cibles**.

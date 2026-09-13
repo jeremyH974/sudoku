@@ -6,10 +6,10 @@ C'est la seule règle écrite du projet qui ne soit pas tenue. Ce document ne la
 il rend la validation **exécutable en une demi-heure par un humain**, et il dit ce qui a été
 établi sans elle.
 
-> ⚠ **Rien de ce qui suit n'a été entendu.** Les mesures citées viennent de rapports de bogues
-> datés, du texte normatif, et des rapports publics du projet ARIA-AT du W3C. Une CI verte ne vaut
-> pas mesure, et un arbre d'accessibilité non plus : il dit ce qu'un lecteur d'écran a **à sa
-> disposition**, jamais ce qu'il **annonce**.
+> ✅ **Exécuté le 13 septembre 2026** — NVDA 2026.2 portable, Chrome 152, Windows 11, sur le site
+> publié. Les relevés sont au bas de ce document, **mot pour mot**. Ce qui suit garde sa valeur :
+> un arbre d'accessibilité dit ce qu'un lecteur d'écran a **à sa disposition**, jamais ce qu'il
+> **annonce** — et c'est précisément l'écart que la mesure a trouvé.
 
 ---
 
@@ -157,4 +157,93 @@ Il ne dit pas que les plateaux sont accessibles. Il dit :
   propre implémentation de référence ;
 - que le nom de chaque case porte **seul** ce qu'il faut, ce qu'un test de CI vérifie sur les
   trente-six ;
-- et que **personne n'a encore écouté**. C'est la seule ligne de ce document qui devra changer.
+- et ce que **l'écoute a effectivement donné** : voir le relevé ci-dessous. C'est la seule ligne de
+  ce document qui a changé.
+
+---
+
+## Le relevé — 13 septembre 2026
+
+**Conditions.** NVDA **2026.2** (copie portable de `guidepup/nvda`, aucune installation système),
+Chrome **152**, Windows 11, sur le site publié, grille figée par son code d'URL
+(`#g=AdIU2wEX0AG3UZYAdDYhRUiTEUVyYjQnWGOXhzE`). NVDA tournait **muet** — synthétiseur `silence` —
+ce qui ne gêne pas la capture : elle se branche sur `pre_speechQueued`, en amont de la synthèse.
+Les phrases ci-dessous sont ce que NVDA a **mis en file pour être prononcé**, sans reformulation.
+
+Le harnais est dans `scripts/lecteur-decran.mjs` et `scripts/lecteur-decran-modes.mjs`. Il n'est
+**pas** câblé à la CI et n'ajoute aucune dépendance au dépôt : voir « Rejouer » plus bas.
+
+### Ce qui est tenu
+
+| Point | Attendu | Entendu |
+|---|---|---|
+| Un seul arrêt de tabulation | le plateau en consomme 1, pas 81 | **tenu** — 9ᵉ arrêt sur 26, puis le pavé de chiffres au suivant |
+| Les dimensions | 9 lignes sur 9 colonnes | « de 9 lignes et 9 colonnes » |
+| Le nom du plateau | « Grille de sudoku, 9 lignes sur 9 colonnes » | mot pour mot |
+| Le nom d'une case | « ligne 1, colonne 1, vide » | « ligne 1, colonne 1, vide, ligne 1, colonne 1 » |
+
+La dernière ligne mérite d'être lue deux fois : NVDA énonce **notre** nom accessible, puis y ajoute
+sa propre lecture de la position. Le nom de chaque case porte donc bien, seul, ce qu'il faut.
+
+### Ce qui n'est pas tenu, et de qui cela manque
+
+**Le rôle est annoncé « tableau », jamais « grille ».** Verbatim, en mode navigation puis en mode
+formulaire :
+
+> « principale région, **tableau**, de 9 lignes et 9 colonnes, Grille de sudoku, 9 lignes sur 9 colonnes »
+>
+> « Grille de sudoku, 9 lignes sur 9 colonnes, **tableau**, focalisé, de 9 lignes et 9 colonnes »
+
+C'est **l'échec ARIA-AT reproduit sur notre plateau** : *Convey role 'grid'*, que le W3C mesure déjà
+en échec sur sa propre implémentation de référence. Rien de notre côté ne le rattraperait —
+verdict : **manquant du fait du lecteur**.
+
+**Et la bascule automatique en mode formulaire n'a pas été observée.** En arrivant sur la case par
+tabulation, NVDA n'a annoncé que « principale région » — ni rôle, ni dimensions, ni nom de case.
+Il a fallu `NVDA+Espace` pour passer en mode formulaire.
+
+⚠ **C'est le point qui contredit une hypothèse écrite du projet.** `CLAUDE.md` gardait `role="grid"`
+au motif mécanique que c'est lui qui fait basculer NVDA en mode formulaire, seul mode où les flèches
+parviennent au plateau. La moitié « les flèches appartiennent à NVDA en mode navigation » est
+**confirmée**, et joliment : la flèche droite a répondu
+
+> « **m** »
+
+— un caractère d'« Imprimer », lu par le curseur virtuel. Mais la moitié « le rôle `grid` obtient la
+bascule » n'a **pas** été observée, ce qui est cohérent : un rôle annoncé « tableau » ne déclenche
+pas le traitement réservé aux grilles.
+
+### Ce qui reste à mesurer
+
+**Les flèches sur une case focalisée, en mode formulaire.** Les deux exécutions ont focalisé le
+*conteneur* de la grille, jamais une case, au moment d'essayer les flèches — et sur le conteneur
+elles ne produisent rien. La question « une fois dans une case, les flèches déplacent-elles le
+curseur du plateau pour un utilisateur de NVDA ? » **n'est donc pas tranchée**, et c'est la plus
+importante qui reste.
+
+Ne pas conclure d'ici que le plateau est utilisable, ni qu'il ne l'est pas.
+
+### Trois pièges de méthode, payés comptant
+
+Ils sont notés parce qu'ils reviendront à la prochaine exécution :
+
+1. **Les frappes vont à la fenêtre qui a le focus.** La première exécution en a envoyé trois dans
+   Discord. Le harnais refuse désormais de mesurer si NVDA ne confirme pas le bon titre de fenêtre.
+2. **Sonder la fenêtre de premier plan depuis PowerShell ouvre une console qui passe elle-même
+   devant** : l'instrument mesurait son interférence. C'est NVDA qui donne le titre (`NVDA+T`).
+3. **Le nombre de tabulations avant le plateau n'est pas stable** : le curseur virtuel démarre là où
+   l'on a cliqué. Un `F5` avant de compter aide, sans y suffire — d'où la mesure indépendante de
+   l'ordre de tabulation dans le DOM (26 arrêts, le plateau au 9ᵉ), qui sert de référence.
+
+### Rejouer
+
+Deux paquets, hors du dépôt, et une copie portable de NVDA qui n'installe rien dans le système :
+
+```bash
+npm install @guidepup/guidepup @guidepup/setup
+npx guidepup install nvda
+node scripts/lecteur-decran.mjs
+```
+
+⚠ NVDA ré-injecte les frappes dans la fenêtre au premier plan. Le script ouvre Chrome puis **attend
+un clic humain** : Windows interdit à un processus d'arrière-plan de mettre une fenêtre devant.
