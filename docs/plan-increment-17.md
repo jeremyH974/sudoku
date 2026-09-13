@@ -285,6 +285,89 @@ des énoncés se vérifie dans `clues.test.ts`, qui est fait pour ça.
 
 ---
 
+### Le facteur jsdom, expliqué
+
+Un calcul purement arithmétique coûtait **2,14 fois plus cher** sous `environment: 'jsdom'` que
+sous `node`, à code identique et configuration identique. Deux explications avaient été écartées
+par la mesure — le tas retenu et la forme de `globalThis`. Il y en avait **deux autres**, et elles
+se cumulent.
+
+#### Première cause : les tableaux typés viennent d'un autre realm
+
+Une micro-mesure des primitives que le moteur emploie a isolé une seule anomalie :
+
+| | jsdom | node | |
+|---|---|---|---|
+| **`new Uint32Array(2)`** | **76,2 ms** | **18,2 ms** | **×4,19** |
+| lecture/écriture dans un tableau typé | 1,9 ms | 1,9 ms | ×1,0 |
+| objet littéral | 8,8 ms | 9,2 ms | ×0,96 |
+| `Array.prototype.filter` | 18,9 ms | 16,4 ms | ×1,15 |
+| `Map` set/get | 8,0 ms | 8,3 ms | ×0,96 |
+| arithmétique pure | 31,1 ms | 32,9 ms | ×0,95 |
+
+**Seule l'allocation d'un tableau typé diffère.** L'indice qui l'explique tient en une ligne :
+
+```
+Buffer.from([1]) instanceof Uint8Array   →  jsdom : false   node : true
+```
+
+`Buffer` est toujours celui de Node. S'il n'est plus un `Uint8Array`, c'est que la liaison globale
+`Uint8Array` a été remplacée. jsdom construit sa fenêtre dans un contexte `vm` — donc un autre
+realm — et vitest recopie ses globales sur `globalThis`. Sont ainsi remplacés **dix constructeurs de
+tableaux typés et `ArrayBuffer`** ; `Array`, `Object`, `Function`, `RegExp` et `Promise` ne le sont
+pas.
+
+Le prix de la traversée, mesuré **dans le même processus** jsdom, sur 200 000 allocations :
+
+| | |
+|---|---|
+| `new Uint8Array(2)` par la liaison globale | 16,7 ms |
+| `new Uint8Array(2)` par le constructeur de Node | **7,8 ms** |
+
+Un facteur deux, et il porte sur ce que le moteur fait le plus : un `CellSet` **est** un
+`Uint32Array`, et une composition en alloue plus d'un milliard.
+
+#### Seconde cause : le graphe d'objets vivants, et non le tas
+
+La première enquête avait testé le tas avec un **lest d'un seul gros tableau** de 125 Mo, sans effet
+(×1,11). Ce n'était pas le bon témoin : jsdom ne retient pas un gros objet, il en retient des
+centaines de milliers de petits, chaînés les uns aux autres.
+
+Refait avec un graphe touffu — 600 000 nœuds liés, attributs et parents —, dans l'environnement
+**node** propre :
+
+| | tas vivant | la même composition |
+|---|---|---|
+| sans le graphe | 42 Mo | 549 ms |
+| avec le graphe | 217 Mo | **779 ms** |
+
+**+42 %**, sur du calcul qui ne touche à rien. La cause est le ramasse-miettes : un milliard de
+petites allocations déclenche des collectes de jeune génération sans arrêt, et chacune coûte
+d'autant plus cher que le graphe vivant à traverser est dense.
+
+*(Le temps de GC n'a pas pu être lu directement : `PerformanceObserver` sur `entryTypes: ['gc']` ne
+rend aucune entrée dans un travailleur de vitest, même par `takeRecords()`.)*
+
+#### Ce qu'on en fait : rien, et c'est mesuré aussi
+
+Rendre à Node ses constructeurs dans un fichier de préparation **fonctionne** et ne casse rien —
+les cinquante tests du projet DOM passent. Le gain :
+
+| | |
+|---|---|
+| sur la composition seule | −14 % à −26 % selon la passe |
+| **sur le projet DOM entier** | 8,39 s → **8,24 s**, soit 1,8 % — du bruit |
+
+La correction précédente a déplacé le goulot : la composition ne pèse plus assez pour que le
+facteur jsdom se voie. Le correctif est donc **écarté** — il fait combattre l'environnement pour
+un gain qui n'existe plus.
+
+**Et surtout : rien de tout cela n'atteint l'application.** Un navigateur n'a qu'un realm et
+aucun travailleur de vitest. C'est un artefact de mesure, entièrement, et il fallait le savoir pour
+cesser d'en tenir compte.
+
+---
+
 ### Une piste que vitest suggère lui-même, et qui ne donne rien
 
 Le journal de la CI imprime un conseil à chaque exécution :
@@ -435,9 +518,6 @@ de contrôle.
 
 ## Ce qui reste ouvert
 
-- **Le facteur jsdom — ×2,14 sur du calcul pur — n'est pas expliqué.** C'est le plus gros
-  multiplicateur non compris de la suite, et le comprendre vaudrait la moitié du temps des tests
-  d'accessibilité. Tas retenu et forme de `globalThis` sont écartés par mesure.
 - **Le rejet tardif de `carve` reste entier** — 91,3 % du travail est jeté, et la seule borne
   exacte disponible ne récupère que 1,17 % (mesurée, puis retirée). Le gisement demande un
   changement de conception qui changerait les affaires.
