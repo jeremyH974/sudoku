@@ -321,12 +321,40 @@
           {#each { length: size } as _, column (column)}
             {@const cell = row * size + column}
             {@const who = game.occupant[cell] ?? -1}
+            <!--
+              Pas d'`aria-selected`, et c'est une décision mesurée.
+
+              Ce plateau n'a pas de **sélection** au sens d'ARIA — un ensemble
+              de cases retenues pour une opération, comme dans un tableur. Il a
+              un **curseur**, que le focus porte déjà : `tabindex` roving amène
+              le focus sur la case courante, et un lecteur d'écran annonce
+              toujours ce qui reçoit le focus.
+
+              L'attribut n'ajoutait donc rien, et coûtait. Relevé dans le
+              navigateur : 35 cases sur 36 portaient `aria-selected="false"`,
+              que NVDA énonce « non sélectionné » — un mot de bruit sur
+              presque chaque case. Le support est par ailleurs documenté comme
+              inconstant : NVDA ne l'annonce pas du tout sous Chrome et le
+              rapporte sur toutes les cellules sous Firefox (nvaccess/nvda
+              #15198, juillet 2023), et l'état sélectionné n'est pas annoncé
+              dans le calendrier-grille de l'APG lui-même, qui est le cas
+              officiel le plus proche du nôtre (#16454, avril 2024, clos en
+              « needs external fix »). Sarah Higley classe `aria-selected` sur
+              `gridcell` parmi les attributs « à n'employer qu'en sachant
+              exactement ce qu'on fait ».
+
+              « No ARIA is better than bad ARIA » est la première règle de
+              l'APG, et c'est celle-ci qui s'applique.
+
+              ⚠ Ce qui reste **non vérifié** : rien de ce qui précède n'a été
+              entendu dans un lecteur d'écran ici. Ce sont des rapports de
+              bogues datés et le texte normatif, pas une mesure à l'oreille.
+            -->
             <div
               bind:this={cellElements[cell]}
               role="gridcell"
               aria-colindex={column + 1}
               aria-label={describeCell(cell)}
-              aria-selected={game.cursor === cell}
               tabindex={game.cursor === cell ? 0 : -1}
               class="cell"
               data-zone={scene.zoneOf[cell] % 6}

@@ -215,12 +215,15 @@
       {#each { length: SIZE } as _, col (col)}
         {@const cell = row * SIZE + col}
         {@const value = values[cell]}
+        <!-- Pas d'`aria-selected` : le focus porte déjà le curseur, et
+             l'attribut ajoutait « non sélectionné » sur quatre-vingts cases. Le
+             raisonnement complet, mesures et sources comprises, est dans
+             `investigation/SceneBoard.svelte`, qui a servi de banc d'essai. -->
         <div
           bind:this={cellElements[cell]}
           role="gridcell"
           aria-colindex={col + 1}
           aria-label={describe(cell)}
-          aria-selected={interactive && game.selected === cell}
           aria-readonly={!interactive || game.isGiven(cell)}
           aria-invalid={conflicts.has(cell)}
           tabindex={interactive && game.selected === cell ? 0 : -1}

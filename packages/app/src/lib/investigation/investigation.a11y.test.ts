@@ -219,6 +219,70 @@ describe('accessibilité du plan', () => {
     // accessible le **dit** — le trait léger n'en est qu'un rappel visuel.
     expect(cells[1]?.getAttribute('aria-label')).toContain('impossible');
   });
+
+  it('donne à chaque case un nom qui se suffit à lui-même', () => {
+    /*
+      La règle vient du texte normatif de l'APG, et non d'une préférence : dans
+      un `role="grid"`, un lecteur d'écran passe en mode application, où
+      l'utilisateur « n'entend que les éléments focalisables et le contenu qui
+      les nomme ». Tout ce qui n'est pas dans le nom d'une case est donc
+      **inaudible** — la couleur d'une pièce, la position dans le plan, le trait
+      qui ferme une rangée.
+
+      Le nom de chaque case doit donc porter seul : sa rangée, sa colonne, la
+      pièce où elle se trouve, et son état. C'est ce que ce contrôle mesure, et
+      c'est la contrepartie que le rôle `grid` impose en échange d'un seul arrêt
+      de tabulation au lieu de trente-six.
+
+      ⚠ Ce test ne remplace pas une écoute réelle. Un DOM simulé ne dit pas ce
+      qu'un lecteur d'écran **annonce** ; il dit ce qu'il a à sa disposition pour
+      le faire. La validation au lecteur d'écran reste due.
+    */
+    const game = loadedGame(WORKSHOP);
+    game.apply(0);
+    view = render(SceneBoard, { game });
+    const cells = [...view.container.querySelectorAll('[role="gridcell"]')];
+    expect(cells).toHaveLength(36);
+
+    const zones = new Set(game.puzzle?.scene.zones.map((zone) => zone.name) ?? []);
+    expect(zones.size).toBeGreaterThan(1);
+
+    for (const [index, cell] of cells.entries()) {
+      const name = cell.getAttribute('aria-label') ?? '';
+      const row = Math.floor(index / 6) + 1;
+      const column = (index % 6) + 1;
+      expect(name, `case ${String(index)}`).toContain(`rangée ${String(row)}`);
+      expect(name, `case ${String(index)}`).toContain(`colonne ${String(column)}`);
+      // La pièce, nommée — sans quoi le plan n'existe que pour l'œil.
+      expect([...zones].some((zone) => name.includes(zone)), `case ${String(index)} : ${name}`).toBe(
+        true,
+      );
+      // Et l'état : libre, occupée, ou fermée. Jamais rien.
+      expect(/libre|placé ici|placée ici|impossible/.test(name), `case ${String(index)} : ${name}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('ne prétend pas à une sélection qu’il n’a pas', () => {
+    /*
+      Le plan a un **curseur**, pas une sélection : aucune case n'est retenue
+      pour une opération ultérieure, contrairement à un tableur. `aria-selected`
+      décrirait donc autre chose que ce qui se passe — et le focus, que le
+      `tabindex` roving amène sur la case courante, porte déjà l'information.
+
+      Relevé dans un navigateur avant de trancher : l'attribut était posé sur les
+      36 cases, dont 35 à « false », que NVDA énonce « non sélectionné ». Le
+      raisonnement complet et ses sources sont dans `SceneBoard.svelte`.
+    */
+    view = render(SceneBoard, { game: loadedGame(ROTUNDA) });
+    const cells = [...view.container.querySelectorAll('[role="gridcell"]')];
+    expect(cells.filter((cell) => cell.hasAttribute('aria-selected'))).toHaveLength(0);
+
+    // Le curseur reste pourtant atteignable : une case, et une seule, est dans
+    // l'ordre de tabulation.
+    expect(cells.filter((cell) => cell.getAttribute('tabindex') === '0')).toHaveLength(1);
+  });
 });
 
 describe('accessibilité de l’écran d’enquête', () => {
