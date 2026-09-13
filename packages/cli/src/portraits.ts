@@ -43,8 +43,16 @@ import { FACES, type Face } from '../../app/src/lib/investigation/portrait.js';
  *
  * ─── Usage ─────────────────────────────────────────────────────────────────
  *
- *     OPENAI_API_KEY=… pnpm portraits          # les seize
- *     OPENAI_API_KEY=… pnpm portraits L M      # seulement Léa et Maël
+ * Sous PowerShell — il n'y a **pas** de préfixe de variable en ligne, la forme
+ * `VAR=valeur commande` est du bash et n'existe pas ici :
+ *
+ *     $env:OPENAI_API_KEY = "…"
+ *     pnpm portraits                 # les seize
+ *     pnpm portraits L M             # seulement Léa et Maël
+ *
+ * Sous bash ou zsh :
+ *
+ *     OPENAI_API_KEY=… pnpm portraits
  *
  * La clef est lue dans l'environnement et n'est jamais écrite nulle part.
  */
@@ -165,10 +173,24 @@ async function encode(png: Buffer, lettre: string): Promise<void> {
 async function main(): Promise<void> {
   const clef = process.env.OPENAI_API_KEY;
   if (clef === undefined || clef === '') {
+    /*
+      Le message dit la syntaxe de **la** machine, pas celle d'une autre.
+
+      Il ne donnait que la forme bash `VAR=valeur commande`, qui n'existe pas
+      sous PowerShell : l'utilisateur a reçu « le terme OPENAI_API_KEY= n'est
+      pas reconnu » et a pu croire à un défaut du script. Un message d'aide qui
+      se trompe de plateforme est pire que pas de message.
+    */
+    const windows = process.platform === 'win32';
     console.error(
-      'OPENAI_API_KEY manque.\n' +
-        'La clef est lue dans l’environnement et n’est jamais écrite : \n' +
-        '  OPENAI_API_KEY=… pnpm portraits',
+      [
+        'OPENAI_API_KEY manque.',
+        'La clef est lue dans l’environnement, jamais écrite ni conservée.',
+        '',
+        ...(windows
+          ? ['PowerShell :', '  $env:OPENAI_API_KEY = "…"', '  pnpm portraits']
+          : ['bash / zsh :', '  OPENAI_API_KEY=… pnpm portraits']),
+      ].join('\n'),
     );
     process.exit(1);
   }
