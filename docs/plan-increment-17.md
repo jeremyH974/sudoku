@@ -173,13 +173,50 @@ Mémoïser `unaryCells` paraissait le gain évident : pure en (indice, décor), 
 indice unaire **nié**, parce qu'`isUseful` les élimine tous en amont. La boucle coûteuse ne tourne
 donc jamais.
 
-### Ce qui n'a pas été fait
+### Rejeter plus tôt : la borne existe, elle est exacte, et elle ne rapporte rien
 
-**Rejeter plus tôt.** 91,3 % des `carve` terminés sont jetés, dont la moitié pour « plus de deux
-cartes » — un critère qui n'est connu qu'à la fin, puisque les cartes ne rétrécissent que pendant
-`carve`. Y toucher voudrait dire diriger l'ordre de retrait par la taille des cartes : un
-changement de conception, qui **changerait les affaires produites**. Sans gain mesuré en face, ce
-n'est pas un arbitrage qu'on peut faire.
+91,3 % des `carve` terminés sont jetés, dont la moitié parce qu'un suspect garde plus de deux
+cartes. On ne l'apprenait qu'à la fin, après avoir payé la centaine de vérifications d'unicité que
+coûte un parcours complet. Il y a pourtant une borne exacte, et elle est jolie.
+
+`removalOrder` émet **exactement une entrée par carte**, la victime exceptée — elle n'en a qu'une,
+celle qui fait l'affaire. Pour un suspect, en notant `n` ses cartes de départ :
+
+```
+n = réussites + refus + passes        (chaque entrée fait l'un des trois)
+cartes finales = n − réussites = refus + passes ≥ refus
+```
+
+Donc **plus de `maxCards` refus sur un même suspect condamne la taille**, quoi qu'il arrive ensuite.
+Et les « passes » — les entrées sautées parce qu'il ne reste qu'une carte — ne comptent pas comme
+des refus : c'est ce qui rend la borne exacte plutôt que seulement prudente. Le hasard n'est pas
+touché non plus, puisque `removalOrder` consomme le générateur **avant** la boucle.
+
+Écrit, vérifié identique sur 200 affaires… et **retiré**.
+
+Le chronomètre n'arrivait pas à trancher : quatre passes appariées, alternées, ont donné +0,5 %,
+−10,8 %, −7,9 % et −0,5 %, et un pire cas médian **plus mauvais** avec l'abandon qu'avec. Un banc
+qui dit tout et son contraire ne dit rien.
+
+La question s'est donc posée autrement : compter le **travail** plutôt que le chronométrer. Un
+compteur temporaire sur `countSolutions`, deux exécutions sur les mêmes 400 graines :
+
+| | appels à `countSolutions` |
+|---|---|
+| sans l'abandon | 651 435 |
+| avec | **643 834** |
+
+**−1,17 %.** Voilà pourquoi aucun chronomètre ne pouvait le voir. La raison tient à
+l'arithmétique : les refus ne font que 4,6 % des retraits, soit 1,3 par suspect en moyenne — en
+atteindre trois sur un même suspect demande une concentration inhabituelle, et quand elle arrive,
+elle arrive tout à la fin du parcours.
+
+Quinze lignes et une preuve de vingt-cinq pour un centième : même verdict que `unaryCells`, et pour
+une raison mesurée plutôt que sentie.
+
+**Ce qui reste possible, et qu'on ne fait pas :** diriger l'ordre de retrait par la taille des
+cartes. Ce serait un changement de conception, et il **changerait les affaires produites** — ce
+n'est pas un arbitrage qu'on tranche sur un gain de vitesse.
 
 ---
 
@@ -310,8 +347,9 @@ de contrôle.
 
 - **Le délai des tests d'accessibilité n'a pas disparu**, il est passé de 30 à 15 s. Ce qui domine
   maintenant n'est plus la composition mais le rendu et `axe` : le pire test reste à 2,05 s ici.
-- **Le rejet tardif de `carve` reste entier** — 91,3 % du travail est jeté. C'est le gisement
-  suivant, et il demande un changement de conception, pas une optimisation.
+- **Le rejet tardif de `carve` reste entier** — 91,3 % du travail est jeté, et la seule borne
+  exacte disponible ne récupère que 1,17 % (mesurée, puis retirée). Le gisement demande un
+  changement de conception qui changerait les affaires.
 - **Patrick Hand a une hauteur d'x 10 % plus petite qu'Arial** et une chasse 19 % plus étroite
   (mesuré sur les binaires). Les noms de jeu sont à 22 px, sous le seuil de 24 px que Mozilla
   s'impose pour sa propre police d'affichage. À regarder si la lisibilité est mise en cause.
