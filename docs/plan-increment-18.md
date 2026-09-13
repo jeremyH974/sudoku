@@ -198,9 +198,79 @@ Prouvé sur un cas fabriqué plutôt que par lecture : un créneau vidé, l'atte
 créneau mise à 99,9. Ancien code, une passe : `[99,9 · 2 · 2,6 …]`. Nouveau code, une passe :
 `[1,5 · 2 · 2,6 …]`.
 
+### Le dossier imprimé
+
+Deux feuilles, dans cet ordre et séparées : le dossier, puis le corrigé. On imprime l'ensemble et
+on détache la dernière — intercaler le corrigé le rendrait visible par transparence et impossible
+à retirer. C'est aussi le motif que les éditeurs du genre emploient : enveloppe séparée chez les
+dîners-enquête, page de fin chez Penny Dell.
+
+**Le plan imprimé n'a aucune couleur, et c'est deux décisions en une.** La première est mécanique :
+un navigateur **ne peut pas** imprimer les fonds par défaut, donc des pièces distinguées par leur
+teinte sortiraient en carrés blancs. `print-color-adjust: exact` les force — mais sa forme
+normalisée n'a atteint Chrome qu'en **avril 2025** (Chrome 136), et la spécification elle-même
+n'en fait qu'une *suggestion* que le réglage utilisateur devrait pouvoir contredire. La seconde
+est une règle du projet : à l'écran la teinte d'une pièce **double** son nom, sur le papier le nom
+suffit. Le dossier se lit donc à l'identique sur une couleur et sur la laser noir et blanc que la
+plupart des écoles possèdent.
+
+Le mobilier garde **trois** gris et non un seul : chaque meuble est modelé par une face éclairée,
+la matière et une face dans l'ombre, sous une source de lumière unique. Aplatir effacerait ce
+volume.
+
+La géométrie des murs a quitté `SceneBoard.svelte` pour `lib/investigation/plan.ts`. Le plan se
+dessine désormais à deux endroits, et une géométrie recopiée est une géométrie qui dérive.
+
+Mesuré dans un vrai navigateur, ce qu'aucun DOM simulé ne peut faire :
+
+| | |
+|---|---|
+| plan | **108 mm**, cases de 18 mm |
+| mur coupé · seuil de porte | 2,16 mm · **0,54 mm** (rapport 4:1, ISO 128-23) |
+| quadrillage | 0,26 mm — au-dessus du plancher métier de ~0,09 mm |
+| marge restante en bas | **13 mm** avec neuf témoignages |
+
+Le plan est volontairement **plus petit que la place disponible** : les 13 mm sont réservés au cas
+le plus chargé que la fabrique puisse produire — douze témoignages, deux cartes par personne. Se
+caler sur le cas moyen ferait déborder une affaire sur dix dans la marge, et `overflow: hidden` la
+couperait en silence. Un test borne cette hypothèse à défaut de pouvoir mesurer la page.
+
+Deux réserves écrites plutôt que tues. **L'échelle** : la taille physique n'est juste qu'à 100 %,
+« ajuster à la page » rétrécit le plan, et Chrome ne mémorise pas ce réglage — l'aperçu le dit donc
+en toutes lettres. **Le gros caractère** : les témoignages sont à 11 points, là où les guides
+« clear print » du RNIB et du CNIB recommandent l'équivalent de 14. Le dossier n'est pas un
+document en gros caractères et ne prétend pas l'être ; le chemin accessible est l'écran, dont tout
+le texte suit le réglage de taille. Aucun texte de la famille WCAG ne vise d'ailleurs le papier —
+WCAG2ICT, republié le 11 décembre 2025, borne sa portée au contenu présenté par un agent
+utilisateur.
+
+Le garde-fou qui compte est celui de la fuite : **la feuille à remplir ne porte aucune initiale
+posée et aucune phrase de verdict.** Cette faute-là ne casserait aucun test fonctionnel et
+ruinerait chaque exemplaire imprimé.
+
+### Les statistiques, et ce qu'elles refusent
+
+La promesse du plan 11 — « une branche dans `stats.ts` » — ne tenait pas au niveau des types, et
+l'écrire vaut mieux que forcer : `GameRecord` porte un niveau et une leçon venus de `logic/`,
+l'enquête n'a **pas de niveau**, et son `TechniqueId` est un type distinct de même nom. Module
+frère, donc, avec sa clef et sa version. Ce qui est **repris** est ce qui ne parle que de jours :
+les séries sont extraites de `progress.ts` au lieu d'être recopiées.
+
+**La question de conception était : grouper par quoi ?** Le sudoku affiche des médianes par
+niveau parce que ses niveaux sont calibrés grille par grille, et `progress.ts` refuse
+explicitement d'agréger. L'enquête n'a pas de niveau — mais elle a un fait mesuré et observable :
+**la technique la plus dure que le chemin exige**. C'est le seul axe de comparaison qui existe
+ici, et il s'affiche comme un **comptage** : « quatre affaires dont la plus dure déduction était un
+recoupement » se vérifie ; « tension 78 » ne se vérifie pas.
+
+Le reste est hérité et tenu : aucun taux de réussite faute de dénominateur, aucun compteur rangé,
+aucune durée approchée. Le chronomètre est celui du sudoku, et il rend déjà `null` dès qu'il doute
+de lui-même — un onglet resté ouvert pendant le déjeuner n'enregistre pas de durée plutôt qu'une
+durée fausse.
+
 ### Ce qui n'est pas fait, et reste ouvert
 
-L'impression du dossier et les statistiques. La cartographie a relevé au
+Rien de la liste des six. Ce qui reste est ailleurs. La cartographie a relevé au
 passage que la promesse du plan 11 — « l'issue d'une partie a la forme de celle du sudoku, une
 branche dans `stats.ts` » — **n'est pas vraie au niveau des types** : `GameRecord.level` et
 `GameRecord.lesson` viennent de `logic/`, et l'enquête a son propre `TechniqueId`, de même nom et
@@ -338,9 +408,6 @@ Elle est donc posée ici avec son chiffre, et laissée à trancher.
 
 - **La validation au lecteur d'écran**, toujours due, et toujours la seule règle écrite du projet
   qui ne soit pas tenue.
-- **L'impression du dossier et les statistiques d'Enquête.** Le codec débloque les deux ;
-  les statistiques demandent en plus une conception, parce que `GameRecord` est plus spécifique au
-  sudoku que le plan 11 ne le supposait.
 - **Le quadruplet caché sans exercice**, et l'accord avec l'oracle qui le rend acceptable.
 - **La refonte constructive de `carve`**, chiffrée mais non tranchée.
 - **WXYZ-Wing puis les chaînes**, si l'on veut un jour étendre la portée — et non l'Unique

@@ -167,7 +167,13 @@ version à l'autre. Ce qui doit être identique pour tout le monde et pour toujo
 Le lien de partage s'écrit `#a=<code>`, dans le **fragment** : un fragment n'est jamais envoyé au
 serveur, donc l'affaire qu'on s'échange n'apparaît dans aucun journal d'accès.
 
-Le même code porte l'**affaire du jour** : 370 jours composés une fois, vérifiés un par un, livrés
+Le même code porte le **dossier imprimé** — le plan à remplir, les témoignages, un QR de reprise,
+et le corrigé sur une feuille qu'on détache. Le plan y est dessiné à l'encre seule, sans une goutte
+de couleur : un navigateur n'imprime pas les fonds par défaut, et une teinte ne survit pas à une
+laser noir et blanc. Sur le papier, le nom de la pièce porte donc seul ce que la teinte double à
+l'écran.
+
+Le même code porte enfin l'**affaire du jour** : 370 jours composés une fois, vérifiés un par un, livrés
 en 17 Kio avec l'application — donc jouables **hors ligne**, ce que presque aucun concurrent ne
 sait faire puisque chez eux le défi vient d'un serveur. Rien n'y est promis sur la difficulté :
 l'enquête n'affiche ni niveau ni score, faute d'oracle pour les calibrer.
@@ -1065,10 +1071,8 @@ précédente. Le port fait partie de l'origine ; en changer, c'est repartir d'un
 
 Ce qui reste ouvert, par ordre de valeur :
 
-- **Le dossier imprimé et les statistiques d'Enquête.** Le code d'affaire (incrément 18) débloque
-  les deux. Les statistiques demandent en plus une conception : contre ce que supposait le plan
-  d'incrément 11, `GameRecord` est plus spécifique au sudoku qu'il n'y paraît — son niveau et sa
-  leçon viennent de `logic/`, et l'enquête a son propre `TechniqueId`.
+- **Le cahier d'enquêtes en lot.** Le dossier s'imprime affaire par affaire depuis l'incrément 18 ;
+  en produire vingt d'un coup demanderait le studio que le sudoku possède déjà.
 - **WXYZ-Wing, puis les chaînes**, si l'on veut étendre la portée. C'est ce que la mesure
   désigne — et **pas** l'Unique Rectangle, écarté sur preuve : zéro occurrence comme pic sur
   441 grilles, et une déduction qui conclurait d'une *promesse* sur la grille plutôt que de la
