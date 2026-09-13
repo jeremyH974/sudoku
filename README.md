@@ -167,6 +167,11 @@ version à l'autre. Ce qui doit être identique pour tout le monde et pour toujo
 Le lien de partage s'écrit `#a=<code>`, dans le **fragment** : un fragment n'est jamais envoyé au
 serveur, donc l'affaire qu'on s'échange n'apparaît dans aucun journal d'accès.
 
+Le même code porte l'**affaire du jour** : 370 jours composés une fois, vérifiés un par un, livrés
+en 17 Kio avec l'application — donc jouables **hors ligne**, ce que presque aucun concurrent ne
+sait faire puisque chez eux le défi vient d'un serveur. Rien n'y est promis sur la difficulté :
+l'enquête n'affiche ni niveau ni score, faute d'oracle pour les calibrer.
+
 Pas de somme de contrôle, et c'est mesuré plutôt que supposé : une affaire décodée doit avoir
 exactement une solution, ce qui est un contrôle bien plus fort qu'un caractère de garde. Sur
 20 000 corruptions de chaque sorte, **0 troncature** et 1 insertion se relisent encore — et la
@@ -1060,10 +1065,10 @@ précédente. Le port fait partie de l'origine ; en changer, c'est repartir d'un
 
 Ce qui reste ouvert, par ordre de valeur :
 
-- **L'affaire du jour, le dossier imprimé et les statistiques d'Enquête.** Le code d'affaire
-  (incrément 18) débloque les trois. Les statistiques demandent en plus une conception : contre ce
-  que supposait le plan d'incrément 11, `GameRecord` est plus spécifique au sudoku qu'il n'y
-  paraît — son niveau et sa leçon viennent de `logic/`, et l'enquête a son propre `TechniqueId`.
+- **Le dossier imprimé et les statistiques d'Enquête.** Le code d'affaire (incrément 18) débloque
+  les deux. Les statistiques demandent en plus une conception : contre ce que supposait le plan
+  d'incrément 11, `GameRecord` est plus spécifique au sudoku qu'il n'y paraît — son niveau et sa
+  leçon viennent de `logic/`, et l'enquête a son propre `TechniqueId`.
 - **WXYZ-Wing, puis les chaînes**, si l'on veut étendre la portée. C'est ce que la mesure
   désigne — et **pas** l'Unique Rectangle, écarté sur preuve : zéro occurrence comme pic sur
   441 grilles, et une déduction qui conclurait d'une *promesse* sur la grille plutôt que de la

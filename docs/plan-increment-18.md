@@ -166,9 +166,40 @@ qu'on joue ne ferait rien du tout. Vérifié dans un vrai navigateur, pas seulem
 - un lien valide change l'affaire dans un onglet resté ouvert ;
 - un lien abîmé **le dit** au lieu d'ouvrir autre chose en silence.
 
+### L'affaire du jour
+
+370 jours composés une fois, vérifiés, livrés en **17 Kio** à côté de l'application — donc
+disponibles **hors ligne**. Le corpus porte le code, jamais la graine, pour la raison ci-dessus.
+
+Il n'a **pas** de fichier d'attentes, contrairement à celui du sudoku. Celui-là fige les scores
+attendus parce qu'un palier est *annoncé au joueur* ; l'enquête n'annonce ni niveau ni score, donc
+il n'y a rien à figer et rien qui puisse se périmer. Le test vérifie ce qui est intemporel — chaque
+code se relit, a exactement une solution, se déduit sans deviner — et il le vérifie sur **les 370
+jours**, pas sur un échantillon : un jour faux ne se verrait que ce jour-là, sans recours.
+
+Le plafond par fichier du dossier servi a dû être remis sur ses pieds. Posé à 96 ko quand le corpus
+du sudoku en pesait 66,7, il en pèse 87,7 pour 369 jours — environ **244 octets par jour** —, donc
+il allait casser au prochain allongement de l'horizon, sur une croissance prévue et non sur une
+faute. Les deux corpus sont exemptés **nommément**, comme les feuilles d'impression dans
+`appStyles.test.ts` : un fichier renommé retombe sous la règle au lieu d'en sortir en silence. S'y
+ajoute un plafond **total**, qui est ce que mesurait vraiment l'incident de l'incrément 17 :
+341 Kio aujourd'hui, 900 Kio autorisés.
+
+### Un défaut de convergence, trouvé et corrigé
+
+`pnpm dailies` laissait deux jours sur 369 avec un score attendu périmé, et il fallait une seconde
+exécution. La cause : un jour ayant **à la fois** un créneau à régénérer et un autre dont le score
+avait bougé sans changer de palier. La boucle de régénération repartait des scores du fichier et
+n'écrasait que ceux des créneaux refaits, gardant une valeur que la passe de détection venait
+pourtant de mesurer fausse.
+
+Prouvé sur un cas fabriqué plutôt que par lecture : un créneau vidé, l'attente d'un **autre**
+créneau mise à 99,9. Ancien code, une passe : `[99,9 · 2 · 2,6 …]`. Nouveau code, une passe :
+`[1,5 · 2 · 2,6 …]`.
+
 ### Ce qui n'est pas fait, et reste ouvert
 
-L'affaire du jour, l'impression du dossier et les statistiques. La cartographie a relevé au
+L'impression du dossier et les statistiques. La cartographie a relevé au
 passage que la promesse du plan 11 — « l'issue d'une partie a la forme de celle du sudoku, une
 branche dans `stats.ts` » — **n'est pas vraie au niveau des types** : `GameRecord.level` et
 `GameRecord.lesson` viennent de `logic/`, et l'enquête a son propre `TechniqueId`, de même nom et
@@ -306,10 +337,9 @@ Elle est donc posée ici avec son chiffre, et laissée à trancher.
 
 - **La validation au lecteur d'écran**, toujours due, et toujours la seule règle écrite du projet
   qui ne soit pas tenue.
-- **L'affaire du jour, l'impression du dossier, les statistiques d'Enquête.** Le codec les
-  débloque toutes les trois ; les statistiques demandent en plus une conception, parce que
-  `GameRecord` est plus spécifique au sudoku que le plan 11 ne le supposait.
-- **`pnpm dailies` ne converge pas en une passe** après un changement de barème.
+- **L'impression du dossier et les statistiques d'Enquête.** Le codec débloque les deux ;
+  les statistiques demandent en plus une conception, parce que `GameRecord` est plus spécifique au
+  sudoku que le plan 11 ne le supposait.
 - **Le quadruplet caché sans exercice**, et l'accord avec l'oracle qui le rend acceptable.
 - **La refonte constructive de `carve`**, chiffrée mais non tranchée.
 - **WXYZ-Wing puis les chaînes**, si l'on veut un jour étendre la portée — et non l'Unique
