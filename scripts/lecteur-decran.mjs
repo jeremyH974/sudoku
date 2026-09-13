@@ -6,18 +6,16 @@
  * Les tests `*.a11y.test.ts` voient l'arbre d'accessibilité : les rôles, les
  * noms, l'ordre des titres. Ils ne disent **rien** de ce qu'un lecteur d'écran
  * prononce. C'est l'écart que ce script mesure, et c'est là que les défauts se
- * cachent — l'incrément 21 a trouvé que NVDA annonce le plateau « tableau » et
- * n'entre jamais de lui-même en mode formulaire, deux choses qu'aucun test de
- * CI classique ne pouvait voir.
+ * cachent — l'incrément 21 a trouvé que NVDA annonce le plateau « table » et
+ * jamais « grid », ce qu'aucun test de CI classique ne pouvait voir.
  *
  * ─── Comment il est piloté ──────────────────────────────────────────────────
  *
  *   BASE=http://localhost:4181/sudoku/  node scripts/lecteur-decran.mjs
  *
  * `BASE` désigne la racine du site (défaut : le site publié). `SANS_CLIC=1`
- * suppose que la fenêtre du navigateur est déjà au premier plan — c'est le cas
- * sur une machine d'intégration continue, où rien d'autre ne tourne — et fait
- * échouer tout de suite si elle ne l'est pas, au lieu d'attendre un humain.
+ * interdit de demander un clic humain : c'est ce qu'il faut sur une machine
+ * d'intégration, où personne ne lirait la demande.
  *
  * ⚠ NVDA ré-injecte les frappes dans la fenêtre qui a le focus, et Windows
  * interdit à un processus d'arrière-plan de faire passer une fenêtre devant :
@@ -32,7 +30,7 @@
  * 2. Sonder cette fenêtre depuis PowerShell ouvre une console qui passe
  *    elle-même devant : l'instrument mesurait son interférence. C'est NVDA qui
  *    donne le titre, par `NVDA+T`, et lui ne déplace rien.
- * 3. Le nombre de tabulations avant le plateau n'est pas stable — le curseur
+ * 3. Le nombre de tabulations avant un plateau n'est pas stable — le curseur
  *    virtuel démarre là où l'on a cliqué. On recharge (`F5`) pour repartir du
  *    début, et l'on **détecte** le plateau au lieu de compter à l'aveugle.
  */
@@ -42,27 +40,56 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { nvda } from '@guidepup/guidepup';
 
-const BASE = process.env.BASE ?? 'https://jeremyh974.github.io/sudoku/';
-/** Une grille figée par son code : le relevé doit être comparable d'une fois sur l'autre. */
-const GRILLE = 'AdIU2wEX0AG3UZYAdDYhRUiTEUVyYjQnWGOXhzE';
-const URL_PAGE = `${BASE.replace(/\/$/, '')}/sudoku/#g=${GRILLE}`;
+const BASE = (process.env.BASE ?? 'https://jeremyh974.github.io/sudoku/').replace(/\/$/, '');
 const SANS_CLIC = process.env.SANS_CLIC === '1';
 
-/** Une case focalisée se reconnaît à ce que NVDA prononce notre nom accessible. */
-const EST_UNE_CASE = /ligne (\d+),? colonne (\d+)/i;
-/** Le pavé de chiffres suit immédiatement le plateau : l'entendre, c'est l'avoir dépassé. */
-const APRES_LE_PLATEAU = /Placer le 1\b|Saisie des chiffres/i;
+/**
+ * Les deux plateaux, et ce qui les distingue pour l'oreille.
+ *
+ * Tout le reste du protocole leur est commun : c'est le même motif — un
+ * `role="grid"`, un `tabindex` glissant, des flèches — et il doit donner la même
+ * expérience des deux côtés. Les différences tiennent en quatre motifs.
+ *
+ * ⚠ Les grilles et les affaires sont **figées par leur code d'URL**. Un relevé
+ * doit être comparable d'une semaine sur l'autre ; une grille tirée au hasard
+ * rendrait chaque exécution incomparable à la précédente.
+ */
+const PLATEAUX = [
+  {
+    nom: 'sudoku',
+    chemin: '/sudoku/#g=AdIU2wEX0AG3UZYAdDYhRUiTEUVyYjQnWGOXhzE',
+    /** Le titre de la fenêtre, pour s'y rendre par cyclage. */
+    fenetre: /sudoku/i,
+    /** Une case focalisée se reconnaît à ce que NVDA prononce notre nom. */
+    case: /ligne (\d+),? colonne (\d+)/i,
+    /** Ce qui suit immédiatement le plateau : l'entendre, c'est l'avoir dépassé. */
+    apres: /Placer le 1\b|Saisie des chiffres/i,
+    /** Ce que le conteneur doit annoncer quand on y revient. */
+    conteneur: /9 lignes sur 9 colonnes/i,
+  },
+  {
+    nom: 'enquête',
+    chemin: '/enquete/#a=AUd9_LXz0b-CpECUFCAUUUyEgAkE2FElQA',
+    fenetre: /enqu[êe]te/i,
+    // « rangée » et non « ligne » : le plan d'une scène n'est pas une grille de
+    // chiffres, et son vocabulaire le dit.
+    case: /rang[ée]e (\d+),? colonne (\d+)/i,
+    apres: /poser la personne|Placer poser/i,
+    conteneur: /6 rang[ée]es sur 6 colonnes/i,
+  },
+];
 
 const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
 const releve = [];
 const echecs = [];
+let courant = '';
 
 async function dire(etape, geste, action, delai = 420) {
   await nvda.clearSpokenPhraseLog();
   await action();
   await attendre(delai);
   const entendu = await nvda.spokenPhraseLog();
-  releve.push({ etape, geste, entendu });
+  releve.push({ plateau: courant, etape, geste, entendu });
   console.log(`[${etape}] ${geste}`);
   for (const p of entendu) console.log(`      « ${p} »`);
   if (entendu.length === 0) console.log('      (rien)');
@@ -72,8 +99,13 @@ async function dire(etape, geste, action, delai = 420) {
 /** Une assertion nommée : elle dit ce qu'elle attendait et ce qu'elle a eu. */
 function exiger(nom, condition, detail) {
   console.log(`  ${condition ? '✓' : '✗'} ${nom}`);
-  if (!condition) echecs.push(`${nom} — ${detail}`);
-  releve.push({ etape: 'assertion', geste: nom, entendu: [condition ? 'tenu' : `MANQUÉ : ${detail}`] });
+  if (!condition) echecs.push(`[${courant}] ${nom} — ${detail}`);
+  releve.push({
+    plateau: courant,
+    etape: 'assertion',
+    geste: nom,
+    entendu: [condition ? 'tenu' : `MANQUÉ : ${detail}`],
+  });
 }
 
 /** Le titre de la fenêtre au premier plan, demandé à NVDA lui-même. */
@@ -85,7 +117,7 @@ async function titreCourant() {
 }
 
 /**
- * Amener le navigateur au premier plan — **sans le demander à Windows**.
+ * Amener une fenêtre au premier plan — **sans le demander à Windows**.
  *
  * C'est là que l'incrément 21 s'est cassé les dents. `AppActivate` et
  * `SetForegroundWindow` rendent `True` et ne font rien : Windows interdit à un
@@ -95,13 +127,13 @@ async function titreCourant() {
  * La solution est celle de la fixture Playwright de guidepup : on ne demande
  * rien à l'OS, on **cycle les fenêtres** avec `Alt+Échap` — une frappe injectée
  * par NVDA, qui lui en a le droit — et l'on **vérifie par la parole** que l'on
- * est arrivé. Dix tentatives à une demi-seconde, comme leur
- * `MAX_APPLICATION_SWITCH_RETRY_COUNT`.
+ * est arrivé. Douze tentatives à une demi-seconde.
  *
- * Le point qui change tout : cela marche aussi sur un poste de travail. Le clic
- * humain n'est plus qu'un dernier recours.
+ * C'est aussi ce qui permet de passer d'un plateau à l'autre : les deux vivent
+ * dans deux fenêtres ouvertes en même temps, et l'on va à celle dont le titre
+ * répond.
  */
-async function amenerDevant(reconnaitre, tentatives = 10) {
+async function amenerDevant(reconnaitre, tentatives = 12) {
   for (let i = 1; i <= tentatives; i++) {
     const titre = await titreCourant();
     if (reconnaitre.test(titre)) {
@@ -115,18 +147,135 @@ async function amenerDevant(reconnaitre, tentatives = 10) {
   return false;
 }
 
-async function main() {
-  console.log(`Page mesurée : ${URL_PAGE}\n`);
-  const profil = mkdtempSync(join(tmpdir(), 'chrome-lecteur-'));
-  spawn(
-    'cmd',
-    ['/c', 'start', 'chrome', `--user-data-dir=${profil}`, '--no-first-run',
-      '--no-default-browser-check', '--new-window', URL_PAGE],
-    { detached: true, stdio: 'ignore' },
-  ).unref();
-  await attendre(9000);
+/** Le protocole, sur un plateau. */
+async function mesurer(spec) {
+  courant = spec.nom;
+  console.log(`\n══════ ${spec.nom} ══════`);
 
-  console.log('Démarrage de NVDA (muet)…');
+  let auPoint = await amenerDevant(spec.fenetre);
+  /*
+    Le clic humain n'est qu'un dernier recours : le cyclage y arrive seul dans le
+    cas normal. On ne le propose que sur un poste de travail, et jamais sur une
+    machine d'intégration où personne ne lit la sortie.
+  */
+  if (!auPoint && !SANS_CLIC) {
+    console.log('');
+    console.log(`  Le cyclage n’a pas suffi. CLIQUE SUR LA FENÊTRE « ${spec.nom} ».`);
+    console.log('');
+    for (let i = 0; i < 60 && !auPoint; i++) {
+      auPoint = spec.fenetre.test(await titreCourant());
+      if (!auPoint) await attendre(1200);
+    }
+  }
+  if (!auPoint) {
+    echecs.push(`[${spec.nom}] la fenêtre n’a jamais eu le focus`);
+    return;
+  }
+
+  // Point de départ déterministe : après un rechargement, le clavier repart du
+  // début du document, quel que soit l'endroit où le clic est tombé.
+  await nvda.press('F5');
+  await attendre(5000);
+  if (!(await amenerDevant(spec.fenetre, 4))) {
+    echecs.push(`[${spec.nom}] focus perdu au rechargement`);
+    return;
+  }
+
+  /* ── 1. Atteindre le plateau, et compter ce qu'il coûte ─────────────────── */
+  console.log('── Tabulation jusqu’au plateau ──');
+  let avant = 0;
+  let atteint = false;
+  for (let i = 1; i <= 24 && !atteint; i++) {
+    const dit = await dire(`tab.${i}`, `Tab n°${i}`, () => nvda.press('Tab'), 300);
+    if (dit.some((p) => spec.apres.test(p))) {
+      atteint = true;
+      const retour = await dire('retour', 'Maj+Tab (revenir sur le plateau)', () =>
+        nvda.press('Shift+Tab'),
+      );
+      exiger(
+        'le conteneur s’annonce avec ses dimensions',
+        retour.some((p) => spec.conteneur.test(p)),
+        `entendu : « ${retour.join(' / ')} »`,
+      );
+      break;
+    }
+    avant = i;
+  }
+  console.log(`  (plateau atteint après ${String(avant)} arrêt(s) avant lui)`);
+  exiger(
+    'le plateau ne consomme qu’un arrêt de tabulation',
+    atteint,
+    'ce qui suit le plateau n’a jamais été atteint',
+  );
+  if (!atteint) return;
+
+  /* ── 2. Ce que le lecteur dit de la case focalisée ──────────────────────── */
+  /*
+    `NVDA+Tab` demande « où suis-je ? ». La réponse doit être **une case**, nommée
+    par notre `aria-label`.
+
+    ⚠ Ne pas y chercher les dimensions du plateau : elles sont annoncées quand on
+    **entre** dans le conteneur, pas quand on rapporte une case. La première
+    version de ce script les exigeait ici et échouait sur une bonne réponse.
+  */
+  const ici = await dire('ou', 'NVDA+Tab : où suis-je ?', () => nvda.press('Insert+Tab'));
+  const depart = spec.case.exec(ici.join(' '));
+  exiger(
+    'la case focalisée prononce son nom accessible',
+    depart !== null,
+    `entendu : « ${ici.join(' / ')} »`,
+  );
+  if (depart === null) return;
+
+  /* ── 3. Le parcours aux flèches, depuis cette case ──────────────────────── */
+  /*
+    Les assertions qui comptent. Le déplacement lui-même est vérifié côté
+    application par les tests de plateau ; ce qui se vérifie ici est que le
+    lecteur d'écran le **dit**.
+  */
+  const droite = await dire('droite', '→ flèche droite', () => nvda.press('ArrowRight'));
+  const versDroite = spec.case.exec(droite.join(' '));
+  exiger(
+    'une flèche fait annoncer la case voisine',
+    versDroite !== null && versDroite[2] !== depart[2] && versDroite[1] === depart[1],
+    versDroite === null
+      ? `aucune case annoncée — entendu : « ${droite.join(' / ')} »`
+      : `partie de ${depart[0]}, arrivée à ${versDroite[0]}`,
+  );
+
+  const bas = await dire('bas', '↓ flèche bas', () => nvda.press('ArrowDown'));
+  const versBas = spec.case.exec(bas.join(' '));
+  exiger(
+    'une flèche vers le bas change de rangée',
+    versBas !== null && versBas[1] !== depart[1],
+    versBas === null
+      ? `aucune case annoncée — entendu : « ${bas.join(' / ')} »`
+      : `toujours rangée ${versBas[1]}`,
+  );
+}
+
+async function main() {
+  /*
+    Une fenêtre par plateau, ouvertes d'avance et laissées ouvertes : on passe de
+    l'une à l'autre par le même cyclage qui sert à les atteindre. Un profil neuf,
+    parce qu'un profil réutilisé rouvre l'onglet et les réglages de la session
+    précédente — l'incrément 21 a mesuré une page avec son panneau de réglages
+    ouvert sans s'en apercevoir.
+  */
+  const profil = mkdtempSync(join(tmpdir(), 'chrome-lecteur-'));
+  for (const spec of PLATEAUX) {
+    const url = `${BASE}${spec.chemin}`;
+    console.log(`Ouverture : ${url}`);
+    spawn(
+      'cmd',
+      ['/c', 'start', 'chrome', `--user-data-dir=${profil}`, '--no-first-run',
+        '--no-default-browser-check', '--new-window', url],
+      { detached: true, stdio: 'ignore' },
+    ).unref();
+    await attendre(6000);
+  }
+
+  console.log('\nDémarrage de NVDA (muet)…');
   await nvda.start({
     settings: {
       // Muet, et cela n'empêche pas la capture : elle se branche sur
@@ -148,113 +297,12 @@ async function main() {
   await attendre(3000);
 
   try {
-    console.log('── Amener le navigateur devant ──');
-    let auPoint = await amenerDevant(/sudoku/i);
-
-    /*
-      Le clic humain n'est plus qu'un dernier recours : le cyclage y arrive seul
-      dans le cas normal. On ne le propose donc que sur un poste de travail, et
-      jamais sur une machine d'intégration où personne ne lit la sortie.
-    */
-    if (!auPoint && !SANS_CLIC) {
-      console.log('');
-      console.log('  Le cyclage n’a pas suffi. CLIQUE SUR LA FENÊTRE CHROME « Sudoku ».');
-      console.log('');
-      for (let i = 0; i < 60 && !auPoint; i++) {
-        auPoint = /sudoku/i.test(await titreCourant());
-        if (!auPoint) await attendre(1200);
-      }
-    }
-    if (!auPoint) throw new Error('La fenêtre du navigateur n’a jamais eu le focus.');
-
-    // Point de départ déterministe : après un rechargement, le clavier repart du
-    // début du document, quel que soit l'endroit où le clic est tombé.
-    await nvda.press('F5');
-    await attendre(5000);
-    if (!(await amenerDevant(/sudoku/i, 4))) throw new Error('Focus perdu au rechargement.');
-    console.log('\n→ Ne touche plus à rien.\n');
-
-    /* ── 1. Atteindre le plateau, en comptant ce qu'il coûte ──────────────── */
-    console.log('── Tabulation jusqu’au plateau ──');
-    let arretsAvant = 0;
-    let arretsDuPlateau = 0;
-    let atteint = false;
-    for (let i = 1; i <= 24 && !atteint; i++) {
-      const dit = await dire(`tab.${i}`, `Tab n°${i}`, () => nvda.press('Tab'), 300);
-      if (dit.some((p) => /discord|slack|edge|powershell|explorateur/i.test(p))) {
-        throw new Error(`Le focus a quitté la page au Tab n°${String(i)}.`);
-      }
-      if (dit.some((p) => APRES_LE_PLATEAU.test(p))) {
-        // On vient de dépasser : le plateau était l'arrêt précédent.
-        arretsDuPlateau = 1;
-        atteint = true;
-        await dire('retour', 'Maj+Tab (revenir sur le plateau)', () => nvda.press('Shift+Tab'));
-        break;
-      }
-      arretsAvant = i;
-    }
-    console.log(`  (plateau atteint après ${String(arretsAvant)} arrêt(s) avant lui)`);
-    exiger(
-      'le plateau ne consomme qu’un arrêt de tabulation',
-      atteint && arretsDuPlateau === 1,
-      atteint
-        ? `${String(arretsDuPlateau)} arrêt(s), après ${String(arretsAvant)} autres`
-        : 'le pavé de chiffres n’a jamais été atteint',
-    );
-
-    /* ── 2. Ce que le lecteur dit de la case focalisée ───────────────────── */
-    /*
-      `NVDA+Tab` demande « où suis-je ? ». Après le `Maj+Tab` ci-dessus, la
-      réponse doit être **une case**, nommée par notre `aria-label`.
-
-      ⚠ Ne pas y chercher les dimensions du plateau : elles sont annoncées quand
-      on **entre** dans le conteneur, pas quand on rapporte une case. La première
-      version de ce script les exigeait ici et échouait sur une bonne réponse —
-      « ligne 1, colonne 1, vide, cell, focused ». L'assertion était fausse, pas
-      le produit.
-    */
-    const ici = await dire('ou', 'NVDA+Tab : où suis-je ?', () => nvda.press('Insert+Tab'));
-    const depart = EST_UNE_CASE.exec(ici.join(' '));
-    exiger(
-      'la case focalisée prononce son nom accessible',
-      depart !== null,
-      `entendu : « ${ici.join(' / ')} »`,
-    );
-
-    /* ── 3. Le parcours aux flèches, depuis cette case ────────────────────── */
-    if (depart !== null) {
-      /*
-        L'assertion qui compte, et la seule que l'incrément 21 avait laissée
-        ouverte : **une flèche fait-elle annoncer la case voisine ?** Le
-        déplacement lui-même est vérifié côté application par les tests du
-        plateau ; ce qui se vérifie ici est que le lecteur d'écran le **dit**.
-      */
-      const droite = await dire('droite', '→ flèche droite', () => nvda.press('ArrowRight'));
-      const arrivee = EST_UNE_CASE.exec(droite.join(' '));
-      exiger(
-        'une flèche fait annoncer la case voisine',
-        arrivee !== null && arrivee[2] !== depart[2] && arrivee[1] === depart[1],
-        arrivee === null
-          ? `aucune case annoncée — entendu : « ${droite.join(' / ')} »`
-          : `partie de ${depart[0]}, arrivée à ${arrivee[0]}`,
-      );
-
-      const bas = await dire('bas', '↓ flèche bas', () => nvda.press('ArrowDown'));
-      const dessous = EST_UNE_CASE.exec(bas.join(' '));
-      exiger(
-        'une flèche vers le bas change de ligne',
-        dessous !== null && dessous[1] !== depart[1],
-        dessous === null
-          ? `aucune case annoncée — entendu : « ${bas.join(' / ')} »`
-          : `toujours ligne ${dessous[1]}`,
-      );
-    }
-
+    for (const spec of PLATEAUX) await mesurer(spec);
   } catch (error) {
     const message = String(error?.message ?? error);
     console.error(`\nINTERROMPU : ${message}`);
     echecs.push(`exécution interrompue — ${message}`);
-    releve.push({ etape: 'erreur', geste: 'interruption', entendu: [message] });
+    releve.push({ plateau: courant, etape: 'erreur', geste: 'interruption', entendu: [message] });
   } finally {
     console.log('\nArrêt de NVDA…');
     try {
@@ -264,14 +312,14 @@ async function main() {
     }
     writeFileSync(
       new URL('../releve-lecteur-decran.json', import.meta.url),
-      JSON.stringify({ url: URL_PAGE, quand: new Date().toISOString(), echecs, releve }, null, 2),
+      JSON.stringify({ base: BASE, quand: new Date().toISOString(), echecs, releve }, null, 2),
       'utf8',
     );
   }
 
   console.log('\n════════════════════════════════════');
   if (echecs.length === 0) {
-    console.log('  Tout est tenu.');
+    console.log('  Les deux plateaux sont tenus.');
   } else {
     console.log(`  ${String(echecs.length)} manquement(s) :`);
     for (const e of echecs) console.log(`   • ${e}`);
