@@ -16,4 +16,5 @@ export * from './scene/index.js';
 export * from './clues/index.js';
 export * from './deduce/index.js';
 export * from './exact/index.js';
+export * from './io/index.js';
 export * from './compose/index.js';
