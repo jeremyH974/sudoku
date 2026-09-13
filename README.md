@@ -1083,8 +1083,12 @@ Ce qui reste ouvert, par ordre de valeur :
   sur les 441 grilles de la référence, l'oracle n'en rapporte aucun non plus.
 - **Le paysage sur téléphone** : la grille à gauche, le pavé à droite. C'est une troisième
   disposition ; la barre basse s'y dégrade en « il faut un peu défiler », pas en « cassé ».
-- **La validation au lecteur d'écran de `role="grid"`**, que `CLAUDE.md` exige avant de le
-  considérer comme acquis. axe ne peut pas la fournir, et une CI verte ne doit pas être prise pour
+- **La validation au lecteur d'écran**, que `CLAUDE.md` exige, et que personne n'a encore faite.
+  `docs/lecteur-decran.md` la rend exécutable en une demi-heure — commandes NVDA, capture du
+  journal, verdicts à remplir — et tranche au passage la question du rôle : `role="grid"` est gardé
+  parce que c'est lui qui fait passer NVDA en mode formulaire, seul mode où les flèches parviennent
+  au plateau. Le document mesure aussi ce qu'aucune correction de notre côté ne rattraperait : sur
+  l'implémentation de référence du W3C, NVDA + Chrome n'annonce déjà pas le rôle. axe ne peut pas la fournir, et une CI verte ne doit pas être prise pour
   elle. L'incrément 18 a lu l'arbre d'accessibilité d'un vrai Chromium — ce que jsdom ne calcule
   jamais — et en a tiré une correction : `aria-selected` est retiré des deux plateaux, parce qu'il
   décrivait une sélection qui n'existe pas et posait « non sélectionné » sur 35 cases sur 36. Mais

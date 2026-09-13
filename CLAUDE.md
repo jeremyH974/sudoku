@@ -95,8 +95,15 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
 - Le réglage de taille agit sur **deux** leviers, et il faut les deux : `font-size` sur la racine
   pour tout ce qui est en `rem`, et `--text-scale` pour les chiffres à l'intérieur d'une grille
   dont la largeur est déjà bornée par l'écran.
-- `role="grid"` est signalé comme anti-pattern potentiel hors données tabulaires : à valider par
-  un test réel avec un lecteur d'écran avant de le considérer comme acquis. **`axe` ne peut pas le
+- `role="grid"` est **gardé**, et la raison est mécanique plutôt qu'esthétique : NVDA intercepte
+  les flèches en mode navigation et ne les transmet à la page qu'en mode formulaire, dans lequel
+  c'est ce rôle qui le fait basculer. Un `role="table"` rendrait le plateau inutilisable au clavier
+  pour ceux qu'on cherche à servir. Le raisonnement complet, ses sources et le **protocole de
+  validation** sont dans `docs/lecteur-decran.md`.
+
+  ⚠ La validation elle-même **reste due** : personne n'a encore écouté. Et le W3C mesure que NVDA
+  + Chrome échoue l'assertion « annoncer le rôle grid » sur sa **propre** implémentation de
+  référence — aucune correction de notre côté ne rattraperait cela. **`axe` ne peut pas le
   faire** — et plus généralement, un DOM simulé ne calcule aucune mise en page : les tests
   `*.a11y.test.ts` voient les rôles, les noms accessibles et l'ordre des titres, **jamais le
   contraste ni la taille des cibles**. Ces deux-là se mesurent à la main, et une CI verte ne vaut
