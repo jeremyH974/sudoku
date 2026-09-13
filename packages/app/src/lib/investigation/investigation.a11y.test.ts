@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { composeCase } from '@sudoku/engine/investigation';
 import type { CaseFile } from '@sudoku/engine/investigation';
 import { CaseGame } from './caseGame.svelte.js';
@@ -25,6 +25,28 @@ import type { Rendered } from '../../test/render.js';
  * référence du genre livre aujourd'hui — un `<canvas>` sans rôle ni nom, zéro
  * élément focalisable, zéro région annoncée.
  */
+
+/*
+  Le délai est **mesuré**, et il signale un défaut plutôt qu'il ne le corrige.
+
+  Chaque test de ce fichier engendre son affaire, et la composition est lente :
+  sur les douze graines employées ici, la médiane est à 197 ms et le pire cas à
+  1 005 ms — `a11y-tabulation`, suivie de `a11y-dimensions` et `a11y-mesure` à
+  825 ms. Ces trois-là, et exactement ces trois-là, ont fait tomber la
+  publication sur le coureur de la CI : deux cœurs partagés, quarante-quatre
+  travailleurs qui se les disputent, et les cinq secondes du défaut de vitest
+  franchies par composition + rendu + `axe`.
+
+  Le symptôme ressemblait à un composant cassé ; la cause est le chronomètre,
+  exactement comme pour le test de propriété de `composeCase`. Trente secondes
+  laissent une marge de trente fois le pire cas local.
+
+  ⚠ Ce n'est pas la correction. La correction est de rendre la composition
+  assez rapide pour que la question ne se pose plus — le bouton « Nouvelle
+  affaire » fait attendre le joueur du même temps. Le jour où c'est fait, ce
+  délai doit **redescendre**, et sa disparition sera la preuve.
+*/
+vi.setConfig({ testTimeout: 30_000 });
 
 /** Une affaire **engendrée**, jamais écrite à la main. */
 function loadedGame(seed: string): CaseGame {
