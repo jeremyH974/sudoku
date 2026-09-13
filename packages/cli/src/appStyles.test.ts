@@ -414,6 +414,37 @@ describe('discipline des jetons', () => {
     expect(appCss).toMatch(/--tap:\s*2\.75rem;/);
   });
 
+  it('fait charger les règles d’impression par qui pose une feuille', () => {
+    /*
+      Défaut vécu, et invisible à l'écran.
+
+      L'application est construite en **trois paquets indépendants** — accueil,
+      sudoku, enquête — pour qu'un joueur de sudoku ne télécharge jamais le
+      moteur d'Enquête. La contrepartie : une feuille de style globale importée
+      d'un seul côté n'existe pas de l'autre. `print.css` ne l'était que par
+      `PrintStudio.svelte`, donc uniquement dans le paquet du sudoku, et le
+      dossier d'enquête sortait de l'imprimante avec l'en-tête, les boutons et le
+      plateau autour — sans un seul saut de page.
+
+      L'aperçu, lui, était parfaitement juste : rien ne pouvait le signaler avant
+      d'appuyer sur Imprimer. D'où cette règle, structurelle et non esthétique :
+      **le composant qui pose une `.sheets` importe les règles qui la
+      détachent.** Elle est volontairement naïve — elle ne suit pas le graphe
+      d'imports — parce qu'un contrôle qu'on comprend d'un coup d'œil vaut mieux
+      qu'un contrôle exact que personne ne relit.
+    */
+    const owners = styleFiles(APP_SRC)
+      .filter((file) => extname(file) === '.svelte')
+      .map((file) => ({ path: relative(APP_SRC, file).split(sep).join('/'), source: readFileSync(file, 'utf8') }))
+      .filter((file) => /class="sheets"/.test(file.source));
+
+    expect(owners.length, 'aucune feuille posée : le contrôle ne prouverait rien').toBeGreaterThan(0);
+    const orphans = owners
+      .filter((file) => !/import ['"]\.\/print\.css['"]/.test(file.source))
+      .map((file) => file.path);
+    expect(orphans).toEqual([]);
+  });
+
   it('n’exempte que des fichiers qui existent', () => {
     // Un renommage élargirait sinon l'exemption en silence : le fichier renommé
     // échapperait à toutes les règles sans que rien ne le dise.

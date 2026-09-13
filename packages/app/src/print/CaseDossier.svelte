@@ -2,6 +2,22 @@
   import type { CaseFile } from '@sudoku/engine/investigation';
   import CaseSheet from './CaseSheet.svelte';
   import { PAPER_SIZES, formatById, paperById } from './presets.js';
+  /*
+    ⚠ Les règles d'impression, **importées ici et pas ailleurs**.
+
+    L'application est construite en trois paquets indépendants, exprès : un
+    joueur de sudoku ne télécharge jamais le moteur d'Enquête. La contrepartie
+    est qu'une feuille de style globale importée d'un seul côté n'existe pas de
+    l'autre — et `print.css` ne l'était que par `PrintStudio.svelte`, donc
+    seulement dans le paquet du sudoku. Le dossier d'enquête sortait de
+    l'imprimante avec l'en-tête, les boutons, le plateau et les statistiques
+    autour, et sans aucun saut de page.
+
+    Rien ne le montrait à l'écran : l'aperçu était juste. `appStyles.test.ts`
+    tient désormais la règle — qui pose une `.sheets` importe les règles qui la
+    détachent.
+  */
+  import './print.css';
   import type { PaperSizeId } from './presets.js';
 
   interface Props {

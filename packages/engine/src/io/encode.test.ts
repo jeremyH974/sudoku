@@ -32,7 +32,18 @@ describe('encodeGrid / decodeGrid', () => {
       expect(formatGrid(decodeGrid(encodeGrid(puzzle)))).toBe(formatGrid(puzzle));
       expect(formatGrid(decodeGrid(encodeGrid(solution)))).toBe(formatGrid(solution));
     }
-  });
+    /*
+      Soixante grilles **réellement creusées**, pas des fixtures : c'est ce qui
+      donne sa valeur à ce contrôle, et c'est aussi ce qui le rend long. Le
+      creusement symétrique coûte une vingtaine de millisecondes pièce, mesuré
+      au banc — soit plus d'une seconde de travail utile avant le premier
+      encodage, et davantage sur une machine de CI partagée.
+
+      Le délai est donc explicite, comme pour les corpus dans `packages/cli`.
+      Il ne masque rien : la lenteur est celle du générateur qu'on veut
+      éprouver, et la réduire reviendrait à éprouver moins de grilles.
+    */
+  }, 30_000);
 
   it('gère les deux extrêmes : grille vide et grille pleine', () => {
     const empty = createEmptyGrid();

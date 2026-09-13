@@ -65,6 +65,29 @@ export default defineConfig({
           name: 'dom',
           environment: 'jsdom',
           include: ['packages/app/src/**/*.{a11y,dom}.test.ts'],
+          /*
+            Vingt secondes, et c'est une propriété de **l'environnement**, pas un
+            pansement sur un test lent.
+
+            Ce projet-ci paie deux choses qu'aucun test du moteur ne paie : le
+            démarrage d'un jsdom par fichier, et la compilation Svelte de tout ce
+            que le fichier importe. Vitest chiffre lui-même la seconde à 40 à
+            84 secondes par passe, refaite à chaque exécution — et la variation
+            est telle que le premier test d'un fichier, s'il déclenche un import
+            dynamique à froid, dépasse les cinq secondes du défaut une passe sur
+            deux. Mesuré : `textSize.dom.test.ts` et `theme.dom.test.ts` tombent
+            ensemble, toujours sur leur premier test, jamais sur une assertion.
+
+            ⚠ À ne pas confondre avec le délai supprimé à l'incrément 17. Celui-là
+            masquait un **générateur lent**, et la vraie correction a été de le
+            rendre rapide. Ici rien du produit n'est lent : composer une affaire
+            tient en 19 ms au médian. C'est l'outillage qui coûte, et un délai
+            calé sur l'outillage est le bon endroit pour le dire.
+
+            Si ce nombre devait remonter, ce serait le signe qu'un fichier
+            importe trop — et c'est cela qu'il faudrait corriger, pas le délai.
+          */
+          testTimeout: 20_000,
         },
       },
     ],

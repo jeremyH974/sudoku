@@ -85,11 +85,27 @@ describe('performance du mode Enquête', () => {
       passe à l'autre sur la même machine et le même code. Les quantiles, eux,
       sont stables — c'est sur eux qu'il faut juger une régression.
 
-      Le seuil passe de 6 000 à 3 000 ms, soit près du double du pire cas relevé.
-      S'il devait descendre encore, ce serait en touchant le budget `attempts` —
-      et en récupérant des graines stériles.
+      ─── Incrément 19 : le critère de taille a changé ────────────────────────
+
+      `carve` ne taille plus contre un comptage de solutions mais contre la
+      **déductibilité**, et l'unicité vient avec (voir `compose/generate.ts`).
+      Relevé sur les mêmes 400 graines, sans aucun changement de règle du jeu :
+
+        |        | inc. 17 | inc. 19 |
+        | p50    |   63    |   19    |
+        | p90    |  234    |   65    |
+        | p99    |  570    |  103    |
+        | pire   |  609    |  129    |
+
+      Les affaires produites, elles, **changent** — c'est un changement de
+      conception, autorisé comme tel. Ce qui ne bouge pas : la longueur moyenne
+      (8,7 → 8,9 indices) et la répartition des décors, identique.
+
+      Le seuil passe de 3 000 à 600 ms. Il reste près de cinq fois le pire cas
+      relevé, parce que le pire cas est l'indicateur le plus bruité de tous et
+      que ce banc doit tenir sur une machine de CI partagée.
     */
-    expect(timings[timings.length - 1]).toBeLessThan(3000);
+    expect(timings[timings.length - 1]).toBeLessThan(600);
   });
 });
 
