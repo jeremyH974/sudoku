@@ -182,6 +182,48 @@ function rulesOf(css: string): Rule[] {
   return rules;
 }
 
+interface Block {
+  readonly selector: string;
+  /** Les déclarations écrites **directement** dans ce bloc, sans les imbriqués. */
+  readonly declarations: string;
+}
+
+/**
+ * Chaque bloc d'une feuille, avec ses seules déclarations propres.
+ *
+ * `rulesOf` rend les sélecteurs ; il faut ici l'inverse — ce qui est écrit
+ * **dans** un bloc —, pour vérifier que deux déclarations voisinent. Les blocs
+ * imbriqués sont exclus : une graisse posée dans un `:hover` interne ne répond
+ * pas de la police déclarée au-dessus.
+ */
+function blocksOf(css: string): Block[] {
+  const done: Block[] = [];
+  const open: { selector: string; declarations: string }[] = [];
+  let prelude = '';
+
+  for (const char of css) {
+    if (char === '{') {
+      open.push({ selector: prelude.trim(), declarations: '' });
+      prelude = '';
+    } else if (char === '}') {
+      const block = open.pop();
+      if (block !== undefined && !block.selector.startsWith('@')) {
+        for (const selector of block.selector.split(',')) {
+          done.push({ selector: selector.trim(), declarations: block.declarations });
+        }
+      }
+      prelude = '';
+    } else {
+      prelude += char;
+      // Le texte va au bloc courant, et **seulement** à lui : un `:hover`
+      // imbriqué remplit le sien, jamais celui de son parent.
+      const current = open[open.length - 1];
+      if (current !== undefined) current.declarations += char;
+    }
+  }
+  return done;
+}
+
 /** Le sélecteur sans ses états : `.action:hover:not(:disabled)` devient `.action`. */
 const baseOf = (selector: string): string =>
   selector.replace(/:(?:hover|active|focus-visible|focus|disabled)|:not\([^)]*\)/g, '').trim();
@@ -259,6 +301,36 @@ describe('discipline des jetons', () => {
           .filter((value) => !value.startsWith('var(--font-') && value !== 'inherit')
           .map((value) => `${path} : font-family: ${value}`),
       );
+    expect(offenders).toEqual([]);
+  });
+
+  it('ne demande jamais à la manuscrite une graisse qu’elle n’a pas', () => {
+    /*
+      Patrick Hand ne livre **qu'un seul fichier, en 400**. Demander 700 ne rend
+      pas une variante grasse : le navigateur en **fabrique** une, et le procédé
+      a un nom — gras synthétique.
+
+      Ce n'est pas une subtilité de typographe. Mesuré sur le titre « Enquête »,
+      qui portait le défaut en production : le 700 dépose **41,5 % d'encre en
+      plus** que le 400 pour la même fonte. Et — c'est le piège — **à chasse
+      rigoureusement identique**, parce que Chromium cerne le contour au lieu
+      d'élargir la lettre. Une vérification par la largeur du texte n'y voit
+      donc rien du tout ; il a fallu compter les pixels sombres d'un rendu.
+
+      Le défaut arrive tout seul : un `h1` vaut 700 par défaut. Toute règle qui
+      cite `--font-hand` doit donc **écrire** sa graisse, et cette écriture est
+      la seule trace visible du problème dans le code.
+
+      `font-synthesis-weight: none` aurait été l'autre voie. Écrire 400 lui est
+      préféré : la propriété corrige le symptôme là où la déclaration dit
+      l'intention, et une graisse explicite se relit sans connaître la règle.
+    */
+    const offenders = sheets.flatMap(({ path, css }) =>
+      blocksOf(css)
+        .filter(({ declarations }) => /font-family\s*:\s*var\(--font-hand\)/.test(declarations))
+        .filter(({ declarations }) => !/font-weight\s*:\s*400/.test(declarations))
+        .map(({ selector }) => `${path} : ${selector} cite --font-hand sans écrire font-weight: 400`),
+    );
     expect(offenders).toEqual([]);
   });
 

@@ -567,6 +567,7 @@
   */
   .name {
     font-family: var(--font-hand);
+    font-weight: 400;
     font-size: var(--text-lg);
     line-height: var(--leading-tight);
   }

@@ -485,6 +485,7 @@
     padding: 0 var(--space-1);
     color: var(--ink-soft);
     font-family: var(--font-hand);
+    font-weight: 400;
     font-size: var(--text-sm);
     white-space: nowrap;
   }

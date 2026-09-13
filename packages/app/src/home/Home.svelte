@@ -109,11 +109,25 @@
     gap: var(--space-2);
   }
 
+  /*
+    Le titre du site, de la même main que les titres de section.
+
+    L'accueil était le dernier écran resté en pile système, alors que la
+    direction artistique dit « tout le site adopte le style illustré ». C'est
+    la **première** chose qu'un visiteur voit : la laisser en sans-serif faisait
+    promettre une application là où les deux jeux tiennent un cahier dessiné.
+
+    La graisse est écrite. Patrick Hand ne livre que le 400 ; un `h1` en demande
+    700, et le navigateur le **fabrique** — mesuré ailleurs dans ce projet à
+    41,5 % d'encre en plus, à chasse inchangée.
+  */
   h1 {
     display: flex;
     align-items: center;
     gap: var(--space-3);
     margin: 0;
+    font-family: var(--font-hand);
+    font-weight: 400;
     font-size: var(--text-xl);
     line-height: var(--leading-tight);
   }
@@ -148,17 +162,34 @@
     display: grid;
     gap: var(--space-2);
     padding: var(--space-5);
-    border: 1px solid var(--border);
+    /*
+      Le trait d'encre et l'ombre dure, comme les cartes de suspect : deux
+      pixels, pas un, et une ombre **sans flou**, décalée de trois. C'est toute
+      la grammaire illustrée, et l'accueil en était resté au relief discret de
+      l'ancienne interface — un pixel de bordure et une ombre floue, soit
+      exactement ce que le reste du site a cessé d'être.
+    */
+    border: 2px solid var(--ink);
     border-radius: var(--radius-lg);
     background: var(--surface);
     color: var(--text);
     text-decoration: none;
-    box-shadow: var(--shadow-raised);
+    box-shadow: var(--shadow-hard);
   }
 
+  /*
+    Le nom du jeu, **écrit à la main** — la même règle que les noms de suspect
+    et les noms de pièce sur le plan : la manuscrite sert aux titres et aux
+    noms propres, jamais au corps de texte ni à un libellé de contrôle.
+
+    C'est pourquoi l'accroche, la description et le pied restent en pile
+    système : une manuscrite y serait plus lente à lire pour tout le monde, et
+    franchement pénible pour qui déchiffre déjà difficilement.
+  */
   .name {
+    font-family: var(--font-hand);
+    font-weight: 400;
     font-size: var(--text-lg);
-    font-weight: 700;
     line-height: var(--leading-tight);
   }
 
@@ -180,8 +211,15 @@
     }
   }
 
+  /*
+    Au doigt, la carte s'enfonce **dans sa propre ombre** : elle glisse de trois
+    pixels, l'ombre disparaît, et le relief est consommé. C'est le geste des
+    cartes de suspect, et il n'existait pas ici.
+  */
   .game:active {
     background: var(--surface-pressed);
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
   .foot {

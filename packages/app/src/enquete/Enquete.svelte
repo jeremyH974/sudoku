@@ -98,10 +98,20 @@
     flex: 1 1 12rem;
   }
 
-  /* Le titre de la section, de la même main que les noms sur les cartes. */
+  /*
+    Le titre de la section, de la même main que les noms sur les cartes.
+
+    La graisse est écrite, et ce n'est pas une redondance : un `h1` vaut 700 par
+    défaut, Patrick Hand ne livre que le 400, et le navigateur comble l'écart en
+    **fabriquant** le gras. Mesuré sur ce titre : 41,5 % d'encre en plus pour la
+    même fonte, à chasse inchangée — Chromium cerne le glyphe au lieu d'élargir,
+    ce qui explique qu'une mesure de largeur n'y voie rien. Le résultat est une
+    manuscrite empâtée, qui ne ressemble plus à une main.
+  */
   h1 {
     margin: 0;
     font-family: var(--font-hand);
+    font-weight: 400;
     font-size: var(--text-xl);
     line-height: var(--leading-tight);
   }
