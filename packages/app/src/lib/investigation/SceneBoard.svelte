@@ -1,6 +1,6 @@
 <script lang="ts">
   import { doorwaysOf, propsOfCell } from '@sudoku/engine/investigation';
-  import type { PropId, Scene } from '@sudoku/engine/investigation';
+  import type { Doorway, PropId, Scene } from '@sudoku/engine/investigation';
   import type { CaseGame } from './caseGame.svelte.js';
   import { FILL, FURNITURE, FURNITURE_LABEL, LAYER_ORDER } from './furniture.js';
 
@@ -79,9 +79,8 @@
    * demi-mur de chaque côté** avant d'être retranchée, pour que le vide visible
    * mesure exactement ce que le moteur a calculé.
    */
-  function wallRuns(plan: Scene): string {
+  function wallRuns(plan: Scene, doors: readonly Doorway[]): string {
     const n = plan.size;
-    const doors = doorwaysOf(plan);
     const parts: string[] = [];
 
     for (const axis of ['vertical', 'horizontal'] as const) {
@@ -144,14 +143,21 @@
    * l'élément le plus épais du dessin encadre ; le seuil n'est qu'une précision
    * qui s'efface proprement.
    */
-  function sills(plan: Scene): string {
-    return doorwaysOf(plan)
-      .map((door) => segment(door.axis, door.line, door.from, door.to))
-      .join('');
+  function sills(doors: readonly Doorway[]): string {
+    return doors.map((door) => segment(door.axis, door.line, door.from, door.to)).join('');
   }
 
-  const wallPath = $derived(scene === null ? '' : wallRuns(scene));
-  const sillPath = $derived(scene === null ? '' : sills(scene));
+  /*
+    Les portes, calculées **une fois** par plan.
+
+    Les murs et les seuils les demandaient chacun de leur côté, et chaque
+    demande rejouait tout l'arbre couvrant : le relevé des mitoyennetés, le
+    regroupement par contiguïté, le tri, l'union-find. Deux fois le même
+    résultat à chaque rendu, pour un calcul qui ne dépend que du décor.
+  */
+  const doorways = $derived(scene === null ? [] : doorwaysOf(scene));
+  const wallPath = $derived(scene === null ? '' : wallRuns(scene, doorways));
+  const sillPath = $derived(sills(doorways));
 
   /**
    * Les meubles d'une case, dans l'ordre où on les dessine.

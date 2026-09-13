@@ -247,6 +247,25 @@ pour que le vide visible mesure exactement ce que le moteur a calculé.
 
 ---
 
+### Les noms de pièce, posés sur leur propre sol
+
+Le nom d'une pièce s'ancre dans son coin bas-gauche et déborde volontairement : un nom tronqué à la
+case ne se lirait pas, et c'est le nom qui distingue deux pièces de teinte voisine. Il flottait donc
+au-dessus de ce qui s'y trouvait, et tombait régulièrement sur un meuble — « Salon » sur un
+fauteuil, « Hall » sur une table. C'était déjà vrai ; l'épaississement des murs l'a rendu voyant.
+
+Il repose désormais sur un morceau du sol de **sa propre pièce**, par le même mécanisme `data-zone`
+que les cases. La teinte compte, et pas une plaque neutre : le nom se lit alors comme du mobilier
+écarté pour le laisser passer, ce que fait un plan d'architecte. Une plaque blanche se lirait comme
+un objet posé sur le plan.
+
+Mesuré plutôt que supposé, sur les six teintes : **4,80:1 au pire en thème clair, 5,11:1 en
+sombre**, contre les 4,5:1 que WCAG demande d'un texte normal. C'est une amélioration et pas un
+rangement — avant, un nom pouvait tomber sur de l'encre de mobilier, et le rapport n'était garanti
+par rien.
+
+---
+
 ## 5. La manuscrite, et un gras qui n'existait pas
 
 ### Le défaut, livré en production
@@ -293,8 +312,6 @@ de contrôle.
   maintenant n'est plus la composition mais le rendu et `axe` : le pire test reste à 2,05 s ici.
 - **Le rejet tardif de `carve` reste entier** — 91,3 % du travail est jeté. C'est le gisement
   suivant, et il demande un changement de conception, pas une optimisation.
-- **Les étiquettes de pièce peuvent tomber sur un meuble.** Ancrées au coin bas-gauche, elles
-  évitent désormais les murs mais pas le mobilier — visible sur « Salon » du pavillon.
 - **Patrick Hand a une hauteur d'x 10 % plus petite qu'Arial** et une chasse 19 % plus étroite
   (mesuré sur les binaires). Les noms de jeu sont à 22 px, sous le seuil de 24 px que Mozilla
   s'impose pour sa propre police d'affichage. À regarder si la lisibilité est mise en cause.
