@@ -35,7 +35,7 @@
  *    début, et l'on **détecte** le plateau au lieu de compter à l'aveugle.
  */
 import { spawn } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { appendFileSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { nvda } from '@guidepup/guidepup';
@@ -79,9 +79,35 @@ const PLATEAUX = [
   },
 ];
 
+/**
+ * Combien de fois on retente **un plateau** avant de le déclarer manqué.
+ *
+ * ─── Pourquoi des réessais, et pourquoi ils se comptent ─────────────────────
+ *
+ * Piloter un lecteur d'écran est fragile par nature : une fenêtre qui met une
+ * seconde de trop à s'ouvrir, un focus qui s'échappe, et la mesure est perdue
+ * sans que rien du produit n'ait bougé. Sans réessai, le rendez-vous du lundi
+ * rougirait pour des raisons qui ne nous apprennent rien.
+ *
+ * ⚠ Mais un réessai **cache** ce qu'il absorbe, et ce projet ne s'accommode pas
+ * d'un chiffre invisible. Guidepup encaisse sa fragilité avec cinq essais par
+ * test et n'en publie aucun taux ; ARIA-AT fait l'inverse et rejoue chaque plan
+ * cinq fois pour la **mesurer**. On fait les deux : on retente, **et l'on compte**.
+ * Le nombre de tentatives part dans le relevé et dans le résumé de l'exécution,
+ * de sorte qu'une dérive se voie sans lire les journaux.
+ *
+ * Un plateau tenu à la deuxième tentative n'est donc pas « vert » tout court :
+ * il est vert **et** noté comme tel.
+ */
+const ESSAIS = Number(process.env.ESSAIS ?? '3');
+
 const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
 const releve = [];
 const echecs = [];
+/** Les manquements de la tentative en cours — remis à zéro à chaque essai. */
+let fautes = [];
+/** Un bilan par plateau : tenu ou non, et **en combien de tentatives**. */
+const bilans = [];
 let courant = '';
 
 async function dire(etape, geste, action, delai = 420) {
@@ -99,7 +125,7 @@ async function dire(etape, geste, action, delai = 420) {
 /** Une assertion nommée : elle dit ce qu'elle attendait et ce qu'elle a eu. */
 function exiger(nom, condition, detail) {
   console.log(`  ${condition ? '✓' : '✗'} ${nom}`);
-  if (!condition) echecs.push(`[${courant}] ${nom} — ${detail}`);
+  if (!condition) fautes.push(`${nom} — ${detail}`);
   releve.push({
     plateau: courant,
     etape: 'assertion',
@@ -147,10 +173,12 @@ async function amenerDevant(reconnaitre, tentatives = 12) {
   return false;
 }
 
-/** Le protocole, sur un plateau. */
-async function mesurer(spec) {
+/** Le protocole, sur un plateau, **une fois**. Rend les manquements observés. */
+async function tenter(spec, essai) {
   courant = spec.nom;
-  console.log(`\n══════ ${spec.nom} ══════`);
+  fautes = [];
+  console.log(`
+══════ ${spec.nom} — tentative ${String(essai)} / ${String(ESSAIS)} ══════`);
 
   let auPoint = await amenerDevant(spec.fenetre);
   /*
@@ -168,8 +196,8 @@ async function mesurer(spec) {
     }
   }
   if (!auPoint) {
-    echecs.push(`[${spec.nom}] la fenêtre n’a jamais eu le focus`);
-    return;
+    fautes.push('la fenêtre n’a jamais eu le focus');
+    return fautes;
   }
 
   // Point de départ déterministe : après un rechargement, le clavier repart du
@@ -177,8 +205,8 @@ async function mesurer(spec) {
   await nvda.press('F5');
   await attendre(5000);
   if (!(await amenerDevant(spec.fenetre, 4))) {
-    echecs.push(`[${spec.nom}] focus perdu au rechargement`);
-    return;
+    fautes.push('focus perdu au rechargement');
+    return fautes;
   }
 
   /* ── 1. Atteindre le plateau, et compter ce qu'il coûte ─────────────────── */
@@ -207,7 +235,7 @@ async function mesurer(spec) {
     atteint,
     'ce qui suit le plateau n’a jamais été atteint',
   );
-  if (!atteint) return;
+  if (!atteint) return fautes;
 
   /* ── 2. Ce que le lecteur dit de la case focalisée ──────────────────────── */
   /*
@@ -225,7 +253,7 @@ async function mesurer(spec) {
     depart !== null,
     `entendu : « ${ici.join(' / ')} »`,
   );
-  if (depart === null) return;
+  if (depart === null) return fautes;
 
   /* ── 3. Le parcours aux flèches, depuis cette case ──────────────────────── */
   /*
@@ -252,6 +280,38 @@ async function mesurer(spec) {
       ? `aucune case annoncée — entendu : « ${bas.join(' / ')} »`
       : `toujours rangée ${versBas[1]}`,
   );
+
+  return fautes;
+}
+
+/**
+ * Un plateau, retenté jusqu'à `ESSAIS` fois — et le compte est rendu.
+ *
+ * Ce que l'on retente est **un plateau entier**, pas une assertion : une mesure
+ * perdue l'est en général pour une raison qui a précédé les assertions — une
+ * fenêtre lente, un focus parti. Recommencer une seule assertion sur un état
+ * déjà dérivé ne mesurerait rien.
+ *
+ * Chaque tentative repart d'un `F5`, donc d'un document propre : le protocole
+ * est rejouable tel quel, c'est ce qui rend le réessai honnête plutôt que
+ * cosmétique.
+ */
+async function mesurer(spec) {
+  for (let essai = 1; essai <= ESSAIS; essai++) {
+    const manques = await tenter(spec, essai);
+    if (manques.length === 0) {
+      if (essai > 1) console.log(`  ⚠ tenu, mais à la ${String(essai)}ᵉ tentative.`);
+      return { plateau: spec.nom, tenu: true, tentatives: essai, manques: [] };
+    }
+    console.log(`  ✗ tentative ${String(essai)} manquée : ${manques.join(' | ')}`);
+    if (essai < ESSAIS) {
+      console.log('  … on recommence.');
+      await attendre(1500);
+    }
+  }
+  const derniers = fautes.map((f) => `[${spec.nom}] ${f}`);
+  echecs.push(...derniers);
+  return { plateau: spec.nom, tenu: false, tentatives: ESSAIS, manques: fautes };
 }
 
 async function main() {
@@ -297,7 +357,7 @@ async function main() {
   await attendre(3000);
 
   try {
-    for (const spec of PLATEAUX) await mesurer(spec);
+    for (const spec of PLATEAUX) bilans.push(await mesurer(spec));
   } catch (error) {
     const message = String(error?.message ?? error);
     console.error(`\nINTERROMPU : ${message}`);
@@ -312,19 +372,62 @@ async function main() {
     }
     writeFileSync(
       new URL('../releve-lecteur-decran.json', import.meta.url),
-      JSON.stringify({ base: BASE, quand: new Date().toISOString(), echecs, releve }, null, 2),
+      JSON.stringify(
+        { base: BASE, quand: new Date().toISOString(), essaisMax: ESSAIS, bilans, echecs, releve },
+        null,
+        2,
+      ),
       'utf8',
     );
   }
 
-  console.log('\n════════════════════════════════════');
-  if (echecs.length === 0) {
-    console.log('  Les deux plateaux sont tenus.');
-  } else {
-    console.log(`  ${String(echecs.length)} manquement(s) :`);
-    for (const e of echecs) console.log(`   • ${e}`);
-    process.exitCode = 1;
+  /*
+    Le bilan, et **le compte des tentatives avec lui**.
+
+    Un plateau tenu du premier coup et un plateau tenu au troisième essai donnent
+    tous deux un job vert ; ils ne disent pas la même chose. Le second est écrit
+    comme tel, ici et dans le résumé de l'exécution, parce qu'une fragilité qu'on
+    absorbe sans la compter finit par ne plus se voir du tout.
+  */
+  const resumeLignes = bilans.map(
+    (b) =>
+      `${b.tenu ? 'OK ' : 'RATÉ'} ${b.plateau} — ${b.tenu ? 'tenu' : 'manqué'}` +
+      (b.tentatives > 1 ? ` à la ${String(b.tentatives)}e tentative` : ' du premier coup') +
+      (b.tenu ? '' : ` : ${b.manques.join(' | ')}`),
+  );
+  const reessais = bilans.reduce((n, b) => n + b.tentatives - 1, 0);
+
+  console.log('');
+  console.log('════════════════════════════════════');
+  for (const l of resumeLignes) console.log(`  ${l}`);
+  if (reessais > 0) {
+    console.log(`  ⚠ ${String(reessais)} réessai(s) au total — le job est vert, la fragilité non.`);
   }
+
+  /*
+    Visible sur la page de l'exécution, sans ouvrir les journaux : c'est là que se
+    lit une dérive d'une semaine sur l'autre.
+  */
+  const fichierResume = process.env.GITHUB_STEP_SUMMARY;
+  if (fichierResume !== undefined && fichierResume !== '') {
+    const texte = [
+      "### Lecteur d'écran",
+      '',
+      '| plateau | verdict | tentatives |',
+      '| --- | --- | --- |',
+      ...bilans.map(
+        (b) => `| ${b.plateau} | ${b.tenu ? 'tenu' : 'manqué'} | ${String(b.tentatives)} |`,
+      ),
+      '',
+      reessais > 0
+        ? `⚠ **${String(reessais)} réessai(s)** — le job est vert, la fragilité ne l'est pas.`
+        : 'Aucun réessai.',
+      '',
+    ].join(String.fromCharCode(10));
+    appendFileSync(fichierResume, texte, 'utf8');
+  }
+
+  if (echecs.length > 0) process.exitCode = 1;
 }
 
 await main();
