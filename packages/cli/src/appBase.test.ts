@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -227,6 +227,60 @@ describe('adresses de l’application sous son sous-chemin', () => {
     const licence = join(APP, 'public', 'fonts', 'OFL.txt');
     expect(existsSync(licence), 'la licence OFL doit accompagner la fonte').toBe(true);
     expect(readFileSync(licence, 'utf8')).toContain('SIL Open Font License');
+  });
+
+  it('ne sert aucun fichier qu’une première visite ne peut porter', () => {
+    /*
+      Ce que `public/` contient, le service worker le précache — et une visite
+      le paie d'un coup.
+
+      Le défaut que ce test ferme a été livré : les seize **masters** des
+      portraits, 1024 px et 230 ko chacun, vivaient sous `public/portraits/`.
+      Le glob de précache prend `avif` depuis la bibliothèque des visages, donc
+      il les a pris aussi : `dist` pesait 4,5 Mo dont 3,7 de fichiers que
+      personne n'affiche jamais. Rien ne le signalait, et c'est le propre de ce
+      défaut — un cache hors ligne qui grossit ne casse rien, il ralentit
+      seulement la première visite de tout le monde.
+
+      Le plafond porte sur **chaque fichier**, pas sur le total, parce que c'est
+      la forme que prend la faute : on dépose un fichier source dans le dossier
+      servi. Le plus gros fichier légitime est le corpus du défi du jour, pesé à
+      66,7 ko ; 96 ko lui laissent de quoi grandir de moitié et arrêtent un
+      master par un facteur de deux.
+    */
+    const PLAFOND = 96_000;
+    const files: string[] = [];
+    const walk = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else files.push(full);
+      }
+    };
+    walk(join(APP, 'public'));
+    expect(files.length, 'public/ doit contenir des fichiers').toBeGreaterThan(10);
+
+    const heavy = files
+      .filter((file) => statSync(file).size > PLAFOND)
+      // L'image d'aperçu des liens partagés est la seule exclue du précache, et
+      // `globIgnores` le dit déjà dans `vite.config.ts`. Elle pèse 47,7 ko, donc
+      // passe de toute façon sous le plafond : la note est là pour le jour où
+      // elle grossira.
+      .filter((file) => !file.endsWith('og-image.png'))
+      .map((file) => `${relative(APP, file)} : ${String(Math.round(statSync(file).size / 1000))} ko`);
+    expect(heavy).toEqual([]);
+  });
+
+  it('garde les négatifs des portraits hors du dossier servi', () => {
+    // Le pendant du test précédent, nommé plutôt que mesuré : les masters sont
+    // des **entrées** de la fabrique, pas des fichiers du site. Un `git mv` en
+    // sens inverse remettrait 3,7 Mo dans le cache de chaque visiteur, et le
+    // plafond par fichier le dirait — mais ce test-ci dit *pourquoi*.
+    expect(existsSync(join(APP, 'public', 'portraits', 'masters'))).toBe(false);
+
+    const masters = resolve(import.meta.dirname, '../../../assets/portraits/masters');
+    expect(existsSync(masters), 'les masters doivent rester dans le dépôt').toBe(true);
+    expect(readdirSync(masters).filter((name) => name.endsWith('.avif'))).toHaveLength(16);
   });
 
   it('annonce dans le README l’adresse que la construction sert', () => {

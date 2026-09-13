@@ -112,8 +112,15 @@ export default defineConfig({
           `avif` et `webp` sont entrés avec la bibliothèque des seize portraits.
           Sans eux, les visages auraient été la seule chose de l'application à
           exiger le réseau — le même défaut que `json` évite pour le défi du
-          jour. Cent cinquante-cinq kilo-octets pour les trente-deux fichiers,
+          jour. Cent cinquante-trois kilo-octets pour les trente-deux fichiers,
           pesés et non estimés.
+
+          ⚠ Ce glob a coûté cher une fois. Les **masters** des portraits — 1024
+          px, 230 ko pièce — vivaient sous `public/portraits/masters`, donc
+          `avif` les a pris : 4 266 Kio précachés pour une application dont le
+          code fait 240 ko, et rien ne le signalait. Ils sont sortis du dossier
+          servi vers `assets/portraits/masters`, le précache est retombé à
+          600 Kio, et `appBase.test.ts` plafonne désormais chaque fichier servi.
         */
         globPatterns: ['**/*.{js,css,html,svg,png,avif,webp,woff2,json}'],
         /*

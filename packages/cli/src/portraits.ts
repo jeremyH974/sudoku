@@ -60,7 +60,24 @@ import { FACES, type Face } from '../../app/src/lib/investigation/portrait.js';
 const ICI = dirname(fileURLToPath(import.meta.url));
 const RACINE = join(ICI, '../../..');
 const PUBLIC = join(RACINE, 'packages/app/public/portraits');
-const MASTERS = join(RACINE, 'packages/app/public/portraits/masters');
+
+/**
+ * Les masters vivent **hors** du dossier servi, et c'est une correction.
+ *
+ * Ils étaient dans `packages/app/public/portraits/masters`, donc publiés, donc
+ * pris par le glob de précache du service worker : seize fichiers de 1024 px
+ * pour 3,7 Mo, téléchargés par chaque visiteur à la première visite pour
+ * n'être jamais affichés. Le `dist` pesait 4,5 Mo dont 3,7 de masters — du
+ * poids mort dans un cache hors ligne, ce qui est exactement le contraire du
+ * but qu'on poursuit en précachant.
+ *
+ * Ils ne sont pas supprimés pour autant : ce sont les **négatifs** de la
+ * bibliothèque. Sans eux, changer de taille ou de format obligerait à
+ * régénérer, donc à repayer, donc à accepter une nouvelle dérive de style. Ils
+ * restent donc dans le dépôt, du côté des entrées — `assets/` n'est servi par
+ * rien, et aucun glob ne va le chercher.
+ */
+const MASTERS = join(RACINE, 'assets/portraits/masters');
 
 /**
  * Le côté du fichier livré, et c'est un calcul, pas un arrondi.
@@ -70,7 +87,6 @@ const MASTERS = join(RACINE, 'packages/app/public/portraits/masters');
  * 210 px. 224 les couvre et garde un peu de marge.
  */
 const COTE = 224;
-
 
 /** Le crème du fond, lu dans le jeton plutôt que recopié. */
 function cremeDuFond(): [number, number, number] {
@@ -331,7 +347,8 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `\n${String(cibles.length)} portraits écrits dans packages/app/public/portraits.\n` +
+    `\n${String(cibles.length)} portraits écrits dans packages/app/public/portraits,\n` +
+      `masters dans assets/portraits/masters.\n` +
       'À relire axe par axe contre la table avant de livrer : la fidélité mesurée\n' +
       'sur la première bibliothèque était de 67 sur 68, pas de 68 sur 68.',
   );
