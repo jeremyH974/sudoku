@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { doorwaysOf, propsOfCell } from '@sudoku/engine/investigation';
-  import type { Doorway, PropId, Scene } from '@sudoku/engine/investigation';
+  import { propsOfCell } from '@sudoku/engine/investigation';
+  import type { PropId } from '@sudoku/engine/investigation';
   import type { CaseGame } from './caseGame.svelte.js';
   import { FILL, FURNITURE, FURNITURE_LABEL, LAYER_ORDER } from './furniture.js';
+  import { SILL, WALL, planPaths } from './plan.js';
 
   interface Props {
     game: CaseGame;
@@ -43,121 +44,13 @@
   const rowOf = (cell: number): number => Math.floor(cell / size);
   const columnOf = (cell: number): number => cell % size;
 
-  /**
-   * L'épaisseur d'un mur, en fraction de case.
-   *
-   * Les murs étaient des **bordures de case** : deux pixels de chaque côté,
-   * donc quatre entre deux pièces, et aucun moyen d'y ménager une ouverture —
-   * une bordure CSS est pleine ou n'est pas. C'est cela qui a fait passer le
-   * plan au tracé.
-   *
-   * La valeur suit la hiérarchie d'ISO 128-23 : sur un plan de bâtiment, le mur
-   * coupé porte le trait le plus fort et le symbole de porte le plus fin, dans
-   * un rapport de **quatre pour un**. C'est le seuil du seuil ci-dessous.
-   */
-  const WALL = 0.12;
-
-  /** Le seuil d'une porte : le quart du mur, exactement, et c'est la norme. */
-  const SILL = WALL / 4;
-
-  /**
-   * Les murs du plan, en tracés d'un seul tenant.
-   *
-   * ─── Pourquoi un seul chemin, et pas un segment par case ────────────────
-   *
-   * Parce qu'à cette échelle un pixel change le sens du dessin. Les moteurs
-   * anticrénèlent **chaque forme séparément contre le canevas** au lieu de
-   * faire un anticrénelage de scène : deux segments exactement jointifs
-   * laissent apparaître une couture claire, qui va et vient selon le zoom et la
-   * densité d'écran. Des pans d'un seul tenant n'ont pas de jonction à trahir.
-   *
-   * ─── Les coins ──────────────────────────────────────────────────────────
-   *
-   * Les bouts sont carrés (`stroke-linecap: square`), donc chaque pan déborde
-   * d'un demi-mur : c'est ce qui remplit les angles en L et en T sans un seul
-   * tracé de plus. En contrepartie, l'ouverture d'une porte est **élargie d'un
-   * demi-mur de chaque côté** avant d'être retranchée, pour que le vide visible
-   * mesure exactement ce que le moteur a calculé.
-   */
-  function wallRuns(plan: Scene, doors: readonly Doorway[]): string {
-    const n = plan.size;
-    const parts: string[] = [];
-
-    for (const axis of ['vertical', 'horizontal'] as const) {
-      // Seules les lignes intérieures : le pourtour est la bordure d'encre du
-      // plateau, qui est aussi ce qui le fait lire comme un objet posé.
-      for (let line = 1; line < n; line++) {
-        const openings = doors
-          .filter((door) => door.axis === axis && door.line === line)
-          .map((door) => ({ from: door.from - WALL / 2, to: door.to + WALL / 2 }))
-          .sort((left, right) => left.from - right.from);
-
-        let start = -1;
-        for (let step = 0; step <= n; step++) {
-          const solid =
-            step < n &&
-            (axis === 'vertical'
-              ? plan.zoneOf[step * n + line - 1] !== plan.zoneOf[step * n + line]
-              : plan.zoneOf[(line - 1) * n + step] !== plan.zoneOf[line * n + step]);
-
-          if (solid && start === -1) start = step;
-          if (!solid && start !== -1) {
-            // Le pan court de `start` à `step` ; on en retire les ouvertures.
-            let cursor = start;
-            for (const hole of openings) {
-              if (hole.to <= cursor || hole.from >= step) continue;
-              if (hole.from > cursor) parts.push(segment(axis, line, cursor, hole.from));
-              cursor = Math.max(cursor, hole.to);
-            }
-            if (cursor < step) parts.push(segment(axis, line, cursor, step));
-            start = -1;
-          }
-        }
-      }
-    }
-    return parts.join('');
-  }
-
-  /** Un pan de mur, le long de sa ligne de grille. */
-  const segment = (axis: 'vertical' | 'horizontal', line: number, from: number, to: number): string =>
-    axis === 'vertical'
-      ? `M${String(line)} ${String(from)}V${String(to)}`
-      : `M${String(from)} ${String(line)}H${String(to)}`;
-
-  /**
-   * Les seuils, tracés dans le vide des portes.
-   *
-   * Une ouverture nue n'est couverte par aucun des deux objets qu'ISO 7519
-   * distingue — ni la porte, ni la baie marquée : un vide sans marque se lit
-   * aussi bien comme « une fin de mur ». Le seuil lève l'ambiguïté avec un seul
-   * trait, quatre fois plus fin que le mur.
-   *
-   * Le vantail et son arc de débattement ont été écartés, et pas par paresse :
-   * ils codent un **sens d'ouverture** dont aucune donnée de décor ne dispose.
-   * Les dessiner au hasard mettrait une information fausse sur un plan par
-   * ailleurs exact — la même règle que « ne jamais afficher une difficulté
-   * qu'on n'a pas mesurée ».
-   *
-   * À la plus petite taille de plan, le seuil descend sous le pixel et
-   * s'estompe. C'est voulu : l'information est portée par **le vide**, que
-   * l'élément le plus épais du dessin encadre ; le seuil n'est qu'une précision
-   * qui s'efface proprement.
-   */
-  function sills(doors: readonly Doorway[]): string {
-    return doors.map((door) => segment(door.axis, door.line, door.from, door.to)).join('');
-  }
-
   /*
-    Les portes, calculées **une fois** par plan.
-
-    Les murs et les seuils les demandaient chacun de leur côté, et chaque
-    demande rejouait tout l'arbre couvrant : le relevé des mitoyennetés, le
-    regroupement par contiguïté, le tri, l'union-find. Deux fois le même
-    résultat à chaque rendu, pour un calcul qui ne dépend que du décor.
+    Les tracés du plan vivent dans `plan.ts`, parce que le dossier imprimé les
+    dessine aussi. Une géométrie recopiée est une géométrie qui dérive.
   */
-  const doorways = $derived(scene === null ? [] : doorwaysOf(scene));
-  const wallPath = $derived(scene === null ? '' : wallRuns(scene, doorways));
-  const sillPath = $derived(sills(doorways));
+  const paths = $derived(scene === null ? null : planPaths(scene));
+  const wallPath = $derived(paths?.walls ?? '');
+  const sillPath = $derived(paths?.sills ?? '');
 
   /**
    * Les meubles d'une case, dans l'ordre où on les dessine.

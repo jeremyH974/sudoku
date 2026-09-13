@@ -6,6 +6,7 @@
   import SceneBoard from './SceneBoard.svelte';
   import { loadCase, saveCase } from './storage.js';
   import { caseCodeFor, loadCaseCorpus, today } from './daily.js';
+  import CaseDossier from '../../print/CaseDossier.svelte';
 
   interface Props {
     /**
@@ -188,6 +189,13 @@
     game.load(file);
   }
 
+  /*
+    L'aperçu du dossier imprimé. Il n'existe qu'à la demande : monter deux
+    feuilles A4 et leurs deux plans coûte, et la très grande majorité des
+    parties ne s'imprime jamais.
+  */
+  let printing = $state(false);
+
   /** Copie le lien de l'affaire, et dit ce qui s'est passé. */
   async function share(): Promise<void> {
     const file = game.file;
@@ -253,6 +261,15 @@
       </button>
       <button type="button" class="action" onclick={() => void share()} disabled={game.file === null}>
         Partager
+      </button>
+      <button
+        type="button"
+        class="action"
+        onclick={() => (printing = !printing)}
+        aria-expanded={printing}
+        disabled={game.file === null}
+      >
+        Imprimer
       </button>
       <button type="button" class="action" onclick={newCase} disabled={game.composing}>
         {game.composing ? 'Composition…' : 'Nouvelle affaire'}
@@ -445,6 +462,14 @@
         solution, et le registre sait la trouver sans jamais essayer une case au hasard.
       </p>
     </section>
+  {/if}
+
+  {#if printing && game.file !== null}
+    <CaseDossier
+      file={game.file}
+      code={encodeCase(game.file)}
+      onClose={() => (printing = false)}
+    />
   {/if}
 </section>
 

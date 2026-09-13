@@ -94,6 +94,11 @@ const PAPER = [
   'print/PrintableGrid.svelte',
   'print/QrCode.svelte',
   'print/print.css',
+  // Incrément 18 : le dossier d'enquête. `CaseDossier.svelte` n'y est **pas** —
+  // c'est l'aperçu à l'écran qui entoure les feuilles, donc une vue ordinaire,
+  // tenue aux jetons comme les autres.
+  'print/CaseSheet.svelte',
+  'print/PrintableScene.svelte',
 ];
 
 /** Les graisses qu'une police système statique sait rendre ; les autres s'arrondissent. */
