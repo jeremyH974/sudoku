@@ -103,6 +103,86 @@ libres en `.fr` **et** `.com`, dont `caseacase`, `deducase` et `cahierdencre`.
 
 ---
 
+## 3. La composition, deux fois plus rapide sans changer une seule affaire
+
+### Ce que le profilage a établi
+
+Première mesure, sans instrumenter le moteur : `composeCase(seed, { attempts: k })` rejoue
+exactement les `k` premières tentatives de l'appel complet, donc le plus petit `k` qui rend une
+affaire est le **rang de la tentative gagnante**.
+
+| | rang moyen | ms par tentative |
+|---|---|---|
+| graines rapides | 7,6 | 21,4 |
+| graines lentes | **45,0** | 24,4 |
+
+Le prix d'une tentative est presque constant. **La lenteur n'est pas une étape lente, c'est un taux
+de rejet.**
+
+Le profilage détaillé, sur 400 graines et 118 977 ms, l'a confirmé et localisé :
+
+- **96,8 % du temps** est dans `solveExact`, appelé depuis la boucle de retrait de `carve` —
+  651 435 appels ;
+- **≈ 69 % du temps total** dans la seule fonction `pruneClue` ;
+- **1,16 milliard de `Uint32Array` alloués** dans ce module, soit 6,69 par appel de `pruneClue` ;
+- et sur 4 597 `carve` menés à terme, **4 197 sont jetés — 91,3 %** : 51,6 % parce qu'un suspect
+  garde plus de deux cartes, 36,9 % parce que le registre ne sait pas résoudre. Aucune graine ne
+  tourne en rond ; elles paient simplement le plein tarif à chaque essai.
+
+### Les deux corrections
+
+**Mémoïser la propagation.** `bandsToCells` et `zoneReach` reconstruisaient à chaque nœud deux
+ensembles qui ne dépendent que du décor et d'un masque de six bits — au plus 128 résultats distincts
+par décor. La table vit sur `Scene`, à côté de `cellsNextToProp`, qui existe déjà pour exactement
+cette raison. Elle se remplit à la demande : remplir d'avance coûterait `2^taille` entrées par axe,
+ce qui tient à six suspects et plus du tout à seize.
+
+L'invariant qui autorise le partage est écrit noir sur blanc : **aucune opération de `cellset` ne
+mute son entrée**, elles allouent toutes leur sortie. Un appelant qui muterait un ensemble rendu
+corromprait toutes les déductions suivantes.
+
+**Ramener `SOLUTION_CAP` de 12 à 2.** Les deux seuls appelants de `countSolutions` comparent à
+**un** : « cette disposition est-elle encore la seule ? ». Une seconde solution suffit à répondre
+non. Le commentaire justifiait qu'il y **ait** un plafond, jamais qu'il vaille douze — et le
+`countSolutions` du sudoku s'arrête à deux depuis toujours.
+
+### Le résultat, et la vérification qui compte
+
+| 400 graines | avant | après | |
+|---|---|---|---|
+| p50 | 282 ms | **101 ms** | −64 % |
+| p90 | 931 ms | **343 ms** | −63 % |
+| p99 | 3 051 ms | **1 122 ms** | −63 % |
+| pire | 4 352 ms | **1 603 ms** | −63 % |
+
+Sur les douze graines des tests d'accessibilité : total 4 232 → 1 927 ms (−54,5 %), pire cas
+1 005 → 438 ms.
+
+**Les affaires produites sont identiques.** Vérifié graine par graine sur deux cents compositions,
+en comparant décor, victime, coupable, **chaque indice sérialisé**, technique la plus dure, nombre
+d'étapes et solution complète : 200 sur 200. C'est la vérification qui décide — un gain de vitesse
+qui changerait les affaires serait un changement de jeu déguisé.
+
+Le plafond du banc descend de 6 000 à 3 000 ms, et le délai des tests d'accessibilité de 30 à 15 s.
+
+### Une piste mesurée, et écartée pour cette raison
+
+Mémoïser `unaryCells` paraissait le gain évident : pure en (indice, décor), rappelée à chacun des
+172,8 millions d'appels. Mesurée, cache compris : **+1,8 % sur la somme**, plus rapide sur seulement
+161 graines sur 400. La raison est instructive — **zéro appel sur 172,8 millions** porte sur un
+indice unaire **nié**, parce qu'`isUseful` les élimine tous en amont. La boucle coûteuse ne tourne
+donc jamais.
+
+### Ce qui n'a pas été fait
+
+**Rejeter plus tôt.** 91,3 % des `carve` terminés sont jetés, dont la moitié pour « plus de deux
+cartes » — un critère qui n'est connu qu'à la fin, puisque les cartes ne rétrécissent que pendant
+`carve`. Y toucher voudrait dire diriger l'ordre de retrait par la taille des cartes : un
+changement de conception, qui **changerait les affaires produites**. Sans gain mesuré en face, ce
+n'est pas un arbitrage qu'on peut faire.
+
+---
+
 ## 4. Les portes
 
 ### Pourquoi elles manquaient
@@ -209,8 +289,10 @@ de contrôle.
 
 ## Ce qui reste ouvert
 
-- **Le point 3 n'est pas traité.** Le délai de trente secondes des tests d'accessibilité est un
-  symptôme assumé, pas une correction.
+- **Le délai des tests d'accessibilité n'a pas disparu**, il est passé de 30 à 15 s. Ce qui domine
+  maintenant n'est plus la composition mais le rendu et `axe` : le pire test reste à 2,05 s ici.
+- **Le rejet tardif de `carve` reste entier** — 91,3 % du travail est jeté. C'est le gisement
+  suivant, et il demande un changement de conception, pas une optimisation.
 - **Les étiquettes de pièce peuvent tomber sur un meuble.** Ancrées au coin bas-gauche, elles
   évitent désormais les murs mais pas le mobilier — visible sur « Salon » du pavillon.
 - **Patrick Hand a une hauteur d'x 10 % plus petite qu'Arial** et une chasse 19 % plus étroite

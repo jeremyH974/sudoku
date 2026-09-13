@@ -161,12 +161,34 @@ function bandsOf(scene: Scene, domain: CellSet, axis: 'row' | 'column'): number 
   return mask;
 }
 
+/**
+ * Les clefs de `scene.memo`, séparées par famille.
+ *
+ * Trois questions vivent dans la même table, donc trois espaces disjoints.
+ *
+ * Vingt-quatre bits de charge utile, et c'est une borne et non un confort. Un
+ * masque de tranches porte `scene.size` bits ; un masque de pièces en porte
+ * autant qu'il y a de pièces, **plus un** pour le sens de la relation. Les deux
+ * sont déjà bornés à trente et un par ailleurs — `1 << index` en JavaScript
+ * travaille sur trente-deux bits signés, donc un décor à trente-deux pièces
+ * casserait la propagation bien avant cette table. Vingt-quatre laisse la
+ * marge sans jamais faire se recouvrir deux espaces.
+ */
+const KEY_ROWS = 0;
+const KEY_COLUMNS = 1 << 24;
+const KEY_ZONES = 2 << 24;
+
 function bandsToCells(scene: Scene, axis: 'row' | 'column', mask: number): CellSet {
+  const key = (axis === 'row' ? KEY_ROWS : KEY_COLUMNS) | mask;
+  const known = scene.memo.get(key);
+  if (known !== undefined) return known;
+
   const bands = axis === 'row' ? scene.rows : scene.columns;
   let cells = emptySet(scene.cellCount);
   for (let band = 0; band < bands.length; band++) {
     if ((mask & (1 << band)) !== 0) cells = union(cells, bands[band]);
   }
+  scene.memo.set(key, cells);
   return cells;
 }
 
@@ -179,8 +201,20 @@ function bandsToCells(scene: Scene, axis: 'row' | 'column', mask: number): CellS
  * l'autre n'a plus le choix, et c'est normal — elle dit peu.
  */
 function zoneReach(scene: Scene, domain: CellSet, together: boolean): CellSet {
+  /*
+    Le domaine ne compte que par les pièces qu'il touche.
+
+    C'est ce qui rend la mémoïsation possible : le domaine est un ensemble de
+    cases qui change à chaque nœud du solveur, mais tout ce qu'on en tire est un
+    masque de pièces — au plus 2^pièces valeurs, fois deux pour le sens. Le
+    calcul du masque reste, seule la construction de la réponse est retenue.
+  */
   let reachable = 0;
   for (const zone of scene.zones) if (intersects(domain, zone.cells)) reachable |= 1 << zone.index;
+
+  const key = KEY_ZONES | (reachable << 1) | (together ? 1 : 0);
+  const known = scene.memo.get(key);
+  if (known !== undefined) return known;
 
   let cells = emptySet(scene.cellCount);
   for (const zone of scene.zones) {
@@ -188,6 +222,7 @@ function zoneReach(scene: Scene, domain: CellSet, together: boolean): CellSet {
     const onlyPlace = inside && (reachable & (reachable - 1)) === 0;
     if (together ? inside : !onlyPlace) cells = union(cells, zone.cells);
   }
+  scene.memo.set(key, cells);
   return cells;
 }
 

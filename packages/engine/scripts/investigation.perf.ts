@@ -63,18 +63,33 @@ describe('performance du mode Enquête', () => {
     /*
       Un plafond, pas une cible : la mesure dépend de la machine.
 
-      Relevé sur 400 graines, les quatre décors mêlés — p50 282 ms, p90 931 ms,
-      p99 3 051 ms, pire 4 352 ms, zéro graine stérile. Le seuil était à 3 000,
-      calibré quand le manoir était seul ; les trois décors ajoutés sont plus
-      lents, et le pavillon le plus lent des quatre. C'est le prix de la
-      variété, pas une régression de code.
+      Relevé sur 400 graines, les quatre décors mêlés :
 
-      Ce que la queue coûte vraiment : une composition sur quatre cents fait
-      attendre quatre secondes. Elle se fait dans un Worker, sous un libellé qui
-      dit « Composition… ». Si ce seuil devait être abaissé un jour, ce serait en
-      touchant le budget `attempts` — et en récupérant des graines stériles.
+        |        | avant  | après |
+        | p50    |  282   |  101  |
+        | p90    |  931   |  343  |
+        | p99    | 3 051  | 1 122 |
+        | pire   | 4 352  | 1 603 |
+
+      Zéro graine stérile dans les deux cas, et les affaires produites sont
+      **identiques** — vérifié graine par graine sur deux cents, indice par
+      indice. Le gain vient de deux endroits et d'aucun changement de règle :
+      la propagation mémoïse les ensembles de cases qu'elle reconstruisait à
+      chaque nœud, et `SOLUTION_CAP` est descendu de douze à deux, ce qui est la
+      valeur exacte de la question posée.
+
+      Le pavillon reste le plus lent des quatre décors (p50 153 ms contre 60 pour
+      la rotonde), et c'est le prix de la variété, pas une régression.
+
+      ⚠ Le pire cas est l'indicateur le plus bruité de tous : il varie d'une
+      passe à l'autre sur la même machine et le même code. Les quantiles, eux,
+      sont stables — c'est sur eux qu'il faut juger une régression.
+
+      Le seuil passe de 6 000 à 3 000 ms, soit près du double du pire cas relevé.
+      S'il devait descendre encore, ce serait en touchant le budget `attempts` —
+      et en récupérant des graines stériles.
     */
-    expect(timings[timings.length - 1]).toBeLessThan(6000);
+    expect(timings[timings.length - 1]).toBeLessThan(3000);
   });
 });
 

@@ -230,8 +230,9 @@ le seuil de 3:1 que WCAG demande d'un objet graphique porteur d'information, et 
 exactement cela, puisque c'est par lui qu'une pièce se lit. À l'œil, ils semblaient parfaitement
 nets. Le trait sombre a donc été éclairci (3,8:1) et ne suit plus celui du sudoku.
 
-Mesuré aussi : une affaire 6×6 coûte **122 ms** à la médiane, 471 ms au pire — elle passe par le
-Worker, comme les grilles. La propagation, le solveur exact et le registre valent 0,1 ms chacun. Et
+Mesuré aussi : sur quatre cents affaires et les quatre décors, une affaire 6×6 coûte **101 ms** à
+la médiane, 343 ms au neuvième décile et 1,6 s au pire — elle passe par le Worker, comme les
+grilles, sous un libellé qui dit « Composition… ». La propagation, le solveur exact et le registre valent 0,1 ms chacun. Et
 sur 375 px : plan de 343 px, cases de 56 px, tous les boutons à 44 px ou plus, aucun débordement
 horizontal, et le réglage « gros caractères » fait bien passer les lettres de 24,0 à 30,5 px — le
 levier `--text-scale`, celui qui agit là où la largeur est déjà bornée par l'écran.

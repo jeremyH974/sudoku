@@ -132,6 +132,34 @@ export interface Scene {
   readonly columns: readonly CellSet[];
   /** Les meubles effectivement présents, dans l'ordre de `PROP_ORDER`. */
   readonly propsPresent: readonly PropId[];
+  /**
+   * Les ensembles de cases que la propagation redemande sans cesse.
+   *
+   * ─── Pourquoi une table mutable dans une structure par ailleurs figée ──────
+   *
+   * Parce que ce n'est pas un état : c'est un **souvenir de calcul**. Rien de
+   * ce qu'elle contient n'est observable — retirer la table ne change aucune
+   * affaire produite, seulement le temps qu'il faut pour la produire.
+   *
+   * ─── Ce qu'elle évite ──────────────────────────────────────────────────────
+   *
+   * Le solveur passe 69 % de son temps dans `pruneClue`, et l'essentiel de ce
+   * temps à reconstruire deux ensembles qui ne dépendent que du décor et d'un
+   * masque de six bits : les cases d'un groupe de tranches, et les cases des
+   * pièces qu'un suspect peut encore atteindre. Chaque reconstruction alloue un
+   * `Uint32Array` par tranche — mesuré à plus d'un milliard d'allocations sur
+   * quatre cents affaires, pour au plus 128 résultats distincts par décor.
+   *
+   * C'est la même raison qui fait exister `cellsNextToProp` juste au-dessus, et
+   * elle est poussée d'un cran : là c'était une géométrie, ici c'est une
+   * géométrie **indexée par une question**.
+   *
+   * ⚠ Les ensembles rendus sont **partagés**. Un appelant qui en muterait un
+   * corromprait toutes les déductions suivantes. Aucune opération de `cellset`
+   * ne mute son entrée — elles allouent toutes leur sortie — et c'est cet
+   * invariant, et lui seul, qui autorise le partage.
+   */
+  readonly memo: Map<number, CellSet>;
 }
 
 export const rowOf = (scene: Scene, cell: number): number => Math.floor(cell / scene.size);

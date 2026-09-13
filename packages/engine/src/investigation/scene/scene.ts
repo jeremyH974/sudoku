@@ -143,6 +143,10 @@ export function buildScene(decor: Decor): Scene {
     rows,
     columns,
     propsPresent,
+    // Vide : elle se remplit à la demande, et seulement des questions
+    // réellement posées. Remplir d'avance coûterait 2^taille entrées par axe,
+    // ce qui tient à six suspects et plus du tout à seize.
+    memo: new Map<number, CellSet>(),
   };
 }
 

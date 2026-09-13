@@ -38,15 +38,25 @@ import type { Rendered } from '../../test/render.js';
   franchies par composition + rendu + `axe`.
 
   Le symptôme ressemblait à un composant cassé ; la cause est le chronomètre,
-  exactement comme pour le test de propriété de `composeCase`. Trente secondes
-  laissent une marge de trente fois le pire cas local.
+  exactement comme pour le test de propriété de `composeCase`.
 
-  ⚠ Ce n'est pas la correction. La correction est de rendre la composition
-  assez rapide pour que la question ne se pose plus — le bouton « Nouvelle
-  affaire » fait attendre le joueur du même temps. Le jour où c'est fait, ce
-  délai doit **redescendre**, et sa disparition sera la preuve.
+  ─── Le délai a déjà baissé une fois, et voici pourquoi il ne tombe pas ──────
+
+  Il valait trente secondes. La composition a ensuite été accélérée — mémoïsation
+  de la propagation, plafond de comptage ramené à sa question —, et ce fichier
+  est passé de **21,37 s à 12,34 s**. Les trois graines coupables sont tombées de
+  1 005, 825 et 825 ms à 438, 404 et 332.
+
+  Mais le pire **test** reste à 2,05 s, parce que ce qui domine maintenant n'est
+  plus la composition : c'est le rendu et `axe`. Multiplié par le rapport observé
+  entre cette machine et le coureur partagé, on reste au-dessus des cinq secondes
+  du défaut. Le délai descend donc à quinze secondes — sept fois le pire test
+  mesuré — au lieu de disparaître.
+
+  ⚠ Il reste un symptôme, pas une correction : sa disparition serait la preuve
+  que le rendu d'une affaire ne coûte plus rien, et ce n'est pas le cas.
 */
-vi.setConfig({ testTimeout: 30_000 });
+vi.setConfig({ testTimeout: 15_000 });
 
 /** Une affaire **engendrée**, jamais écrite à la main. */
 function loadedGame(seed: string): CaseGame {
