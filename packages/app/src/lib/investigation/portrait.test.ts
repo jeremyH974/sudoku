@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CAST, castOf } from '@sudoku/engine/investigation';
-import { FACES, HAIR, axesApart, faceOf } from './portrait.js';
+import { FACES, HAIR_SHAPES, axesApart, faceOf } from './portrait.js';
 
 /**
  * Le système de portraits, vérifié là où l'œil ne suffit pas.
@@ -37,7 +37,7 @@ describe('les seize identités', () => {
   });
 
   it('n’emploient que des coiffures qui existent', () => {
-    for (const face of FACES) expect(HAIR[face.hair]).toBeDefined();
+    for (const face of FACES) expect(HAIR_SHAPES).toContain(face.hair);
   });
 
   it('emploient réellement toutes les silhouettes disponibles', () => {
@@ -45,7 +45,7 @@ describe('les seize identités', () => {
     // silhouette sur-employée rapproche les identités qui la partagent.
     const used = new Map<string, number>();
     for (const face of FACES) used.set(face.hair, (used.get(face.hair) ?? 0) + 1);
-    expect([...used.keys()].sort()).toEqual(Object.keys(HAIR).sort());
+    expect([...used.keys()].sort()).toEqual([...HAIR_SHAPES].sort());
     // Trois fois la même coiffure sur seize, c'est le plafond qu'on se donne.
     for (const [shape, count] of used) expect(count, shape).toBeLessThanOrEqual(3);
   });

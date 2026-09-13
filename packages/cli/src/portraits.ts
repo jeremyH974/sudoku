@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -71,24 +71,46 @@ const MASTERS = join(RACINE, 'packages/app/public/portraits/masters');
  */
 const COTE = 224;
 
-/** La charte de série : ce qui est identique pour les seize, mot pour mot. */
-const CHARTE = `Flat vector illustration, NOT painted, NOT airbrushed. A single bust portrait of one person, centred, on a plain flat cream background (#faf6f0) filling the whole square. No border, no frame, no panel, no vignette, no text.
+
+/** Le crème du fond, lu dans le jeton plutôt que recopié. */
+function cremeDuFond(): [number, number, number] {
+  const hex = jeton('portrait-plate');
+  return [
+    Number.parseInt(hex.slice(1, 3), 16),
+    Number.parseInt(hex.slice(3, 5), 16),
+    Number.parseInt(hex.slice(5, 7), 16),
+  ];
+}
+
+/**
+ * La charte de série : ce qui est identique pour les seize, mot pour mot.
+ *
+ * Les cinq couleurs qu'elle nomme sont **lues dans les jetons**, comme les axes.
+ * Elles y étaient d'abord recopiées en dur, ce qui a produit exactement le
+ * défaut que le projet corrige ailleurs : `--portrait-light`, `--portrait-shade`
+ * et `--eye-sclera` se sont retrouvés déclarés et référencés nulle part le jour
+ * où le dessin SVG a disparu, tandis que leurs valeurs continuaient de vivre,
+ * retapées, dans ce texte. Deux sources de vérité, et la mauvaise gagnait.
+ */
+function charte(): string {
+  return `Flat vector illustration, NOT painted, NOT airbrushed. A single bust portrait of one person, centred, on a plain flat background (${jeton('portrait-plate')}) filling the whole square. No border, no frame, no panel, no vignette, no text.
 
 RENDERING, more important than anything else:
 Every surface is one uniform fill of one solid colour. Shadows are SEPARATE SOLID SHAPES with hard crisp edges — never blurred, never blended, never faded. Exactly two values per surface: the base colour, and one shadow colour. No gradient anywhere. No soft shading. No texture. No glow. At most 10 distinct flat colours in the whole image.
 
 SHADOWS — all three, as hard-edged solid shapes: one under the jaw falling onto the neck; one down the right side of the face and neck; one on the right side of the garment. One light source, upper left, so every shadow sits on the lower-right of its form.
 
-Ink outline in warm dark charcoal (#2b2a27), clean and even, noticeably heavier on the outer silhouette than on interior detail.
+Ink outline in warm dark charcoal (${jeton('portrait-shade')}), clean and even, noticeably heavier on the outer silhouette than on interior detail.
 
-FRAMING, exact: head and shoulders, facing the viewer straight on, cropped at mid-chest by the bottom edge. The head fills about half the square's height. The eyes sit on a horizontal line at 45% of the square's height from the top. Generous cream margin on the left and right of the shoulders.
+FRAMING, exact: head and shoulders, facing the viewer straight on, cropped at mid-chest by the bottom edge. The head fills about half the square's height. The eyes sit on a horizontal line at 45% of the square's height from the top. Generous background margin on the left and right of the shoulders.
 
-Eyes: almond shaped, raised outer corner, thickened upper lid line, a teal-grey iris (#5a8a90) clearly distinct from a much darker pupil, one small solid highlight at the upper left of each iris.
+Eyes: almond shaped, raised outer corner, thickened upper lid line. A faintly warm off-white sclera (${jeton('eye-sclera')}) — never pure white. A teal-grey iris (${jeton('eye-iris')}) clearly distinct from a much darker pupil, and one small solid highlight (${jeton('portrait-light')}) at the upper left of each iris.
 
 Calm neutral expression, mouth closed.
 
 The person:
 `;
+}
 
 /** La coiffure, dite comme un illustrateur la demanderait. */
 const COIFFURES: Record<Face['hair'], string> = {
@@ -148,6 +170,71 @@ async function engendre(prompt: string, clef: string): Promise<Buffer> {
 }
 
 /**
+ * La dérive de couleur, corrigée d'un seul décalage.
+ *
+ * Le modèle ne rend pas la couleur qu'on lui donne. Mesuré sur les seize : le
+ * crème demandé était `#faf6f0`, l'obtenu allait de `#ecdec9` à `#fff3da`, et
+ * **toujours plus jaune** — le canal bleu manquait de vingt à quarante points.
+ * Un seul portrait, on ne le voit pas ; seize côte à côte dans une liste, si.
+ *
+ * ─── Pourquoi un décalage global, et pas un remplissage du fond ─────────────
+ *
+ * Parce que la propagation a été essayée et qu'elle a **détruit deux portraits**.
+ * Partie des bords, tolérance comparée au voisin pour suivre le dégradé, elle
+ * s'est faufilée par l'anticrénelage entre le crème et une peau très claire —
+ * `--skin-1` n'est qu'à quatre-vingts points du fond, et la rampe qui va de l'un
+ * à l'autre avance par pas d'une vingtaine. Une fois entrée dans le visage, plus
+ * rien ne l'arrêtait : Léa et Nadia sont ressorties en silhouettes blanches.
+ *
+ * Une tolérance globale ne s'en sort pas non plus : le dégradé du fond couvre
+ * cent points, la peau claire est à quatre-vingts. Aucun seuil ne sépare les deux.
+ *
+ * Le décalage global, lui, ne peut pas fuir — il n'a pas de frontière à franchir.
+ * Et c'est le bon modèle : **toute l'image** a dérivé vers le chaud, pas
+ * seulement son fond. La corriger d'un bloc ramène aussi les peaux et les
+ * vêtements vers leurs jetons.
+ *
+ * La couleur dominante sert de repère parce que le fond occupe plus de surface
+ * que tout le reste. Rien à deviner, rien à seuiller.
+ */
+async function corrigeLaDerive(png: Buffer, cible: [number, number, number]): Promise<Buffer> {
+  const { data, info } = await sharp(png)
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const { width, height, channels } = info;
+
+  // La couleur dominante **est** le fond : il occupe plus de place que tout le
+  // reste. Pas besoin de deviner où il commence.
+  const comptes = new Map<number, number>();
+  for (let i = 0; i < data.length; i += channels) {
+    const clef = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
+    comptes.set(clef, (comptes.get(clef) ?? 0) + 1);
+  }
+  let fond = 0;
+  let record = 0;
+  for (const [clef, n] of comptes) {
+    if (n > record) {
+      record = n;
+      fond = clef;
+    }
+  }
+  const decalage = [
+    cible[0] - ((fond >> 16) & 0xff),
+    cible[1] - ((fond >> 8) & 0xff),
+    cible[2] - (fond & 0xff),
+  ];
+
+  for (let i = 0; i < data.length; i += channels) {
+    for (let c = 0; c < 3; c++) {
+      data[i + c] = Math.min(255, Math.max(0, data[i + c] + decalage[c]));
+    }
+  }
+
+  return sharp(data, { raw: { width, height, channels } }).png().toBuffer();
+}
+
+/**
  * L'encodage, et les trois mesures qui l'ont fixé.
  *
  * Pesé sur les seize vrais fichiers, pas estimé : AVIF q75 en 4:4:4 donne
@@ -162,17 +249,30 @@ async function engendre(prompt: string, clef: string): Promise<Buffer> {
  *   · le master de 1024 est **gardé**, pour pouvoir réencoder sans repayer une
  *     génération.
  */
-async function encode(png: Buffer, lettre: string): Promise<void> {
+async function encode(png: Buffer, lettre: string, garderMaster: boolean): Promise<void> {
   const bas = lettre.toLowerCase();
-  writeFileSync(join(MASTERS, `${bas}.png`), png);
-  const carre = sharp(png).resize(COTE, COTE, { kernel: 'lanczos3' });
+  /*
+    Le master en AVIF de haute qualité plutôt qu'en PNG, et c'est mesuré : les
+    seize pesaient **24,2 Mo** en PNG contre **3,58 Mo** à q94 en 4:4:4, pour un
+    écart maximal de 23 sur un seul canal d'un seul pixel — au bord d'un trait
+    d'encre, là où l'anticrénelage travaille. Le master finit de toute façon
+    réduit à 224 px, ce qui moyenne cet écart bien en dessous du visible.
+
+    Sept fois plus léger dans un dépôt qui les gardera pour toujours, contre une
+    perte qu'aucune mesure ne retrouve en aval : l'arbitrage n'est pas serré.
+  */
+  if (garderMaster) {
+    await sharp(png).avif({ quality: 94, chromaSubsampling: '4:4:4' }).toFile(join(MASTERS, `${bas}.avif`));
+  }
+  const propre = await corrigeLaDerive(png, cremeDuFond());
+  const carre = sharp(propre).resize(COTE, COTE, { kernel: 'lanczos3' });
   await carre.clone().avif({ quality: 75, chromaSubsampling: '4:4:4' }).toFile(join(PUBLIC, `${bas}.avif`));
   await carre.clone().webp({ quality: 80, effort: 6 }).toFile(join(PUBLIC, `${bas}.webp`));
 }
 
 async function main(): Promise<void> {
-  const clef = process.env.OPENAI_API_KEY;
-  if (clef === undefined || clef === '') {
+  const clef = process.env.OPENAI_API_KEY ?? '';
+  if (clef === '' && !process.argv.includes('--reencode')) {
     /*
       Le message dit la syntaxe de **la** machine, pas celle d'une autre.
 
@@ -195,7 +295,19 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const demandes = process.argv.slice(2).map((a) => a.toUpperCase());
+  /*
+    Deux modes, et le second est la raison d'être des masters.
+
+    `--reencode` repart des PNG de 1024 déjà sur le disque : changer un réglage
+    d'encodage, ou corriger le fond comme il a fallu le faire, ne coûte alors ni
+    un appel ni un centime. Un actif qu'on ne peut retoucher qu'en le repayant
+    n'est pas vraiment à soi.
+  */
+  const reencode = process.argv.includes('--reencode');
+  const demandes = process.argv
+    .slice(2)
+    .filter((a) => !a.startsWith('--'))
+    .map((a) => a.toUpperCase());
   const cibles = CAST.slice(0, FACES.length)
     .map((personne, index) => ({ personne, face: FACES[index], index }))
     .filter(({ personne }) => demandes.length === 0 || demandes.includes(personne.letter));
@@ -209,10 +321,12 @@ async function main(): Promise<void> {
   mkdirSync(MASTERS, { recursive: true });
 
   for (const { personne, face, index } of cibles) {
-    const prompt = CHARTE + specification(face, index);
     process.stdout.write(`${personne.letter} — ${personne.name.padEnd(9)} `);
     const debut = Date.now();
-    await encode(await engendre(prompt, clef), personne.letter);
+    const png = reencode
+      ? readFileSync(join(MASTERS, `${personne.letter.toLowerCase()}.avif`))
+      : await engendre(charte() + specification(face, index), clef);
+    await encode(png, personne.letter, !reencode);
     console.log(`${((Date.now() - debut) / 1000).toFixed(1)} s`);
   }
 

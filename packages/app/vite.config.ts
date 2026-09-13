@@ -108,7 +108,14 @@ export default defineConfig({
           l'application à exiger le réseau — exactement la promesse qu'on tient
           face aux concurrents, dont le quotidien vient d'un serveur.
         */
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
+        /*
+          `avif` et `webp` sont entrés avec la bibliothèque des seize portraits.
+          Sans eux, les visages auraient été la seule chose de l'application à
+          exiger le réseau — le même défaut que `json` évite pour le défi du
+          jour. Cent cinquante-cinq kilo-octets pour les trente-deux fichiers,
+          pesés et non estimés.
+        */
+        globPatterns: ['**/*.{js,css,html,svg,png,avif,webp,woff2,json}'],
         /*
           Une exception, et une seule : l'image d'aperçu des liens partagés. Elle
           pèse quarante-sept kilo-octets, ne s'affiche jamais dans

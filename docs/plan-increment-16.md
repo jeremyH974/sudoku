@@ -268,3 +268,56 @@ morphologie et tout autre marqueur de statut.**
 - les contrastes mesurés contre les fonds de carte ;
 - la matrice traits visuels × issue narrative relue, au-delà du χ² ;
 - les conditions du canal de génération réellement employé, lues avant la première image versée.
+
+---
+
+# Ce qui a été livré, et ce que ça a coûté
+
+## Le garde-fou a servi
+
+Le plan posait une condition : *les conditions du canal de génération réellement
+employé, lues avant la première image versée*. Elles ont été lues, et elles ont
+tranché **contre** ce canal — pas d'écrit sur la propriété de l'image, exclusion
+expresse de l'indemnisation, et celle du fournisseur du modèle qui ne se transmet
+pas. La bibliothèque a donc été refaite par l'API du fournisseur en direct, où les
+trois existent. Une borne qui ne rejette jamais rien n'est pas une borne.
+
+## Les mesures
+
+| Mesure | Résultat |
+|---|---|
+| Fidélité aux cinq axes | **80 / 80** (la première série, par le revendeur, faisait 67/68) |
+| Poids servi | **149,8 ko** pour trente-deux fichiers — AVIF q75 en 4:4:4 et WebP q80 |
+| Poids des masters | **3,58 Mo** en AVIF q94, contre 24,2 Mo en PNG |
+| Uniformité du fond | écart de **1 à 4** au jeton, contre 25 à 77 avant correction |
+
+## Trois défauts trouvés en mesurant, pas en relisant
+
+1. **Le modèle ne rend pas la couleur qu'on lui donne.** Crème demandé `#faf6f0`,
+   obtenu de `#ecdec9` à `#fff3da`, toujours plus jaune. Invisible sur un
+   portrait, voyant sur seize côte à côte.
+2. **La propagation depuis les bords a détruit deux portraits.** Elle s'est
+   faufilée par l'anticrénelage entre le fond et une peau très claire — celle-ci
+   n'est qu'à quatre-vingts points du crème — puis plus rien ne l'arrêtait. Léa et
+   Nadia sont ressorties en silhouettes blanches. Aucun seuil ne sépare le dégradé
+   du fond (cent points) d'une peau claire (quatre-vingts) : c'est un décalage
+   **global** qui corrige, parce qu'il n'a aucune frontière à franchir.
+3. **Retirer le dessin SVG a créé des jetons morts.** `--portrait-light`,
+   `--portrait-shade` et `--eye-sclera` se sont retrouvés déclarés et référencés
+   nulle part, pendant que leurs valeurs survivaient **retapées en dur** dans la
+   charte de la fabrique. Exactement le défaut corrigé la veille sur les polices
+   du papier. La charte lit désormais les cinq couleurs dans les jetons.
+
+## Ce qui reste ouvert
+
+- **L'axe des teintes de cheveux s'est appauvri.** En gris, il ne porte plus que
+  deux valeurs au lieu de quatre : le rendu ombre et éclaire les chevelures, ce
+  qui ramène les moyennes vers le milieu. La règle tient — la couleur n'est jamais
+  seule porteuse, huit silhouettes et la lettre font le travail — mais l'axe est
+  moins riche qu'en vectoriel.
+- **Le fond crème est cuit dans l'image.** En thème sombre, les vignettes sont
+  donc plus claires que ne l'était la plaque SVG. C'est cohérent avec « un
+  portrait est une image, et une image ne change pas la nuit », mais ça se voit.
+- **Les *Service-Specific Terms* d'OpenAI n'ont pas pu être lues** — la page a
+  refusé l'accès. L'existence du Copyright Shield et sa couverture de l'API sont
+  confirmées par le contrat-cadre ; le texte exact pour les images, non.

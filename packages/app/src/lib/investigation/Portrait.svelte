@@ -1,162 +1,82 @@
 <script lang="ts">
   import type { Suspect } from '@sudoku/engine/investigation';
-  import {
-    BROWS,
-    BUST,
-    BUST_SHADE,
-    COLLAR,
-    EYES,
-    FACE,
-    FACE_SHADE,
-    GLASSES,
-    HAIR,
-    MOUTH,
-    NECK,
-    NECK_SHADE,
-    NOSE,
-    PLATE,
-    faceOf,
-    garmentToken,
-    hairToken,
-    skinToken,
-  } from './portrait.js';
-  import type { EyePart } from './portrait.js';
 
   interface Props {
     suspect: Suspect;
   }
 
   const { suspect }: Props = $props();
-  const face = $derived(faceOf(suspect));
-  const hair = $derived(HAIR[face.hair]);
-
-  /** Chaque rôle du regard cite son jeton, et jamais une couleur. */
-  function eyeToken(role: EyePart['role']): string {
-    if (role === 'sclera') return 'var(--eye-sclera)';
-    if (role === 'iris') return 'var(--eye-iris)';
-    if (role === 'light') return 'var(--portrait-light)';
-    return 'var(--portrait-shade)';
-  }
+  const stem = $derived(`${import.meta.env.BASE_URL}portraits/${suspect.letter.toLowerCase()}`);
 
   /*
-    ─── L'ordre de dessin est celui d'un cel peint ────────────────────────────
+    ─── Pourquoi ce portrait n'est plus dessiné en SVG ────────────────────────
 
-    La masse de cheveux passe **sous** le visage et donne la silhouette ; le
-    vêtement et son ombre viennent dessus ; le cou puis l'encolure ; le visage ;
-    les traits ; la frange par-dessus le visage ; et le reflet des cheveux en
-    dernier, parce qu'il court sur la frange.
+    Il l'a été, en vingt-six tracés écrits à la main, et c'était le bon choix
+    tant que le dessin restait plat et géométrique. La mesure a dit où ça
+    s'arrête : vingt-six tracés, c'est **exactement** le compte d'avataaars
+    (28), plafond relevé du genre « avatar plat ». Une illustration vectorielle
+    réellement détaillée pèse 84,5 ko — vingt fois le budget admis pour un SVG
+    en ligne — et sur un dessin rendu l'avantage du vectoriel s'inverse : un cas
+    mesuré donne 68 fois plus lourd qu'un JPG.
 
-    Une seule source de lumière, en haut à gauche, et les trois ombres la
-    suivent : celle de la frange sur le front, celle du buste à droite, le reflet
-    de l'œil à gauche de l'iris. C'est ce qui distingue un dessin d'un assemblage
-    de formes — les incohérences d'éclairage se voient sans qu'on sache les
-    nommer.
+    Aucun produit connu ne livre seize illustrations à ce niveau en SVG en
+    ligne. Ceux qui en livrent seize restent plats **exprès**.
 
-    ─── Pourquoi ce dessin est masqué aux lecteurs d'écran ────────────────────
+    Le vectoriel n'a pas perdu partout pour autant : le **plan** de la scène
+    reste dessiné, parce que l'aplat géométrique est précisément là où il gagne.
 
-    Le nom du suspect est écrit juste à côté, et sa lettre est sur le plateau.
-    Le portrait est donc **décoratif** au sens strict : lui inventer un texte de
-    remplacement ferait entendre deux fois la même chose. C'est la règle déjà
-    tenue par le mobilier de la scène.
+    ─── Les mesures qui ont fixé le fichier ───────────────────────────────────
 
-    ─── Et pourquoi il y a un contour, alors que le mobilier n'en a pas ───────
+      · **224 px de côté**, calculé et non arrondi au jugé. La carte fait
+        3,5 rem ; le réglage « très grand » porte la racine à 125 %, donc 70 px ;
+        à densité 3 il faut 210 px. 224 les couvre et garde un peu de marge.
+      · **AVIF q75 en 4:4:4**, WebP q80 en repli — pesé sur les seize vrais
+        fichiers : 83,2 ko et 71,5 ko, soit 154,8 ko pour les trente-deux.
+      · Le **4:4:4 ne coûte que 4,5 %** de plus que le 4:2:0 par défaut, et il
+        évite le bavement de chrominance sur les contours d'encre. C'est là
+        qu'un aplat se distingue nettement d'une photo.
+      · Le **sans perte a été essayé et écarté** : 658 ko, huit fois le compte.
+        « Un aplat compresse bien sans perte » est faux ici — l'anticrénelage
+        des contours le ruine.
 
-    Parce que c'est la grammaire du dessin japonais : la ligne d'encre vient
-    avant la couleur. Et parce que la mesure l'impose — aucun ton de peau ni de
-    cheveux ne contraste avec le fond d'une carte (une peau claire tombe à
-    1,35:1 sur blanc). C'est l'encre qui sépare.
+    ─── Deux fichiers par personne, jamais une feuille de sprite ──────────────
 
-    **Aucune encre ne suit le thème**, et c'est le résultat d'un essai raté.
-    Quand la plaque était sombre, il fallait une encre claire pour séparer les
-    masses — et ce liseré clair cernait aussi le visage, le cou et le buste, à
-    contre-jour d'une lumière posée en haut à gauche. La plaque est restée
-    claire, et tout le dessin avec elle : sourcils, bouche, paupières, pupilles
-    et les quatre lavis d'ombre citent `--portrait-shade`, qui ne change jamais.
+    Le service worker versionne chaque URL précachée séparément. Retoucher un
+    seul portrait dans une feuille commune ferait retélécharger l'ensemble chez
+    chaque visiteur, à chaque déploiement, sans que rien ne le signale.
 
-    Le contour n'est pas d'épaisseur uniforme pour autant, et c'est le seul
-    levier que le SVG laisse : **la silhouette extérieure est plus appuyée que les détails
-    intérieurs** (1,7 contre 1,2). Le trait effilé, lui, n'existe pas — proposé
-    en 2002, écarté de SVG2, toujours un brouillon non implémenté. Seule la
-    **ligne de paupière** s'effile, parce qu'elle est dessinée en forme pleine :
-    c'est là que ça valait le détour de la construire à la main.
+    ─── Et pourquoi l'image est vide pour un lecteur d'écran ──────────────────
+
+    `alt=""` suffit à la retirer de l'arbre d'accessibilité — le nom du suspect
+    est écrit juste à côté, et sa lettre est sur le plateau. On n'y ajoute
+    **pas** `aria-hidden` : le W3C déconseille de cumuler les deux techniques
+    sur le même élément.
   */
 </script>
 
-<svg class="portrait" viewBox="0 0 48 48" aria-hidden="true">
-  <path class="plate" d={PLATE} />
-
-  <!-- La silhouette : ce qu'on lit de loin, et le seul aplat de couleur franche. -->
-  <g class="silhouette">
-    <path d={hair.back} fill={hairToken(face.hairTone)} />
-    <path d={BUST} fill={garmentToken(face.garment)} />
-  </g>
-  <path d={BUST_SHADE} fill="var(--portrait-shade)" fill-opacity="0.15" />
-
-  <g class="inked">
-    <path d={NECK} fill={skinToken(face.skin)} />
-  </g>
-  <path d={NECK_SHADE} fill="var(--portrait-shade)" fill-opacity="0.18" />
-  <path d={COLLAR} fill="var(--portrait-shade)" fill-opacity="0.22" />
-
-  <g class="inked">
-    <path d={FACE} fill={skinToken(face.skin)} />
-  </g>
-
-  <!-- L'ombre du cel : une encre translucide, qui marche sur n'importe quelle
-       peau sans demander un jeton par teinte. -->
-  <path d={FACE_SHADE} fill="var(--portrait-shade)" fill-opacity="0.13" />
-
-  {#each EYES as part, index (index)}
-    <path d={part.d} fill={eyeToken(part.role)} />
-  {/each}
-
-  {#each BROWS as brow (brow)}
-    <path d={brow} fill="var(--portrait-shade)" />
-  {/each}
-  <path d={NOSE} fill="var(--portrait-shade)" fill-opacity="0.4" />
-  <path d={MOUTH} fill="var(--portrait-shade)" />
-
-  <path class="stroked" d={hair.front} fill={hairToken(face.hairTone)} />
-  <path d={hair.shine} fill="var(--portrait-light)" fill-opacity="0.28" />
-
-  {#if face.glasses}
-    <path class="glasses" d={GLASSES} />
-  {/if}
-</svg>
+<picture>
+  <source srcset="{stem}.avif" type="image/avif" />
+  <img class="portrait" src="{stem}.webp" alt="" width="224" height="224" decoding="async" />
+</picture>
 
 <style>
+  /*
+    Les dimensions intrinsèques sont sur l'attribut, la taille d'affichage ici :
+    c'est l'attribut qui réserve la boîte et empêche le saut de mise en page
+    avant que l'image n'arrive.
+  */
   .portrait {
     display: block;
     width: 100%;
     height: 100%;
-  }
-
-  .plate {
-    fill: var(--portrait-plate);
-    stroke: var(--portrait-shade);
-    stroke-width: 2;
-  }
-
-  /* Le contour extérieur : celui qui porte la silhouette, donc le plus appuyé. */
-  .silhouette path {
-    stroke: var(--portrait-shade);
-    stroke-width: 1.7;
-    stroke-linejoin: round;
-  }
-
-  /* Les masses intérieures : plus légères, pour que la silhouette reste devant. */
-  .inked path,
-  .stroked {
-    stroke: var(--portrait-shade);
-    stroke-width: 1.2;
-    stroke-linejoin: round;
-  }
-
-  .glasses {
-    fill: none;
-    stroke: var(--portrait-shade);
-    stroke-width: 1.5;
-    stroke-linejoin: round;
-    stroke-linecap: round;
+    /*
+      Le liseré et l'ombre dure que la plaque SVG portait dans son propre
+      dessin. En matriciel ils passent au CSS, sinon la vignette flotte : c'est
+      la grammaire que tout le site tient — 2 px d'encre, ombre décalée sans
+      flou — et une image posée sans elle se lit comme une pièce rapportée.
+    */
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-hard);
   }
 </style>
