@@ -3,15 +3,27 @@
   import type { Level } from '@sudoku/engine';
   import { engine } from '../lib/engineClient.js';
   import PrintSheet from './PrintSheet.svelte';
+  import { runBatch } from './batch.js';
+  import type { BatchResult } from './batch.js';
   import { paginate } from './layout.js';
   import type { PrintablePuzzle } from './layout.js';
   import { PAPER_SIZES, PRINT_FORMATS, formatById, paperById } from './presets.js';
   import type { PaperSizeId, PrintFormatId } from './presets.js';
   import './print.css';
 
+  /*
+    Les valeurs de départ sont nommées parce qu'elles servent **deux fois** : aux
+    réglages eux-mêmes, et à la copie figée plus bas. Lire `level` au moment de
+    déclarer cette copie reviendrait au même, mais Svelte avertit à juste titre
+    qu'on n'en capture que la valeur initiale — ici c'est voulu, et le dire par la
+    structure vaut mieux que le dire dans un commentaire.
+  */
+  const FIRST_LEVEL: Level = 'moyen';
+  const FIRST_COUNT = 6;
+
   let title = $state('Cahier de sudoku');
-  let level = $state<Level>('moyen');
-  let count = $state(6);
+  let level = $state<Level>(FIRST_LEVEL);
+  let count = $state(FIRST_COUNT);
   let formatId = $state<PrintFormatId>('standard');
   let paperId = $state<PaperSizeId>('a4');
   let includeSolutions = $state(true);
@@ -20,6 +32,12 @@
   let generating = $state(false);
   let produced = $state(0);
   let notice = $state('');
+  /*
+    Hors des runes à dessein : ce drapeau est relu par `runBatch`, dans une
+    fonction ordinaire qui n'a pas besoin d'être réactive. Un `$state` ici
+    n'apporterait rien et suggérerait à tort que l'affichage en dépend.
+  */
+  let stopping = false;
 
   const format = $derived(formatById(formatId));
   const paper = $derived(paperById(paperId));
@@ -32,6 +50,45 @@
   });
 
   /**
+   * Les réglages **figés au lancement**, et non relus en cours de route.
+   *
+   * Les champs restent utilisables pendant la production — on n'ôte pas un
+   * réglage à quelqu'un qui attend. Mais un cahier doit être celui qu'on a
+   * commandé : sans cette copie, changer le niveau à mi-parcours mélangeait deux
+   * paliers dans le même cahier **et** faisait compter les grilles déjà faites
+   * comme « n'ayant pas atteint le niveau », alors qu'elles avaient atteint celui
+   * qu'on demandait à l'époque. Le compteur du bouton avait la même maladie :
+   * baisser le nombre affichait « 6 / 5 ».
+   */
+  let asked = $state<{ level: Level; count: number }>({
+    level: FIRST_LEVEL,
+    count: FIRST_COUNT,
+  });
+
+  /** Une grille du niveau demandé, mise en forme pour le papier. */
+  async function makeOne(): Promise<PrintablePuzzle | null> {
+    const result = await engine.generateAtLevel({
+      level: asked.level,
+      symmetry: 'rotational180',
+    });
+    if (result === null) return null;
+
+    const grid = Uint8Array.from(result.puzzle);
+    return {
+      // Renuméroté après coup : ici on ne sait pas encore combien de tentatives
+      // auront abouti, ni si l'on s'arrêtera en route.
+      index: 0,
+      puzzle: [...result.puzzle],
+      solution: [...result.solution],
+      level: result.rating.level ?? asked.level,
+      levelLabel: levelInfo(result.rating.level ?? asked.level).label,
+      score: result.rating.score,
+      label: gridLabel(grid),
+      code: encodeGrid(grid),
+    };
+  }
+
+  /**
    * Produit le cahier, une grille après l'autre.
    *
    * Les requêtes sont enchaînées plutôt que lancées en parallèle : le moteur
@@ -39,42 +96,81 @@
    * suite, et cet enchaînement donne une progression réelle — non une barre qui
    * saute de zéro à cent. À plusieurs secondes par grille aux niveaux élevés,
    * sans ce retour l'utilisateur conclurait à un blocage.
+   *
+   * La boucle elle-même vit dans `batch.ts`, où elle se teste sans worker : ce
+   * composant ne garde que ce qui lui est propre — fabriquer une grille, et dire
+   * ce qui s'est passé.
    */
   async function generate(): Promise<void> {
     generating = true;
+    stopping = false;
     produced = 0;
     notice = '';
-    const collected: PrintablePuzzle[] = [];
+    asked = { level, count };
 
-    try {
-      for (let i = 0; i < count; i++) {
-        const result = await engine.generateAtLevel({ level, symmetry: 'rotational180' });
-        produced = i + 1;
-        if (result === null) continue;
+    const result = await runBatch<PrintablePuzzle>({
+      count: asked.count,
+      make: makeOne,
+      stopped: () => stopping,
+      onAttempt: (attempted) => (produced = attempted),
+    });
 
-        const grid = Uint8Array.from(result.puzzle);
-        collected.push({
-          index: collected.length + 1,
-          puzzle: [...result.puzzle],
-          solution: [...result.solution],
-          level: result.rating.level ?? level,
-          levelLabel: levelInfo(result.rating.level ?? level).label,
-          score: result.rating.score,
-          label: gridLabel(grid),
-          code: encodeGrid(grid),
-        });
-      }
+    /*
+      L'aperçu suit toujours le message, même quand il n'y a plus rien à montrer.
+      Garder les grilles précédentes en annonçant un échec était le défaut : on
+      affichait un cahier qui n'était pas celui dont on parlait.
+    */
+    puzzles = result.items.map((puzzle, rank) => ({ ...puzzle, index: rank + 1 }));
+    notice = noticeOf(result);
+    generating = false;
+    stopping = false;
+  }
 
-      puzzles = collected;
-      const asked = LEVELS.find((l) => l.id === level)?.label ?? level;
-      const offLevel = collected.filter((p) => p.level !== level).length;
-      notice =
-        offLevel === 0
-          ? `${String(collected.length)} grilles de niveau ${asked}.`
-          : `${String(collected.length)} grilles, dont ${String(offLevel)} n’ont pas atteint le niveau ${asked} dans le temps imparti.`;
-    } finally {
-      generating = false;
-    }
+  /**
+   * Ce que le cahier dit de lui-même.
+   *
+   * Quatre situations, et aucune ne se tait : le compte demandé atteint, un
+   * niveau manqué dans le temps imparti, un arrêt volontaire, une panne du
+   * moteur. Le cas où la fabrique ne rend rien du tout est compté à part — il ne
+   * « ne devrait pas arriver », ce qui est précisément la raison de l'afficher
+   * s'il arrive.
+   */
+  function noticeOf(result: BatchResult<PrintablePuzzle>): string {
+    const wanted = LEVELS.find((l) => l.id === asked.level)?.label ?? asked.level;
+    const kept = result.items.length;
+    const parts: string[] = [];
+
+    if (result.stopped) parts.push(`Arrêté après ${String(result.attempted)} tentative(s).`);
+    if (result.failure !== null) parts.push(`Le moteur a échoué : ${result.failure}`);
+
+    const offLevel = result.items.filter((puzzle) => puzzle.level !== asked.level).length;
+    const empty = result.attempted - kept;
+    parts.push(
+      offLevel === 0
+        ? `${String(kept)} grille(s) de niveau ${wanted}.`
+        : `${String(kept)} grille(s), dont ${String(offLevel)} n’ont pas atteint le niveau ${wanted} dans le temps imparti.`,
+    );
+    if (empty > 0) parts.push(`${String(empty)} tentative(s) n’ont rien donné.`);
+
+    return parts.join(' ');
+  }
+
+  /**
+   * Arrête la production, et **tout de suite**.
+   *
+   * Le drapeau seul ne suffirait pas : il est relu entre deux grilles, et une
+   * grille peut demander jusqu'aux huit secondes du budget du générateur. Tuer
+   * le worker est le seul moyen d'interrompre un calcul synchrone — le pourquoi,
+   * le coût mesuré et ce qui reste non mesuré sont dans `engineClient.ts`.
+   *
+   * C'est là que ce studio diffère de celui de l'enquête, qui se contente du
+   * drapeau : une affaire se compose en 19 ms à la médiane, donc l'attente y est
+   * déjà imperceptible. Le mécanisme suit le coût de l'unité produite, il n'est
+   * pas une question de goût.
+   */
+  function stop(): void {
+    stopping = true;
+    engine.stop();
   }
 
   /*
@@ -164,9 +260,19 @@
       détachent avant distribution.
     </p>
 
-    <button type="button" class="primary" onclick={generate} disabled={generating}>
-      {generating ? `Génération… ${String(produced)} / ${String(count)}` : 'Générer le cahier'}
-    </button>
+    {#if generating}
+      <!--
+        Deux boutons distincts plutôt qu'un seul qui change de rôle : un libellé
+        qui devient « Arrêter » sous le doigt fait cliquer sur l'arrêt celui qui
+        visait la génération. Celui-ci porte aussi la progression, qui est donc
+        du texte — c'est ce qui permet à la barre de se dire décorative.
+      -->
+      <button type="button" class="primary" onclick={stop}>
+        Arrêter · {produced} / {asked.count}
+      </button>
+    {:else}
+      <button type="button" class="primary" onclick={generate}>Générer le cahier</button>
+    {/if}
 
     {#if generating}
       <!--
@@ -178,7 +284,7 @@
       <div class="progress" aria-hidden="true">
         <div
           class="progress-value"
-          style={`width: ${String(Math.min(100, (produced / Math.max(count, 1)) * 100))}%`}
+          style={`width: ${String(Math.min(100, (produced / Math.max(asked.count, 1)) * 100))}%`}
         ></div>
       </div>
       <p class="hint">
@@ -187,9 +293,15 @@
       </p>
     {/if}
 
-    {#if notice !== ''}
-      <p class="notice" role="status">{notice}</p>
-    {/if}
+    <!--
+      La région vivante est **permanente**, et c'était un défaut de ne pas l'être.
+      Un `role="status"` créé en même temps que son texte n'est pas annoncé : le
+      lecteur d'écran doit avoir vu la région vide pour remarquer qu'elle change.
+      Le message d'échec que ce studio vient de gagner serait resté muet pour
+      exactement les personnes qui ne voient pas l'aperçu. L'annonceur global de
+      `App.svelte` suit ce motif depuis toujours ; ce coin-ci l'avait manqué.
+    -->
+    <p class="notice" role="status" aria-live="polite" class:empty={notice === ''}>{notice}</p>
 
     {#if puzzles.length > 0}
       <button type="button" class="secondary" onclick={print}>
@@ -291,6 +403,17 @@
     font-size: var(--text-sm);
   }
 
+  /*
+    Vide, elle reste dans le document — sans quoi elle ne serait pas annoncée —
+    mais ne doit pas peindre une pastille grise sous les réglages. `display: none`
+    la retirerait de l'arbre d'accessibilité, ce qui ramènerait le défaut ;
+    `padding: 0` et pas de fond suffisent, et elle n'occupe alors aucune hauteur.
+  */
+  .notice.empty {
+    padding: 0;
+    background: none;
+  }
+
   .primary,
   .secondary {
     min-height: var(--tap);
@@ -313,12 +436,13 @@
     color: var(--text);
   }
 
-  /* Le curseur d'attente est informatif ici : la génération est en cours. */
-  .primary:disabled {
-    opacity: 0.5;
-    cursor: progress;
-  }
-
+  /*
+    Plus aucun bouton grisé ici : pendant la génération, celui-ci devient
+    « Arrêter » et reste bien vivant. Le curseur d'attente qui l'accompagnait —
+    et la règle `:disabled` qui le posait — sont partis avec lui. Les gardes
+    `:not(:disabled)` restent : elles ne coûtent rien et redeviendraient utiles
+    si un état désactivé revenait un jour.
+  */
   .primary:active:not(:disabled) {
     background: var(--accent-active);
     transition-duration: 0s;

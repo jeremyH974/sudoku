@@ -108,6 +108,15 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   `*.a11y.test.ts` voient les rôles, les noms accessibles et l'ordre des titres, **jamais le
   contraste ni la taille des cibles**. Ces deux-là se mesurent à la main, et une CI verte ne vaut
   pas mesure.
+- **Une région vivante doit exister avant son texte.** Un `role="status"` créé en même temps que
+  son message n'est **pas** annoncé : le lecteur d'écran doit avoir vu la région vide pour
+  remarquer qu'elle change. Donc jamais de `<p role="status">` sous un `{#if}` qui dépend du
+  message lui-même — on pose la région une fois pour toutes et l'on y écrit. Vide, elle se réduit
+  par `padding: 0` et sans fond, **jamais** par `display: none`, qui la retirerait de l'arbre
+  d'accessibilité et ramènerait le défaut. `App.svelte` et `InvestigationPanel.svelte` tiennent le
+  bon motif ; `PrintStudio.svelte` l'avait manqué jusqu'à l'incrément 20, ce qui aurait rendu son
+  message d'échec muet pour exactement les personnes qui ne voient pas l'aperçu. Il reste un cas
+  connu à corriger, `LearnPanel.svelte`.
 - Le thème a **trois** états (clair, sombre, système) ; « système » retire l'attribut au lieu
   d'écrire une valeur. Tout accès à `localStorage` est enveloppé dans un `try` : en navigation
   privée, il lève.
@@ -234,6 +243,35 @@ exercice.**
 > déplorer, il fallait regarder l'oracle — qui n'en rapporte lui non plus aucune sur 335 grilles.
 > Ne pas savoir en produire était un **accord**, pas une lacune.
 
+## Annuler un travail du moteur
+
+Le gestionnaire du Web Worker est **synchrone** : tant qu'un calcul n'est pas fini, il ne dépile
+aucun message. Trois conséquences qui ne se devinent pas :
+
+- **Un drapeau envoyé par `postMessage` n'arrive jamais à temps** — il serait lu *après* le calcul
+  qu'il cherche à interrompre. Et `postMessage` d'un `AbortSignal` n'existe pas : la proposition
+  (`whatwg/dom#948`) dort depuis juillet 2023, étiquetée « needs implementer interest ».
+- **`SharedArrayBuffer` est hors d'atteinte ici**, et c'est une contrainte d'hébergement, non un
+  choix : la mémoire partagée exige COOP/COEP, et GitHub Pages ne pose aucun en-tête. Le
+  contournement (`coi-serviceworker`) coûte un service worker de plus et un rechargement à la
+  première visite.
+- **Le mécanisme suit donc le coût de l'unité produite**, et c'est une règle, pas un goût. Une
+  affaire d'enquête coûte 19 ms à la médiane : un drapeau coopératif relu entre deux affaires
+  suffit. Une grille de sudoku peut coûter les 8 s du budget de `generateAtLevel` : il faut
+  **tuer le worker** (`engine.stop()`), seule façon d'interrompre un calcul synchrone. Mesuré, la
+  résurrection coûte 36 ms à la médiane sur le paquet de production — inutile d'entretenir un
+  worker de rechange.
+
+⚠ `stop()` emporte **tout** ce qui est en vol, puisqu'un seul worker sert toute l'application. Tout
+appelant doit donc gérer un rejet : `EngineStopped` se distingue d'une panne, et le confondre avec
+elle afficherait une erreur pour une action volontaire. La boucle de production partagée
+(`print/batch.ts`) tranche ce cas à un seul endroit.
+
+⚠ `terminate()` rend la main tout de suite et plus aucune réponse n'arrive — mais **rien ne prouve
+que le calcul s'arrête** : Chromium s'accorde deux secondes de grâce
+(`kForcibleTerminationDelay`), le « stopped at once » de MDN est inexact pour Chrome, et deux sondes
+n'ont pas réussi à voir cette queue depuis la page. Ne pas l'affirmer.
+
 ## Vérification avant de conclure
 
 ```bash
@@ -241,3 +279,10 @@ pnpm check
 ```
 
 Typecheck, lint et tests. Rien n'est « terminé » tant que les trois ne passent pas.
+
+> ⚠ **Un onglet masqué bride `setTimeout` à une seconde.** Toute latence mesurée par un sondage en
+> `setTimeout` dans un onglet d'arrière-plan vaut donc 1 000 ms, quelle qu'elle soit — c'est
+> exactement ce qu'un relevé a donné trois fois de suite à l'incrément 20 avant d'être jeté. Un
+> nombre trois fois identique n'est pas une mesure, c'est une constante à expliquer. Le bon
+> instrument est le `MutationObserver` : ses rappels passent par les microtâches et ne sont pas
+> bridés.

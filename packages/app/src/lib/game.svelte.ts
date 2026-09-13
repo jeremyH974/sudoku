@@ -28,7 +28,7 @@ import type {
   Symmetry,
   TechniqueId,
 } from '@sudoku/engine';
-import { engine } from './engineClient.js';
+import { EngineStopped, engine } from './engineClient.js';
 import { localDayKey } from './day.js';
 import type { DayKey } from './day.js';
 import { Stopwatch } from './stopwatch.svelte.js';
@@ -240,6 +240,18 @@ export class Game {
     try {
       const result = await engine.generateAtLevel({ level, symmetry });
       if (result !== null) this.loadPuzzle(result);
+    } catch (error) {
+      /*
+        Un seul worker sert toute l'application, et le cahier à imprimer peut le
+        tuer pour honorer un « Arrêter » — la grille demandée ici part alors avec.
+        Ce n'est pas une panne : on garde la grille en cours et l'on se taît.
+
+        Les autres échecs remontent. Ils le faisaient déjà, mais sans que
+        personne ne les attrape : `App.svelte` awaitait cette promesse sans
+        `catch`, donc un worker en erreur produisait un rejet non traité et une
+        annonce qui mentait — « Génération… » restait à l'écran pour toujours.
+      */
+      if (!(error instanceof EngineStopped)) throw error;
     } finally {
       this.generating = false;
     }

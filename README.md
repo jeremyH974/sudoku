@@ -700,6 +700,18 @@ Détails qui comptent sur du papier : filets de bloc trois fois plus épais que 
 des pages (sinon une page sur deux disparaît dans la pliure), et `print-color-adjust: exact` pour
 que le QR survive au mode économie d'encre.
 
+**Le cahier s'arrête, et il dit quand il échoue.** Un cahier de quarante grilles est long à
+produire : le bouton devient « Arrêter · 6 / 40 » plutôt que de se griser, et l'arrêt est
+**immédiat** — mesuré sous 4 ms, contre les huit secondes qu'un simple drapeau aurait pu laisser
+passer, puisqu'une grille difficile peut occuper tout le budget du générateur. Ce qui était produit
+est gardé et montré ; ce qui a échoué est nommé. L'aperçu ne montre **jamais** un cahier dont le
+bandeau ne parle pas : c'est celui-là qui sortirait de l'imprimante.
+
+Le prix de cette promptitude est de **tuer le Web Worker**, seul moyen d'interrompre un calcul
+synchrone, puis de le faire renaître — 36 ms sur le paquet de production, servi par le précache du
+service worker. Le raisonnement complet, les options écartées et ce qui reste **non mesuré** sont
+dans `docs/plan-increment-20.md`.
+
 ## Le pont papier ↔ écran
 
 C'est le moat n°2, et il est **testé comme tel** : la grille encodée dans le QR, décodée, doit
@@ -998,6 +1010,12 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   enseigne, jamais la difficulté de la grille dont il est extrait.
 - **La structure d'accessibilité est vérifiée par axe sur les cinq onglets** — mais ni le
   contraste ni la taille des cibles, qui restent mesurés à la main.
+- **Un arrêt ne se présente jamais comme une panne, et un échec ne se taît jamais.** La boucle qui
+  produit les deux cahiers distingue les deux cas, garde ce qui a été produit avant l'incident, et
+  le montre. Vérifié sur les quatre situations — compte atteint, palier manqué, arrêt volontaire,
+  moteur en panne — dont trois n'étaient atteignables par aucun test avant l'incrément 20.
+- **Les régions vivantes existent avant leur texte.** Un `role="status"` créé en même temps que son
+  message n'est pas annoncé ; un test l'exige désormais là où le message porte un échec.
 
 > **Attention à la reproductibilité par graine.** Le PRNG est figé par des snapshots, mais cela ne
 > suffit pas : `generateAtLevel` dépend de `RATING_VERSION` *et* du temps réel écoulé sur la
@@ -1074,8 +1092,6 @@ précédente. Le port fait partie de l'origine ; en changer, c'est repartir d'un
 
 Ce qui reste ouvert, par ordre de valeur :
 
-- **Le studio d'impression du sudoku n'a ni annulation, ni message d'échec, ni aucun test.** Celui
-  d'Enquête a les trois depuis l'incrément 19 ; le plus ancien les mérite.
 - **WXYZ-Wing, puis les chaînes**, si l'on veut étendre la portée. C'est ce que la mesure
   désigne — et **pas** l'Unique Rectangle, écarté sur preuve : zéro occurrence comme pic sur
   441 grilles, et une déduction qui conclurait d'une *promesse* sur la grille plutôt que de la

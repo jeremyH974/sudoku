@@ -94,7 +94,17 @@
 
   async function newPuzzle(): Promise<void> {
     announcement = `Génération d’une grille de niveau ${chosenLevel.label}…`;
-    await game.newPuzzle(level, symmetry);
+    try {
+      await game.newPuzzle(level, symmetry);
+    } catch {
+      /*
+        Sans ce `catch`, un moteur en panne laissait « Génération… » à l'écran
+        pour toujours et produisait un rejet non traité. Un arrêt volontaire, lui,
+        n'arrive pas jusqu'ici : `game.newPuzzle` le distingue et se taît.
+      */
+      announcement = 'Le moteur n’a pas répondu. La grille en cours est conservée.';
+      return;
+    }
     announcement = game.levelIsExact
       ? `Grille de niveau ${chosenLevel.label}, ${String(game.clues)} indices.`
       : `Niveau ${chosenLevel.label} non atteint dans le temps imparti.`;

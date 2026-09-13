@@ -3,6 +3,7 @@
   import type { CaseFile } from '@sudoku/engine/investigation';
   import CaseSheet from './CaseSheet.svelte';
   import CaseSummary from './CaseSummary.svelte';
+  import { runBatch } from './batch.js';
   import { paginate } from './layout.js';
   import { PAPER_SIZES, PRINT_FORMATS, formatById, paperById } from './presets.js';
   import type { PaperSizeId, PrintFormatId } from './presets.js';
@@ -65,7 +66,8 @@
   const MAX_CASES = 40;
 
   let title = $state('Cahier d’enquêtes');
-  let count = $state(8);
+  const FIRST_COUNT = 8;
+  let count = $state(FIRST_COUNT);
   let formatId = $state<PrintFormatId>('standard');
   let paperId = $state<PaperSizeId>('a4');
   let includeSolutions = $state(true);
@@ -79,6 +81,8 @@
   let generating = $state(false);
   let produced = $state(0);
   let notice = $state('');
+  // Voir `PrintStudio.svelte` : nommée, pour que la capture soit une intention.
+  let asked = $state(FIRST_COUNT);
   let cancelling = false;
 
   const paper = $derived(paperById(paperId));
@@ -94,43 +98,53 @@
 
   const codeOf = (file: CaseFile): string => encodeCase(file);
 
-  /** Compose un cahier, une affaire à la fois, et rend la main si on l'arrête. */
+  /**
+   * Compose un cahier, une affaire à la fois, et rend la main si on l'arrête.
+   *
+   * La boucle est celle de `batch.ts`, partagée avec le cahier de sudoku depuis
+   * l'incrément 20 : écrite deux fois, elle n'était testée nulle part. Deux
+   * choses en sont revenues ici — ce qui précède un échec est **conservé et
+   * montré**, là où ce studio gardait silencieusement l'aperçu précédent ; et un
+   * arrêt ne se lit plus comme une panne.
+   *
+   * ⚠ L'arrêt reste le **drapeau seul**, sans tuer le worker, et c'est mesuré et
+   * non négligé : composer une affaire tient en 19 ms à la médiane et 470 ms au
+   * pire, donc l'attente entre le clic et l'arrêt est déjà imperceptible. Le
+   * cahier de sudoku, lui, tue — une grille peut y demander les huit secondes du
+   * budget du générateur. Le mécanisme suit le coût de l'unité produite.
+   */
   async function generate(): Promise<void> {
     generating = true;
     cancelling = false;
     produced = 0;
     notice = '';
-    const collected: CaseFile[] = [];
     const stamp = Date.now();
+    // Figé au lancement : le champ reste utilisable pendant la composition, mais
+    // le baisser en route afficherait « 6 / 5 » et fausserait la barre.
+    asked = count;
 
-    try {
-      for (let index = 0; index < count; index++) {
-        if (cancelling) break;
-        /*
-          Une graine lisible et distincte par affaire : elle se retrouve dans un
-          rapport de bug, là où un entier de trente-deux bits ne se recopie pas.
-          Elle ne sert qu'à cela — ce qui identifie une affaire est son code.
-        */
-        const file = await engine.composeCase(`cahier-${String(stamp)}-${String(index)}`);
-        produced = index + 1;
-        if (file !== null) collected.push(file);
-      }
+    const result = await runBatch<CaseFile>({
+      count: asked,
+      /*
+        Une graine lisible et distincte par affaire : elle se retrouve dans un
+        rapport de bug, là où un entier de trente-deux bits ne se recopie pas.
+        Elle ne sert qu'à cela — ce qui identifie une affaire est son code.
+      */
+      make: (index) => engine.composeCase(`cahier-${String(stamp)}-${String(index)}`),
+      stopped: () => cancelling,
+      onAttempt: (attempted) => (produced = attempted),
+    });
 
-      if (collected.length > 0) composed = collected;
-      const asked = cancelling ? produced : count;
-      const missed = asked - collected.length;
-      notice =
-        (cancelling ? `Arrêté après ${String(produced)} affaire(s). ` : '') +
-        `${String(collected.length)} affaire(s) au cahier` +
-        (missed > 0 ? `, ${String(missed)} que la fabrique n’a pas rendue(s).` : '.');
-    } catch (error) {
-      // Le studio du sudoku n'a pas ce `catch`, et laisse l'aperçu mentir en
-      // gardant son contenu précédent sans un mot. On le dit.
-      notice = `Le moteur a échoué : ${error instanceof Error ? error.message : String(error)}`;
-    } finally {
-      generating = false;
-      cancelling = false;
-    }
+    composed = [...result.items];
+    const missed = result.attempted - result.items.length;
+    notice =
+      (result.stopped ? `Arrêté après ${String(result.attempted)} affaire(s). ` : '') +
+      (result.failure === null ? '' : `Le moteur a échoué : ${result.failure} `) +
+      `${String(result.items.length)} affaire(s) au cahier` +
+      (missed > 0 ? `, ${String(missed)} que la fabrique n’a pas rendue(s).` : '.');
+
+    generating = false;
+    cancelling = false;
   }
 
   /*
@@ -198,7 +212,7 @@
 
     {#if generating}
       <button type="button" class="action" onclick={() => (cancelling = true)}>
-        Arrêter ({produced} / {count})
+        Arrêter ({produced} / {asked})
       </button>
     {:else}
       <button type="button" class="action" onclick={() => void generate()}>Composer</button>
@@ -212,7 +226,7 @@
       `aria-hidden`. C'est le choix que le studio du sudoku a déjà tranché.
     -->
     <div class="progress" aria-hidden="true">
-      <span style={`width: ${String(Math.min(100, (produced / Math.max(count, 1)) * 100))}%;`}></span>
+      <span style={`width: ${String(Math.min(100, (produced / Math.max(asked, 1)) * 100))}%;`}></span>
     </div>
   {/if}
 
