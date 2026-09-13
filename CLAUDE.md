@@ -113,10 +113,17 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   remarquer qu'elle change. Donc jamais de `<p role="status">` sous un `{#if}` qui dépend du
   message lui-même — on pose la région une fois pour toutes et l'on y écrit. Vide, elle se réduit
   par `padding: 0` et sans fond, **jamais** par `display: none`, qui la retirerait de l'arbre
-  d'accessibilité et ramènerait le défaut. `App.svelte` et `InvestigationPanel.svelte` tiennent le
-  bon motif ; `PrintStudio.svelte` l'avait manqué jusqu'à l'incrément 20, ce qui aurait rendu son
-  message d'échec muet pour exactement les personnes qui ne voient pas l'aperçu. Il reste un cas
-  connu à corriger, `LearnPanel.svelte`.
+  d'accessibilité et ramènerait le défaut.
+
+  L'annonceur global d'`App.svelte` et celui d'`InvestigationPanel.svelte` tiennent le bon motif ;
+  `PrintStudio.svelte` l'avait manqué jusqu'à l'incrément 20, ce qui aurait rendu son message
+  d'échec muet pour exactement les personnes qui ne voient pas l'aperçu.
+
+  Trois régions conditionnelles subsistent, et **elles ne se valent pas** :
+  `UpdateBanner.svelte` (deux) et `LearnPanel.svelte` ont bien le défaut, à corriger.
+  `App.svelte` (l'indice) l'a en apparence seulement — le texte de l'indice est **aussi** poussé
+  dans l'annonceur global, qui lui est permanent, donc l'information est annoncée et le
+  `role="status"` local n'est qu'une ceinture. Ne pas le « corriger » sans vérifier ce couplage.
 - Le thème a **trois** états (clair, sombre, système) ; « système » retire l'attribut au lieu
   d'écrire une valeur. Tout accès à `localStorage` est enveloppé dans un `try` : en navigation
   privée, il lève.

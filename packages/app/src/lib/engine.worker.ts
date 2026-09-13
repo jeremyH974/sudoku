@@ -40,9 +40,11 @@ function handle(request: WorkerRequest): unknown {
       return generatePuzzle(request.options);
     case 'rate':
       return rate(request.puzzle);
-    // Une affaire coûte 122 ms à la médiane et jusqu'à 470 ms au pire : moins
-    // qu'une grille Expert, mais bien plus qu'une image à trente par seconde.
-    // Elle passe donc par ici comme le reste.
+    // Une affaire coûte 19 ms à la médiane et 129 ms au pire — chiffres de
+    // `scripts/investigation.perf.ts` après la refonte de `carve` à l'incrément
+    // 19, qui les a divisés par trois. C'est moins qu'une grille Expert, mais
+    // bien plus qu'une image à trente par seconde : elle passe donc par ici
+    // comme le reste.
     case 'compose-case':
       return composeCase(request.seed, request.options);
   }

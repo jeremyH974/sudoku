@@ -58,6 +58,11 @@ class FakeWorker {
     }
   }
 
+  /** Une panne au niveau du travailleur lui-même : module illisible, jet au sommet. */
+  breakDown(message: string): void {
+    for (const listener of this.#listeners.get('error') ?? []) listener({ message });
+  }
+
   fail(error: string): void {
     const id = (this.sent.at(-1) as { id: number }).id;
     for (const listener of this.#listeners.get('message') ?? []) {
@@ -179,6 +184,45 @@ describe('le client du moteur', () => {
     // Et la réponse de feu le premier worker ne trouble ni la promesse déjà
     // rejetée, ni celle qui vient de naître.
     killed.answerId(abandonedId, { puzzle: [] });
+    live().answer(null);
+    await expect(fresh).resolves.toBeNull();
+  });
+
+  it('relâche le travailleur quand il tombe en panne', async () => {
+    /*
+      Défaut antérieur, devenu visible avec `stop()` : l'écouteur d'erreur
+      rejetait les promesses **sans** lâcher le worker. `#ensureWorker` rendait
+      donc éternellement un worker mort, les `postMessage` partaient dans le vide,
+      et une partie restait bloquée sur « Génération… » jusqu'au rechargement.
+      L'écran promet désormais que « la grille en cours est conservée » — donc
+      qu'un nouvel essai est possible. Il doit l'être.
+    */
+    const doomed = engine.generateAtLevel({ level: 'expert' });
+    const dead = live();
+    dead.breakDown('module illisible');
+    await expect(doomed).rejects.toThrow('module illisible');
+
+    const retry = engine.generateAtLevel({ level: 'facile' });
+    expect(FakeWorker.instances).toHaveLength(2);
+    expect(live()).not.toBe(dead);
+    live().answer(null);
+    await expect(retry).resolves.toBeNull();
+  });
+
+  it('ignore la panne d’un travailleur déjà abandonné', async () => {
+    /*
+      Tant qu'il n'y avait qu'un worker pour la vie de la page, la question ne se
+      posait pas. Depuis qu'on en tue et qu'on en refait, une erreur émise par un
+      worker abandonné rejetterait les requêtes de son **successeur** : un message
+      de panne pour un incident qui ne concerne plus personne.
+    */
+    fire(engine.generateAtLevel({ level: 'expert' }));
+    const abandoned = live();
+    engine.stop();
+
+    const fresh = engine.composeCase('graine');
+    abandoned.breakDown('râle du mourant');
+
     live().answer(null);
     await expect(fresh).resolves.toBeNull();
   });

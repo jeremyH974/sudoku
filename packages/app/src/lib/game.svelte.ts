@@ -244,7 +244,7 @@ export class Game {
       /*
         Un seul worker sert toute l'application, et le cahier à imprimer peut le
         tuer pour honorer un « Arrêter » — la grille demandée ici part alors avec.
-        Ce n'est pas une panne : on garde la grille en cours et l'on se taît.
+        Ce n'est pas une panne : on garde la grille en cours et l'on se tait.
 
         Les autres échecs remontent. Ils le faisaient déjà, mais sans que
         personne ne les attrape : `App.svelte` awaitait cette promesse sans

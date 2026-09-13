@@ -1010,7 +1010,7 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   enseigne, jamais la difficulté de la grille dont il est extrait.
 - **La structure d'accessibilité est vérifiée par axe sur les cinq onglets** — mais ni le
   contraste ni la taille des cibles, qui restent mesurés à la main.
-- **Un arrêt ne se présente jamais comme une panne, et un échec ne se taît jamais.** La boucle qui
+- **Un arrêt ne se présente jamais comme une panne, et un échec ne se tait jamais.** La boucle qui
   produit les deux cahiers distingue les deux cas, garde ce qui a été produit avant l'incident, et
   le montre. Vérifié sur les quatre situations — compte atteint, palier manqué, arrêt volontaire,
   moteur en panne — dont trois n'étaient atteignables par aucun test avant l'incrément 20.

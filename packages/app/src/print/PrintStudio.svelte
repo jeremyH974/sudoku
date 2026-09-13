@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { LEVELS, encodeGrid, gridLabel, levelInfo } from '@sudoku/engine';
   import type { Level } from '@sudoku/engine';
   import { engine } from '../lib/engineClient.js';
@@ -106,24 +107,46 @@
     stopping = false;
     produced = 0;
     notice = '';
-    asked = { level, count };
-
-    const result = await runBatch<PrintablePuzzle>({
-      count: asked.count,
-      make: makeOne,
-      stopped: () => stopping,
-      onAttempt: (attempted) => (produced = attempted),
-    });
-
     /*
-      L'aperçu suit toujours le message, même quand il n'y a plus rien à montrer.
-      Garder les grilles précédentes en annonçant un échec était le défaut : on
-      affichait un cahier qui n'était pas celui dont on parlait.
+      `bind:value` sur un champ numérique vide rend `null`, et `min="1"` ne borne
+      que la validation du formulaire, jamais la valeur liée. Sans ce garde-fou,
+      un champ effacé figeait `null` pour toute la production : zéro tour de
+      boucle, et un bouton annonçant « Arrêter · 0 / ».
     */
-    puzzles = result.items.map((puzzle, rank) => ({ ...puzzle, index: rank + 1 }));
-    notice = noticeOf(result);
-    generating = false;
-    stopping = false;
+    asked = { level, count: Math.max(1, Math.trunc(count || 1)) };
+
+    try {
+      const result = await runBatch<PrintablePuzzle>({
+        count: asked.count,
+        make: makeOne,
+        stopped: () => stopping,
+        onAttempt: (attempted) => (produced = attempted),
+      });
+
+      /*
+        L'aperçu suit le message, même quand il n'y a plus rien à montrer : garder
+        les grilles précédentes en annonçant un échec était le défaut, on affichait
+        un cahier dont on ne parlait pas — et c'est celui-là qui serait sorti de
+        l'imprimante.
+
+        **Sauf si rien n'a été tenté.** Une boucle qui n'a pas fait un tour n'a
+        rien à dire du cahier en place : elle le laisse. C'est ce qui rend un
+        double-clic inoffensif, et c'est aussi la bonne réponse en soi — « je n'ai
+        rien produit » ne justifie pas de jeter ce qui était là.
+      */
+      if (result.attempted > 0) {
+        puzzles = result.items.map((puzzle, rank) => ({ ...puzzle, index: rank + 1 }));
+      }
+      notice = noticeOf(result);
+    } finally {
+      /*
+        Dans un `finally` : aucun jet n'est atteignable entre les deux — `runBatch`
+        attrape tout ce que la fabrique lève — mais un studio bloqué sur « Arrêter »
+        sans moyen d'en sortir est une panne qu'on ne veut pas devoir diagnostiquer.
+      */
+      generating = false;
+      stopping = false;
+    }
   }
 
   /**
@@ -143,6 +166,18 @@
     if (result.stopped) parts.push(`Arrêté après ${String(result.attempted)} tentative(s).`);
     if (result.failure !== null) parts.push(`Le moteur a échoué : ${result.failure}`);
 
+    /*
+      Rien de tenté, donc rien à dire du cahier : il n'a pas bougé, et l'annoncer
+      vaut mieux que de compter jusqu'à zéro devant un aperçu inchangé — ce serait
+      le bandeau qui contredit l'écran, exactement ce qu'on corrige ici.
+    */
+    if (result.attempted === 0) {
+      parts.push(
+        puzzles.length > 0 ? 'Le cahier précédent est conservé.' : 'Aucune grille produite.',
+      );
+      return parts.join(' ');
+    }
+
     const offLevel = result.items.filter((puzzle) => puzzle.level !== asked.level).length;
     const empty = result.attempted - kept;
     parts.push(
@@ -154,6 +189,20 @@
 
     return parts.join(' ');
   }
+
+  /*
+    Quitter l'onglet arrête la production.
+
+    Sans cela, changer d'onglet en pleine génération laissait la boucle tourner
+    contre un composant détruit : le seul bouton capable de l'arrêter n'existait
+    plus, `stopping` restait faux, et soixante grilles Diaboliques pouvaient
+    occuper le moteur plusieurs minutes — pendant lesquelles le « Générer » de la
+    partie, désactivé tant que le moteur ne répond pas, attendait son tour. Le
+    résultat, lui, était écrit dans une instance morte.
+  */
+  onDestroy(() => {
+    if (generating) stop();
+  });
 
   /**
    * Arrête la production, et **tout de suite**.
@@ -260,19 +309,31 @@
       détachent avant distribution.
     </p>
 
-    {#if generating}
-      <!--
-        Deux boutons distincts plutôt qu'un seul qui change de rôle : un libellé
-        qui devient « Arrêter » sous le doigt fait cliquer sur l'arrêt celui qui
-        visait la génération. Celui-ci porte aussi la progression, qui est donc
-        du texte — c'est ce qui permet à la barre de se dire décorative.
-      -->
-      <button type="button" class="primary" onclick={stop}>
-        Arrêter · {produced} / {asked.count}
-      </button>
-    {:else}
-      <button type="button" class="primary" onclick={generate}>Générer le cahier</button>
-    {/if}
+    <!--
+      **Un seul bouton**, dont le libellé et l'action changent — et non deux sous
+      un `{#if}`, qui paraissait plus clair et ne l'était pas.
+
+      Deux boutons échangés au même endroit sont détruits et recréés : le focus
+      clavier retombe sur `<body>`, deux fois par cahier. Quelqu'un qui navigue
+      au clavier perdrait sa place au moment précis où il vient d'agir, et devrait
+      retraverser la page pour atteindre « Arrêter ». Le même élément qui change
+      de texte garde son identité, donc le focus.
+
+      Il porte aussi la progression, qui est donc du texte — c'est ce qui permet à
+      la barre en dessous de se dire décorative.
+
+      ⚠ Un double-clic active donc l'arrêt juste après le lancement. C'est sans
+      conséquence **par construction** : un arrêt qui n'a rien tenté ne touche pas
+      à l'aperçu (voir `generate`). Sans cette garantie, un doigt trop rapide
+      effacerait un cahier de quarante grilles.
+    -->
+    <button
+      type="button"
+      class="primary"
+      onclick={() => (generating ? stop() : void generate())}
+    >
+      {#if generating}Arrêter · {produced} / {asked.count}{:else}Générer le cahier{/if}
+    </button>
 
     {#if generating}
       <!--
@@ -301,7 +362,7 @@
       exactement les personnes qui ne voient pas l'aperçu. L'annonceur global de
       `App.svelte` suit ce motif depuis toujours ; ce coin-ci l'avait manqué.
     -->
-    <p class="notice" role="status" aria-live="polite" class:empty={notice === ''}>{notice}</p>
+    <p class="notice" role="status" aria-live="polite" class:silent={notice === ''}>{notice}</p>
 
     {#if puzzles.length > 0}
       <button type="button" class="secondary" onclick={print}>
@@ -407,9 +468,14 @@
     Vide, elle reste dans le document — sans quoi elle ne serait pas annoncée —
     mais ne doit pas peindre une pastille grise sous les réglages. `display: none`
     la retirerait de l'arbre d'accessibilité, ce qui ramènerait le défaut ;
-    `padding: 0` et pas de fond suffisent, et elle n'occupe alors aucune hauteur.
+    `padding: 0` et pas de fond suffisent, et sa boîte est alors de hauteur nulle.
+    Elle consomme encore un `gap` de la colonne, ce qui se voit comme un peu d'air
+    de plus sous le bouton — le prix d'une région qui reste annonçable.
+
+    `silent` et non `empty` : `.empty` est déjà le texte d'accueil de l'aperçu,
+    et un sélecteur non scopé aurait attrapé les deux.
   */
-  .notice.empty {
+  .notice.silent {
     padding: 0;
     background: none;
   }

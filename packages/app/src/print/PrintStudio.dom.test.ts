@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateAtLevel } from '@sudoku/engine';
-import type { LeveledPuzzle } from '@sudoku/engine';
+import type { GenerateAtLevelOptions, LeveledPuzzle } from '@sudoku/engine';
 
 /**
  * Le studio du cahier de sudoku : arrêt, échec, et ce qu'il dit de lui-même.
@@ -40,12 +40,23 @@ const stop = vi.fn(() => {
   for (const request of held.splice(0)) request.reject(new Error('Production interrompue.'));
 });
 
+/**
+ * Ce qui a été **demandé** au moteur, et pas seulement ce qu'il a répondu.
+ *
+ * Une doublure qui ignore ses arguments laisse passer une classe entière de
+ * défauts : retirer `symmetry: 'rotational180'` de `makeOne` ferait sortir tous
+ * les cahiers en grilles asymétriques sans qu'un seul test bronche.
+ */
+const asks: GenerateAtLevelOptions[] = [];
+
 vi.mock('../lib/engineClient.js', () => ({
   engine: {
-    generateAtLevel: (): Promise<LeveledPuzzle | null> =>
-      new Promise<LeveledPuzzle | null>((resolve, reject) => {
+    generateAtLevel: (options: GenerateAtLevelOptions): Promise<LeveledPuzzle | null> => {
+      asks.push(options);
+      return new Promise<LeveledPuzzle | null>((resolve, reject) => {
         held.push({ resolve, reject });
-      }),
+      });
+    },
     stop,
   },
 }));
@@ -55,13 +66,23 @@ const { expectNoViolations } = await import('../test/axe.js');
 type Rendered = import('../test/render.js').Rendered;
 const PrintStudio = (await import('./PrintStudio.svelte')).default;
 
-/** Trois grilles réelles de niveau facile, produites une fois pour le fichier. */
+/**
+ * Trois grilles réelles de niveau facile, produites une fois pour le fichier.
+ *
+ * La boucle est **bornée**, et son échec est explicite : sans borne, un
+ * générateur qui rendrait `null` ferait pendre le fichier à l'import plutôt
+ * qu'échouer. Et le niveau obtenu est vérifié, parce que plusieurs assertions
+ * portent sur le texte exact « … de niveau Facile » : `generateAtLevel` peut
+ * rendre une approximation quand son budget s'épuise, et le relever ici donne un
+ * message clair au lieu d'une comparaison de chaînes incompréhensible.
+ */
 const REAL: LeveledPuzzle[] = (() => {
   const out: LeveledPuzzle[] = [];
-  for (let index = 0; out.length < 3; index++) {
+  for (let index = 0; out.length < 3 && index < 40; index++) {
     const made = generateAtLevel({ level: 'facile', seed: `studio-${String(index)}` });
-    if (made !== null) out.push(made);
+    if (made !== null && made.rating.level === 'facile') out.push(made);
   }
+  if (out.length < 3) throw new Error(`Seulement ${String(out.length)} grilles faciles en 40 essais.`);
   return out;
 })();
 
@@ -69,6 +90,7 @@ let view: Rendered | null = null;
 
 beforeEach(() => {
   held.length = 0;
+  asks.length = 0;
   stop.mockClear();
 });
 
@@ -205,32 +227,131 @@ describe('le studio du cahier de sudoku', () => {
     expect(button('Générer le cahier')).toBeInstanceOf(HTMLButtonElement);
   });
 
-  it('dit quand le moteur échoue, et n’affiche pas un cahier qui n’est plus là', async () => {
+  it('remplace l’aperçu par ce qui a vraiment été produit quand le moteur casse', async () => {
+    /*
+      Le défaut d'origine : l'exception remontait sans un mot et l'aperçu gardait
+      son contenu précédent. On montrait alors un cahier dont on ne parlait pas —
+      et c'est celui-là qui serait sorti de l'imprimante.
+    */
     view = render(PrintStudio, {});
+    set('select', 'facile', 'change');
     set('input[type="number"]', '2', 'input');
 
-    // Un premier cahier, bien produit.
+    // Un premier cahier de deux grilles, bien produit.
     button('Générer le cahier').click();
     await settle();
     await answer(REAL[0] ?? null);
     await answer(REAL[1] ?? null);
-    const before = sheets();
-    expect(before).toBeGreaterThan(0);
+    const deux = sheets();
+    expect(deux).toBeGreaterThan(0);
 
-    // Un second qui casse d'entrée.
+    // Un second qui casse après une seule grille.
+    set('input[type="number"]', '3', 'input');
     button('Générer le cahier').click();
     await settle();
-    const request = held.shift();
-    request?.reject(new Error('le travailleur est mort'));
+    await answer(REAL[2] ?? null);
+    held.shift()?.reject(new Error('le travailleur est mort'));
     await settle();
 
     expect(notice()).toContain('Le moteur a échoué : le travailleur est mort');
+    expect(notice()).toContain('1 grille(s) de niveau Facile.');
+    // Une seule grille au cahier, donc strictement moins de feuilles qu'avant.
+    expect(sheets()).toBeGreaterThan(0);
+    expect(sheets()).toBeLessThan(deux);
+  });
+
+  it('ne jette rien quand la boucle n’a pas fait un tour', async () => {
     /*
-      L'aperçu suit le message. Garder les feuilles du cahier précédent en
-      annonçant un échec était le défaut : on montrait un cahier dont on ne
-      parlait pas, et c'est celui-là qui serait sorti de l'imprimante.
+      Un échec — ou un arrêt — avant la première tentative n'a **rien** à dire du
+      cahier en place. L'effacer serait doublement mauvais : on perdrait un cahier
+      produit, et c'est la porte par laquelle un double-clic sur « Générer »
+      passerait, puisque le second clic tombe sur « Arrêter ».
     */
-    expect(sheets()).toBe(0);
+    view = render(PrintStudio, {});
+    set('select', 'facile', 'change');
+    set('input[type="number"]', '2', 'input');
+    button('Générer le cahier').click();
+    await settle();
+    await answer(REAL[0] ?? null);
+    await answer(REAL[1] ?? null);
+    const avant = sheets();
+
+    button('Générer le cahier').click();
+    await settle();
+    held.shift()?.reject(new Error('mort-né'));
+    await settle();
+
+    expect(sheets()).toBe(avant);
+    expect(notice()).toContain('Le moteur a échoué : mort-né');
+    expect(notice()).toContain('Le cahier précédent est conservé.');
+  });
+
+  it('survit à un double-clic sur « Générer », qui tombe sur « Arrêter »', async () => {
+    /*
+      Les deux libellés occupent le **même** bouton : le second clic d'un
+      double-clic active donc l'arrêt. Il doit être sans conséquence — sinon un
+      doigt trop rapide effacerait un cahier de quarante grilles.
+    */
+    view = render(PrintStudio, {});
+    set('select', 'facile', 'change');
+    set('input[type="number"]', '2', 'input');
+    button('Générer le cahier').click();
+    await settle();
+    await answer(REAL[0] ?? null);
+    await answer(REAL[1] ?? null);
+    const avant = sheets();
+    expect(avant).toBeGreaterThan(0);
+
+    set('input[type="number"]', '40', 'input');
+    button('Générer le cahier').click();
+    await settle();
+    button('Arrêter').click();
+    await settle();
+
+    expect(stop).toHaveBeenCalledTimes(1);
+    expect(sheets()).toBe(avant);
+    expect(notice()).toContain('Le cahier précédent est conservé.');
+    expect(notice()).not.toContain('échoué');
+  });
+
+  it('demande bien au moteur ce que le cahier promet', async () => {
+    view = render(PrintStudio, {});
+    set('select', 'expert', 'change');
+    set('input[type="number"]', '2', 'input');
+    button('Générer le cahier').click();
+    await settle();
+    await answer(REAL[0] ?? null);
+
+    /*
+      La symétrie n'apparaît nulle part à l'écran : seul ce contrôle la tient. Le
+      niveau aussi passe par ici — le test des réglages figés prouve que le
+      **bandeau** lit la copie, celui-ci que la **fabrique** la lit aussi.
+    */
+    expect(asks).toHaveLength(2);
+    for (const ask of asks) {
+      expect(ask.symmetry).toBe('rotational180');
+      expect(ask.level).toBe('expert');
+    }
+  });
+
+  it('garde le focus clavier en passant de « Générer » à « Arrêter »', async () => {
+    /*
+      Deux boutons échangés sous un `{#if}` sont détruits et recréés : le focus
+      retombe sur `<body>`, et quelqu'un qui navigue au clavier devrait
+      retraverser la page pour atteindre l'arrêt qu'il vient de rendre possible.
+      Un seul bouton qui change de texte garde son identité.
+    */
+    view = render(PrintStudio, {});
+    set('input[type="number"]', '3', 'input');
+    const lancer = button('Générer le cahier');
+    lancer.focus();
+    expect(document.activeElement).toBe(lancer);
+
+    lancer.click();
+    await settle();
+
+    expect(button('Arrêter')).toBe(lancer);
+    expect(document.activeElement).toBe(lancer);
   });
 
   it('compte les grilles qui n’ont pas atteint le niveau demandé', async () => {

@@ -100,7 +100,7 @@
       /*
         Sans ce `catch`, un moteur en panne laissait « Génération… » à l'écran
         pour toujours et produisait un rejet non traité. Un arrêt volontaire, lui,
-        n'arrive pas jusqu'ici : `game.newPuzzle` le distingue et se taît.
+        n'arrive pas jusqu'ici : `game.newPuzzle` le distingue et se tait.
       */
       announcement = 'Le moteur n’a pas répondu. La grille en cours est conservée.';
       return;

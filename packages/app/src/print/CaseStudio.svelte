@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { encodeCase } from '@sudoku/engine/investigation';
   import type { CaseFile } from '@sudoku/engine/investigation';
   import CaseSheet from './CaseSheet.svelte';
@@ -49,19 +50,21 @@
    * à moitié. À rouvrir le jour où quelqu'un imprimera vraiment quarante
    * affaires.
    *
-   * ─── Ce que ce studio fait et que celui du sudoku ne fait pas ───────────────
+   * ─── L'arrêt, et pourquoi il n'est pas le même qu'en face ───────────────────
    *
-   * Il **s'annule** et il **dit quand il échoue**. Le studio du sudoku n'a ni
-   * l'un ni l'autre : une génération lancée va jusqu'au bout, et si le moteur
-   * rejette, l'exception remonte sans message — l'aperçu garde silencieusement
-   * son contenu précédent. Les deux manques sont repris ici parce qu'ils sont
-   * bon marché, pas parce que l'enquête serait plus fragile.
+   * Ce studio s'annule et dit quand il échoue depuis l'incrément 18 ; le studio
+   * du sudoku a reçu les deux à l'incrément 20, et la boucle est désormais
+   * partagée (`batch.ts`). Le **mécanisme** d'arrêt, lui, diffère, et c'est
+   * mesuré plutôt que choisi.
    *
-   * L'annulation est un **drapeau coopératif** relu entre deux affaires, et non
-   * un signal transféré au travailleur : `postMessage` d'un `AbortSignal` reste
-   * une proposition ouverte du WHATWG, sans implémenteur. Composer une affaire
-   * tient en 19 ms au médian, donc l'attente entre le clic et l'arrêt est celle
-   * d'une seule affaire.
+   * Ici, un **drapeau coopératif** relu entre deux affaires suffit : composer une
+   * affaire tient en 19 ms à la médiane et 129 ms au pire, donc l'attente entre
+   * le clic et l'arrêt est celle d'une seule affaire — imperceptible. En face,
+   * une grille peut demander les huit secondes du budget du générateur, et il
+   * faut tuer le worker. Le détail est dans `engineClient.ts`.
+   *
+   * Ce n'est pas un signal transféré au travailleur : `postMessage` d'un
+   * `AbortSignal` reste une proposition ouverte du WHATWG, sans implémenteur.
    */
   const MAX_CASES = 40;
 
@@ -98,6 +101,13 @@
 
   const codeOf = (file: CaseFile): string => encodeCase(file);
 
+  // Fermer le cahier arrête la composition : le seul bouton capable de l'arrêter
+  // disparaît avec lui. Voir `PrintStudio.svelte`, où le même oubli laissait le
+  // moteur occupé plusieurs minutes.
+  onDestroy(() => {
+    if (generating) cancelling = true;
+  });
+
   /**
    * Compose un cahier, une affaire à la fois, et rend la main si on l'arrête.
    *
@@ -108,8 +118,8 @@
    * arrêt ne se lit plus comme une panne.
    *
    * ⚠ L'arrêt reste le **drapeau seul**, sans tuer le worker, et c'est mesuré et
-   * non négligé : composer une affaire tient en 19 ms à la médiane et 470 ms au
-   * pire, donc l'attente entre le clic et l'arrêt est déjà imperceptible. Le
+   * non négligé : composer une affaire tient en 19 ms à la médiane et 129 ms au
+   * pire (`scripts/investigation.perf.ts`, incrément 19), donc l'attente entre le clic et l'arrêt est déjà imperceptible. Le
    * cahier de sudoku, lui, tue — une grille peut y demander les huit secondes du
    * budget du générateur. Le mécanisme suit le coût de l'unité produite.
    */
@@ -121,30 +131,50 @@
     const stamp = Date.now();
     // Figé au lancement : le champ reste utilisable pendant la composition, mais
     // le baisser en route afficherait « 6 / 5 » et fausserait la barre.
-    asked = count;
+    asked = Math.max(1, Math.trunc(count || 1));
 
-    const result = await runBatch<CaseFile>({
-      count: asked,
+    try {
+      const result = await runBatch<CaseFile>({
+        count: asked,
       /*
         Une graine lisible et distincte par affaire : elle se retrouve dans un
         rapport de bug, là où un entier de trente-deux bits ne se recopie pas.
         Elle ne sert qu'à cela — ce qui identifie une affaire est son code.
       */
-      make: (index) => engine.composeCase(`cahier-${String(stamp)}-${String(index)}`),
-      stopped: () => cancelling,
-      onAttempt: (attempted) => (produced = attempted),
-    });
+        make: (index) => engine.composeCase(`cahier-${String(stamp)}-${String(index)}`),
+        stopped: () => cancelling,
+        onAttempt: (attempted) => (produced = attempted),
+      });
 
-    composed = [...result.items];
-    const missed = result.attempted - result.items.length;
-    notice =
-      (result.stopped ? `Arrêté après ${String(result.attempted)} affaire(s). ` : '') +
-      (result.failure === null ? '' : `Le moteur a échoué : ${result.failure} `) +
-      `${String(result.items.length)} affaire(s) au cahier` +
-      (missed > 0 ? `, ${String(missed)} que la fabrique n’a pas rendue(s).` : '.');
+      /*
+        L'aperçu suit le message. Deux réserves, et elles se tiennent :
 
-    generating = false;
-    cancelling = false;
+        **Rien de tenté ne touche à rien.** Une boucle qui n'a pas fait un tour
+        n'a rien à dire du cahier en place ; cela rend aussi un double-clic
+        inoffensif.
+
+        **Un lot vide n'efface pas non plus.** `cases` retombe sur l'affaire en
+        cours quand `composed` est vide, donc écraser ici afficherait « 0 affaire
+        au cahier » à côté d'une feuille bien visible que « Imprimer » sortirait —
+        le bandeau contredirait l'écran.
+      */
+      if (result.items.length > 0) composed = [...result.items];
+
+      const missed = result.attempted - result.items.length;
+      const prefix =
+        (result.stopped ? `Arrêté après ${String(result.attempted)} affaire(s). ` : '') +
+        (result.failure === null ? '' : `Le moteur a échoué : ${result.failure} `);
+      notice =
+        result.items.length === 0
+          ? `${prefix}Aucune affaire produite ; le cahier reste inchangé.`
+          : `${prefix}${String(result.items.length)} affaire(s) au cahier` +
+            (missed > 0 ? `, ${String(missed)} que la fabrique n’a pas rendue(s).` : '.');
+    } finally {
+      // Voir `PrintStudio.svelte` : rien d'atteignable ne jette ici, mais un
+      // studio bloqué sur « Arrêter » serait une panne pénible à diagnostiquer.
+      generating = false;
+      cancelling = false;
+    }
   }
 
   /*

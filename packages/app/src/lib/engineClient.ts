@@ -59,9 +59,30 @@ class EngineClient {
     });
 
     worker.addEventListener('error', (event) => {
+      /*
+        ⚠ Deux corrections que l'arrivée de `stop()` a rendues nécessaires.
+
+        **L'écouteur est borné à *son* worker.** Tant qu'il n'y en avait qu'un
+        pour la vie de la page, la question ne se posait pas. Depuis qu'on en tue
+        et qu'on en refait, une erreur émise par un worker abandonné rejetterait
+        les requêtes de son successeur — un message de panne pour un incident qui
+        ne concerne plus personne. Le compteur d'identifiants protège déjà le
+        chemin des réponses ; celui-ci n'avait pas d'équivalent.
+
+        **Et le worker est relâché.** Sans cela, `#ensureWorker` continuait de
+        rendre un worker mort : les `postMessage` partaient dans le vide, les
+        promesses ne se réglaient jamais, et une partie restait bloquée sur
+        « Génération… » jusqu'au rechargement de la page. C'est un défaut
+        antérieur, devenu visible parce que l'écran promet désormais que « la
+        grille en cours est conservée » — donc qu'un nouvel essai est possible.
+      */
+      if (this.#worker !== worker) return;
+      this.#worker = null;
+
       const failure = new Error(`Le moteur a échoué : ${event.message}`);
-      for (const pending of this.#pending.values()) pending.reject(failure);
+      const abandoned = [...this.#pending.values()];
       this.#pending.clear();
+      for (const pending of abandoned) pending.reject(failure);
     });
 
     this.#worker = worker;

@@ -4,9 +4,10 @@
 
 Le dernier point ouvert de l'incrément 19 : **le studio du cahier de sudoku n'avait ni annulation,
 ni message d'échec, ni aucun test**, là où celui de l'enquête avait les trois. Les trois sont
-livrés. En chemin, trois défauts se sont montrés — un défaut d'accessibilité dans le bandeau même
-qui devait porter le message d'échec, un rejet non traité dans le chemin de partie, et un aperçu
-qui mentait après un échec, celui-là dans le studio de l'enquête.
+livrés. En chemin, six défauts se sont montrés — un défaut d'accessibilité dans le bandeau même qui
+devait porter le message d'échec, un rejet non traité dans le chemin de partie, un aperçu qui
+mentait après un échec dans le studio de l'enquête, et trois autres qu'une relecture adverse a
+trouvés dans ce que je venais d'écrire (§6).
 
 ---
 
@@ -23,7 +24,7 @@ Le mécanisme suit donc le coût de l'unité produite, et non le goût :
 
 | | une unité coûte | mécanisme |
 |---|---|---|
-| cahier d'enquêtes | 19 ms médian, 470 ms au pire | drapeau seul |
+| cahier d'enquêtes | 19 ms médian, 129 ms au pire | drapeau seul |
 | cahier de sudoku | jusqu'à 8 s (budget du générateur) | on tue le worker |
 
 Mesuré, et c'est ce qui rend le pire cas trompeur : les **mêmes graines** prennent 217 ms à la
@@ -115,12 +116,16 @@ La région est désormais permanente, avec `aria-live="polite"`, et vide elle ne
 `padding: 0` et pas de fond, **hauteur relevée à 0 px**. Pas `display: none`, qui la retirerait de
 l'arbre d'accessibilité et ramènerait le défaut.
 
-L'aperçu suit maintenant le message, y compris quand il n'y a plus rien à montrer. Montrer les
-feuilles du cahier précédent en annonçant un échec était le défaut : on affichait un cahier dont on
-ne parlait pas, **et c'est celui-là qui serait sorti de l'imprimante**. Le prix assumé : un arrêt
-avant la première grille efface le cahier précédent. Un message qui contredit l'écran est pire.
+L'aperçu suit maintenant le message. Montrer les feuilles du cahier précédent en annonçant un échec
+était le défaut : on affichait un cahier dont on ne parlait pas, **et c'est celui-là qui serait
+sorti de l'imprimante**.
 
-Le bandeau dit maintenant quatre choses, et se taît sur aucune : le compte atteint, les grilles qui
+Avec une réserve, qui n'était pas dans la première version et que la relecture a imposée : **une
+boucle qui n'a pas fait un tour ne touche à rien.** Elle n'a rien à dire du cahier en place, donc
+elle le laisse et l'annonce — « Le cahier précédent est conservé. » C'est la bonne réponse en soi,
+et c'est aussi ce qui rend inoffensif le défaut décrit au §6.
+
+Le bandeau dit maintenant quatre choses, et se tait sur aucune : le compte atteint, les grilles qui
 n'ont pas atteint le palier, un arrêt volontaire — **jamais présenté comme une panne** — et les
 tentatives qui n'ont rien donné. Ce dernier cas « ne devrait pas arriver », ce qui est précisément
 la raison de l'afficher s'il arrive.
@@ -163,24 +168,70 @@ plus comme une panne.
 
 ## 5. Les tests
 
-Vingt-six tests neufs, en trois fichiers, et **chacun prouvé mordant** en cassant volontairement le
-code qu'il surveille :
+Trente-trois tests neufs, en trois fichiers, et **chacun prouvé mordant** en cassant volontairement
+le code qu'il surveille :
 
 - `batch.test.ts` (8) — la boucle, dont une propriété `fast-check` sur 200 tirages. La propriété a
   d'abord été écrite avec une implication à sens unique (« si l'on s'est arrêté, alors… ») : elle
   passait sur une boucle qui **ignorait le drapeau**. Affirmée dans les deux sens, elle mord.
-- `engineClient.test.ts` (8) — l'arrêt, contre un travailleur de mensonge : le rejet reconnaissable,
-  le worker tué, la résurrection, et le compteur d'identifiants qui **ne repart pas de zéro** — la
-  vraie protection contre une réponse égarée.
-- `PrintStudio.dom.test.ts` (10) — le studio, avec une doublure qui **retient** les requêtes au lieu
+- `engineClient.test.ts` (10) — l'arrêt, contre un travailleur de mensonge : le rejet
+  reconnaissable, le worker tué, la résurrection, et le compteur d'identifiants qui **ne repart pas
+  de zéro** — la vraie protection contre une réponse égarée.
+- `PrintStudio.dom.test.ts` (15) — le studio, avec une doublure qui **retient** les requêtes au lieu
   de les simuler, ce qui rend observables l'instant où le bouton devient « Arrêter », le contenu du
-  bandeau dans les quatre situations, et le fait qu'un arrêt tue bien le moteur.
+  bandeau dans les quatre situations, et le fait qu'un arrêt tue bien le moteur. Elle **enregistre
+  aussi ce qu'on lui demande** : sans cela, retirer la symétrie du cahier laissait toute la suite
+  verte. Et quatre tests couvrent ce que la relecture a trouvé — le double-clic, le focus, la boucle
+  qui n'a rien tenté, les réglages figés.
 
 Aucune grille inventée : celles qui servent sortent du générateur.
 
 Ce que ces tests ne disent pas, et qui a donc été fait à la main dans un vrai navigateur : que
 `terminate()` interrompe un calcul, que l'arrêt soit rapide, que la région vide n'occupe aucune
 hauteur, et qu'une partie retrouve une grille après six morts du worker.
+
+---
+
+## 6. Ce qu'une relecture adverse a trouvé, et qui n'était pas rien
+
+La première version livrait deux **régressions** que ni les tests ni les relevés au navigateur
+n'avaient vues, parce que ni l'un ni l'autre ne cherchait là.
+
+**Un double-clic sur « Générer le cahier » détruisait un cahier fini.** L'ancien bouton portait
+`disabled={generating}`, qui avalait le second clic. Le remplacer par deux boutons échangés sous un
+`{#if}` a supprimé ce garde-fou : Svelte vide sa file de microtâches entre deux `click`, donc le
+second clic tombait sur le bouton « Arrêter » fraîchement créé, au même endroit et de la même
+taille. Quarante grilles produites, un doigt trop rapide, et l'aperçu se vidait.
+
+Le commentaire que j'avais écrit à cet endroit prétendait justement que deux boutons distincts
+évitaient ce piège. Ils ne l'évitent pas — ils le déplacent.
+
+**Et l'échange faisait perdre le focus clavier**, deux fois par cahier : détruire l'élément focalisé
+renvoie le focus sur `<body>`. Quelqu'un qui navigue au clavier se voyait écarté de la commande au
+moment précis où il venait de la rendre disponible.
+
+Les deux se corrigent ensemble : **un seul bouton** dont le libellé et l'action changent — l'identité
+de l'élément est préservée, donc le focus aussi — et un arrêt à vide qui ne touche pas à l'aperçu,
+ce qui rend le double-clic sans conséquence par construction.
+
+Trois autres défauts, dont deux antérieurs :
+
+- **Quitter l'onglet n'arrêtait pas la production.** La boucle continuait contre un composant
+  détruit, avec le seul bouton capable de l'arrêter disparu — jusqu'à soixante grilles Diaboliques,
+  pendant lesquelles le « Générer » de la partie attendait son tour. `onDestroy` arrête les deux
+  studios.
+- **L'écouteur d'erreur du client ne relâchait pas le worker** (antérieur) : `#ensureWorker` rendait
+  ensuite éternellement un worker mort, et une partie restait bloquée sur « Génération… » jusqu'au
+  rechargement. Cela comptait d'autant plus que l'écran promet désormais qu'« un nouvel essai est
+  possible ».
+- **Cet écouteur n'était pas borné à son worker** : depuis qu'on en tue et qu'on en refait, la
+  panne d'un worker abandonné rejetait les requêtes de son successeur.
+
+Et un nombre : **« 470 ms au pire » pour composer une affaire était faux.** Le banc du dépôt
+(`scripts/investigation.perf.ts`) donne 129 ms depuis la refonte de `carve` à l'incrément 19 ; 470
+venait d'un commentaire de `engine.worker.ts` daté d'avant, que j'ai recopié dans deux endroits
+neufs. La médiane, elle, était juste. Les trois occurrences sont corrigées — c'est exactement le
+genre de chiffre que ce projet refuse : il a l'air mesuré, et il ne l'est plus.
 
 ---
 
