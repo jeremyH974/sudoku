@@ -202,53 +202,54 @@ async function main() {
         : 'le pavé de chiffres n’a jamais été atteint',
     );
 
-    /* ── 2. Le nom et les dimensions du plateau ───────────────────────────── */
-    const surLePlateau = await dire('plateau', 'NVDA+Tab : que dit le plateau ?', () =>
-      nvda.press('Insert+Tab'),
-    );
-    const textePlateau = surLePlateau.join(' ');
+    /* ── 2. Ce que le lecteur dit de la case focalisée ───────────────────── */
+    /*
+      `NVDA+Tab` demande « où suis-je ? ». Après le `Maj+Tab` ci-dessus, la
+      réponse doit être **une case**, nommée par notre `aria-label`.
+
+      ⚠ Ne pas y chercher les dimensions du plateau : elles sont annoncées quand
+      on **entre** dans le conteneur, pas quand on rapporte une case. La première
+      version de ce script les exigeait ici et échouait sur une bonne réponse —
+      « ligne 1, colonne 1, vide, cell, focused ». L'assertion était fausse, pas
+      le produit.
+    */
+    const ici = await dire('ou', 'NVDA+Tab : où suis-je ?', () => nvda.press('Insert+Tab'));
+    const depart = EST_UNE_CASE.exec(ici.join(' '));
     exiger(
-      'les dimensions du plateau sont annoncées',
-      /9 lignes/i.test(textePlateau) && /9 colonnes/i.test(textePlateau),
-      `entendu : « ${textePlateau} »`,
+      'la case focalisée prononce son nom accessible',
+      depart !== null,
+      `entendu : « ${ici.join(' / ')} »`,
     );
 
-    /* ── 3. Mode formulaire, puis une case, puis les flèches ──────────────── */
-    console.log('\n── Mode formulaire, et le parcours aux flèches ──');
-    await dire('mode', 'NVDA+Espace (bascule)', () => nvda.press('Insert+Space'), 700);
-
-    let nomDeCase = '';
-    for (let i = 1; i <= 4 && nomDeCase === ''; i++) {
-      const dit = await dire(`case.${i}`, `Tab n°${i} (chercher une case)`, () => nvda.press('Tab'));
-      const trouve = dit.find((p) => EST_UNE_CASE.test(p));
-      if (trouve !== undefined) nomDeCase = trouve;
-    }
-    exiger(
-      'une case prononce son nom accessible',
-      EST_UNE_CASE.test(nomDeCase),
-      nomDeCase === '' ? 'aucune case ne s’est nommée' : `entendu : « ${nomDeCase} »`,
-    );
-
-    if (nomDeCase !== '') {
-      const depart = EST_UNE_CASE.exec(nomDeCase);
-      const apres = await dire('fleche', '→ flèche droite depuis la case', () =>
-        nvda.press('ArrowRight'),
-      );
-      const arrivee = EST_UNE_CASE.exec(apres.join(' '));
+    /* ── 3. Le parcours aux flèches, depuis cette case ────────────────────── */
+    if (depart !== null) {
       /*
-        L'assertion qui compte vraiment, et la seule que l'incrément 21 avait
-        laissée ouverte : **une flèche fait-elle annoncer la case voisine ?** Le
+        L'assertion qui compte, et la seule que l'incrément 21 avait laissée
+        ouverte : **une flèche fait-elle annoncer la case voisine ?** Le
         déplacement lui-même est vérifié côté application par les tests du
         plateau ; ce qui se vérifie ici est que le lecteur d'écran le **dit**.
       */
+      const droite = await dire('droite', '→ flèche droite', () => nvda.press('ArrowRight'));
+      const arrivee = EST_UNE_CASE.exec(droite.join(' '));
       exiger(
         'une flèche fait annoncer la case voisine',
-        arrivee !== null && arrivee[2] !== depart?.[2],
+        arrivee !== null && arrivee[2] !== depart[2] && arrivee[1] === depart[1],
         arrivee === null
-          ? `aucune case annoncée — entendu : « ${apres.join(' / ')} »`
-          : `toujours colonne ${String(arrivee[2])}`,
+          ? `aucune case annoncée — entendu : « ${droite.join(' / ')} »`
+          : `partie de ${depart[0]}, arrivée à ${arrivee[0]}`,
+      );
+
+      const bas = await dire('bas', '↓ flèche bas', () => nvda.press('ArrowDown'));
+      const dessous = EST_UNE_CASE.exec(bas.join(' '));
+      exiger(
+        'une flèche vers le bas change de ligne',
+        dessous !== null && dessous[1] !== depart[1],
+        dessous === null
+          ? `aucune case annoncée — entendu : « ${bas.join(' / ')} »`
+          : `toujours ligne ${dessous[1]}`,
       );
     }
+
   } catch (error) {
     const message = String(error?.message ?? error);
     console.error(`\nINTERROMPU : ${message}`);
