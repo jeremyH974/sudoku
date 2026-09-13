@@ -49,10 +49,10 @@ Ce ne sont pas des onglets d'une même application mais **trois entrées constru
 télécharge jamais le moteur d'Enquête, et l'accueil ne télécharge ni l'un ni l'autre. Un hébergeur
 statique sert cela sans aucune réécriture d'adresse.
 
-**La redondance de `/sudoku/sudoku/` est temporaire, et assumée.** Elle disparaît le jour où le
-site prend un nom de domaine — l'accueil passe à `/`, les sections à `/sudoku/` et `/enquete/`. Le
-choix inverse, un nom de section plus laid pour embellir une adresse provisoire, aurait été le
-mauvais arbitrage.
+**La redondance de `/sudoku/sudoku/` reste, et c'est désormais un choix tenu.** Elle devait
+disparaître avec un nom de domaine ; le domaine a été **écarté** (voir ci-dessous), donc elle
+reste. Le choix inverse — un nom de section plus laid pour embellir l'adresse — aurait été le
+mauvais arbitrage dans les deux cas.
 
 > ⚠ **La règle qui sauve les cahiers déjà imprimés.** Un QR code imprimé encode `…/sudoku/#g=…` —
 > l'adresse devenue celle de l'accueil, qui ne sait pas jouer une grille. L'accueil **renvoie donc
@@ -60,12 +60,35 @@ mauvais arbitrage.
 > Le même renvoi couvrira le déménagement vers un domaine, puisque GitHub redirige en conservant le
 > chemin et que le navigateur rattache le fragment.
 
-### Pourquoi un nom de domaine viendra
+### Le nom de domaine, écarté — et ce que cela engage
 
-GitHub Pages **ne redirige pas** l'adresse d'un site de projet quand le dépôt est renommé — c'est
-la seule chose que le renommage n'emporte pas. Le jour où ce dépôt cessera de s'appeler « sudoku »,
-tous les cahiers déjà imprimés cesseraient de s'ouvrir. Un nom de domaine est la prévention que
-GitHub documente lui-même : il rend l'adresse indépendante du nom du dépôt.
+Les incréments 11 et 12 tenaient un nom de domaine pour acquis. Il ne l'est plus : le site reste
+sur GitHub Pages, à son adresse actuelle. La décision a été prise en connaissance de son coût, et
+ce coût tient en une phrase.
+
+**GitHub Pages ne redirige pas l'adresse d'un site de projet quand le dépôt est renommé** — c'est
+la seule chose que le renommage n'emporte pas. Donc, tant qu'il n'y a pas de domaine :
+
+> ⚠ **Ce dépôt ne doit jamais être renommé.** Le jour où il cesserait de s'appeler « sudoku »,
+> tous les cahiers déjà imprimés cesseraient de s'ouvrir, sans recours et sans avertissement.
+
+Ce qu'une migration aurait coûté, mesuré avant d'être écarté, et qui vaut d'être écrit pour le
+jour où la question se reposera :
+
+- **changer de domaine change l'origine**, donc `localStorage` : l'historique, la progression, le
+  thème et le réglage de taille de chaque joueur restent sur l'ancienne adresse. Aucune API ne les
+  transfère ;
+- **le service worker déjà installé survit à la bascule et fige l'application.** La spécification
+  W3C impose au contrôle de mise à jour un `redirect mode: "error"` ; or l'ancienne adresse ne
+  répondrait plus qu'en 301. La vérification échouerait indéfiniment sans jamais désenregistrer
+  quoi que ce soit, et tout joueur ayant déjà ouvert le site garderait sa version **à vie**, sans
+  jamais voir la redirection. Le remède existe — un service worker fossoyeur (`selfDestroying`) —
+  mais il doit être déployé **avant** la bascule, puisque après, plus rien ne peut être servi à
+  l'ancienne adresse ;
+- **un `CNAME` n'aurait servi à rien.** Quand la publication passe par un artefact d'Actions, GitHub
+  l'ignore : le réglage vit dans la configuration Pages du dépôt, et nulle part ailleurs.
+
+Pour mémoire, `caseacase.fr` et `caseacase.com` étaient libres au RDAP le 13 septembre 2026.
 
 ## L'adresse publique
 
