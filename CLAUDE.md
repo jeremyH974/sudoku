@@ -108,14 +108,24 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   pas, en pratique, ce qu'on croyait lui devoir.
 
   C'est l'échec ARIA-AT *Convey role 'grid'* reproduit sur notre plateau, et **rien de notre côté ne
-  le rattraperait**. Le rôle est néanmoins **gardé**, et pour une raison mesurée : côté application
-  tout fonctionne — une flèche sur une case focalisée déplace le curseur **et** le focus, donc un
-  lecteur qui suit le focus annonce la nouvelle case, et NVDA le fait en mode formulaire. Ce qui
-  manque est en amont. Verdict : **le plateau est parcourable avec NVDA, au prix d'un `NVDA+Espace`
-  que rien n'annonce.** Ni cassé, ni bon ; et ce n'est pas un choix de rôle qui le changerait.
+  le rattraperait**. Le rôle est néanmoins **gardé**, et pour une raison mesurée.
 
-  ⚠ La validation a été **exécutée** le 13 septembre 2026 : relevé verbatim et harnais rejouable
-  dans `docs/lecteur-decran.md` et `scripts/lecteur-decran*.mjs`. Elle a confirmé que le nom de
+  **Verdict, corrigé à l'incrément 22 : le plateau est parcourable au clavier avec NVDA, flèches
+  comprises, sans aucun geste particulier.** Relevé par la machine, à chaque exécution du job
+  d'écoute : `→` répond « ligne 1, colonne 2, 7, indice de départ, row 1, column 2 », `↓` répond
+  « ligne 2, colonne 2 ». Le seul manque est l'annonce du rôle — « table » et non « grid » —, ce qui
+  prive de l'information, pas de la navigation.
+
+  ⚠ L'incrément 21 avait conclu qu'il fallait forcer le mode formulaire par `NVDA+Espace`. **C'était
+  faux**, et l'erreur mérite d'être connue : ses deux exécutions avaient focalisé le **conteneur**
+  de la grille, où les flèches ne produisent rien — ce qui est normal —, et j'en avais tiré une
+  conclusion sur le mode. Ne pas conclure d'un plateau ce qu'on a mesuré sur son conteneur.
+
+  ⚠ La validation est **exécutée par la machine** depuis l'incrément 22 :
+  `.github/workflows/lecteur-decran.yml`, un runner Windows, 1 min 38 s, à la demande et une fois
+  par semaine. Elle est **délibérément hors de `ci.yml`** : une mise en ligne ne doit pas dépendre
+  d'un lecteur d'écran tiers. Relevés verbatim et harnais dans `docs/lecteur-decran.md` et
+  `scripts/lecteur-decran.mjs`. Elle a confirmé que le nom de
   chaque case porte seul ce qu'il faut — « ligne 1, colonne 1, vide » est prononcé tel quel — et que
   le plateau ne consomme **qu'un** arrêt de tabulation sur vingt-six. Elle a aussi trouvé ce que le
   W3C annonçait, et une hypothèse du projet à corriger : voir le point sur `role="grid"` ci-dessus.

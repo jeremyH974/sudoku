@@ -241,9 +241,13 @@ arrive sur une page — tabuler sur une case n'annonce que « principale région
 dans l'autre (au retour, `Maj+Tab` annonce le conteneur : « Grille de sudoku, 9 lignes sur
 9 colonnes, tableau »). Et les flèches restent au curseur virtuel.
 
-**Donc : le plateau est parcourable avec NVDA, mais seulement après `NVDA+Espace`.** Ce n'est ni
-« cassé » ni « bon » : c'est utilisable au prix d'un geste que rien n'annonce, parce que le rôle
-n'est pas transmis comme une grille.
+**Donc : le plateau est parcourable avec NVDA, mais seulement après `NVDA+Espace`.**
+
+> ⚠ **Cette conclusion était fausse, et l'incrément 22 l'a corrigée.** Voir plus bas : les flèches
+> fonctionnent **sans** `NVDA+Espace`. Ce qui manquait à ces deux relevés n'était pas le mode, mais
+> le **focus sur une case** : il était sur le conteneur, où les flèches ne produisent rien. La
+> phrase est laissée telle quelle plutôt que réécrite — se relire est plus instructif que se
+> corriger en silence.
 
 ### Trois pièges de méthode, payés comptant
 
@@ -269,3 +273,75 @@ node scripts/lecteur-decran.mjs
 
 ⚠ NVDA ré-injecte les frappes dans la fenêtre au premier plan. Le script ouvre Chrome puis **attend
 un clic humain** : Windows interdit à un processus d'arrière-plan de mettre une fenêtre devant.
+
+---
+
+## Le relevé automatisé — 14 septembre 2026, sur machine d'intégration
+
+Depuis l'incrément 22, le protocole s'exécute **tout seul** : `.github/workflows/lecteur-decran.yml`,
+sur un runner Windows, à la demande et une fois par semaine. **1 min 38 s** au total, dont 34 s
+d'écoute. Le relevé est joint à chaque exécution.
+
+### Ce que la machine a entendu, mot pour mot
+
+```
+[tab.7] « Imprimer, button »
+[tab.8] « main landmark »                                        ← le plateau
+[tab.9] « Saisie des chiffres, grouping, Placer le 1, … »        ← on l'a dépassé
+[retour] Maj+Tab   « Grille de sudoku, 9 lignes sur 9 colonnes, table »
+[ou] NVDA+Tab      « ligne 1, colonne 1, vide, cell, focused »
+[droite] →         « ligne 1, colonne 2, 7, indice de départ, row 1, column 2 »
+[bas] ↓            « ligne 2, colonne 2, 2, indice de départ, row 2, column 2 »
+```
+
+(Les noms de rôles sont en anglais : le NVDA du runner l'est, là où celui de la machine de
+développement est en français. Nos propres libellés, eux, sont identiques des deux côtés.)
+
+### La correction
+
+**Les flèches font annoncer la case voisine, et aucun `NVDA+Espace` n'a été pressé.** Le relevé du
+13 septembre concluait l'inverse ; il se trompait, parce que ses deux exécutions avaient focalisé le
+**conteneur** de la grille et non une case. Sur le conteneur, les flèches ne produisent rien — ce
+qui est normal — et j'en avais tiré une conclusion sur le mode.
+
+Ce qui est donc établi, et vérifié à chaque exécution :
+
+| | |
+|---|---|
+| le plateau consomme **un** arrêt de tabulation | ✓ après huit autres, avant le pavé de chiffres |
+| la case focalisée prononce **notre** nom | « ligne 1, colonne 1, vide » |
+| `→` annonce la case voisine | change de colonne, garde la ligne |
+| `↓` annonce la case du dessous | change de ligne |
+
+**Le plateau est parcourable au clavier avec NVDA.** Ce qui reste vrai du relevé précédent : le
+conteneur est annoncé « table », jamais « grid ». C'est l'échec ARIA-AT, et il coûte moins cher
+qu'on ne le croyait — il prive l'utilisateur de l'annonce du rôle, pas de la navigation.
+
+### Pourquoi ce job n'est pas dans `ci.yml`
+
+`ci.yml` tourne en une minute sur Linux et **garde la publication**. Faire dépendre une mise en
+ligne d'un lecteur d'écran tiers serait accepter qu'une régression de NVDA bloque le site. Le job
+d'écoute est donc à part, sur `workflow_dispatch` et un rendez-vous hebdomadaire. Guidepup, lui,
+déclenche le sien sur chaque poussée ; ARIA-AT ne le déclenche qu'à la main. Nous sommes entre les
+deux, et c'est un choix, pas un défaut.
+
+### Deux choses que l'automatisation a apprises
+
+**Le clic humain n'était pas nécessaire.** Cinq clics ont été dépensés à l'incrément 21 parce que
+`AppActivate` et `SetForegroundWindow` rendent `True` sans rien faire — Windows interdit à un
+processus d'arrière-plan de voler le premier plan. La parade n'est pas de ruser avec l'OS : on
+**cycle les fenêtres avec `Alt+Échap`**, frappe injectée par NVDA, et l'on **vérifie par la parole**
+qu'on est arrivé. C'est ce que fait la fixture Playwright de guidepup, et cela marche aussi sur un
+poste de travail.
+
+**`@guidepup/setup` n'entre pas dans ce dépôt.** Il dépend de `@guidepup/record`, qui dépend de
+`ffmpeg-static` : quatre-vingts mégaoctets téléchargés à chaque installation, y compris sur la CI
+Linux qui n'a que faire d'un encodeur vidéo. Le workflow télécharge donc l'archive lui-même, et y
+gagne ce que l'outil ne montrait pas — **la somme de contrôle est vérifiée**, et elle vient du
+manifeste de guidepup, pas de nous.
+
+### Ce que cela ne remplace toujours pas
+
+Une CI verte dit que la parole **n'a pas régressé**. Elle ne dit pas que l'interface est utilisable :
+cela demande quelqu'un qui s'en serve pour de vrai. Les mainteneurs de `virtual-screen-reader`
+l'écrivent de leur propre outil, et c'est vrai du nôtre.

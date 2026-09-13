@@ -1021,6 +1021,12 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   moteur en panne — dont trois n'étaient atteignables par aucun test avant l'incrément 20.
 - **Les régions vivantes existent avant leur texte.** Un `role="status"` créé en même temps que son
   message n'est pas annoncé ; un test l'exige désormais là où le message porte un échec.
+- **Un vrai NVDA parcourt le plateau, et la machine le vérifie.** Un runner Windows lance le lecteur
+  d'écran sur le site construit et écoute : le plateau ne consomme qu'un arrêt de tabulation, la
+  case focalisée prononce son nom, et les flèches annoncent la case voisine. 1 min 38 s, à la
+  demande et une fois par semaine — **volontairement hors du portail de publication**, parce qu'une
+  mise en ligne ne doit pas dépendre d'un lecteur d'écran tiers. Ce que cela ne dit pas : qu'une
+  personne s'en serve confortablement. Cela demande une personne.
 
 > **Attention à la reproductibilité par graine.** Le PRNG est figé par des snapshots, mais cela ne
 > suffit pas : `generateAtLevel` dépend de `RATING_VERSION` *et* du temps réel écoulé sur la
