@@ -130,6 +130,21 @@ describe('le dossier imprimé', () => {
     expect(reopened.murderer).toBe(CASE.murderer);
   });
 
+  it('ne dépasse pas le nombre de témoignages pour lequel la feuille est dessinée', () => {
+    /*
+      Un DOM simulé ne calcule aucune mise en page : ce test ne peut pas vérifier
+      que tout tient sur la page. Il vérifie l'**hypothèse** sur laquelle la mise
+      en page a été dimensionnée, et c'est ce qui la rend tenable.
+
+      La fabrique plafonne chaque suspect à deux cartes, victime comprise : douze
+      témoignages au plus pour six personnes. La feuille réserve la place de ces
+      douze, mesurée dans un vrai navigateur à 108 mm de plan et 5 mm de marge
+      restante. Si ce plafond montait, la place réservée devrait monter avec lui —
+      et ce test le dirait.
+    */
+    expect(CASE.clues.length).toBeLessThanOrEqual(12);
+  });
+
   it('numérote ses pages quand le format le demande', () => {
     view = render(CaseSheet, { ...base, kind: 'solution' as const, pageNumber: 2 });
     expect(format.showPageNumbers).toBe(true);

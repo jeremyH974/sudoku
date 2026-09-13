@@ -90,7 +90,7 @@
     </p>
 
     <div class="plan-side">
-      <PrintableScene scene={puzzle.scene} millimetres={130} />
+      <PrintableScene scene={puzzle.scene} millimetres={108} />
       <p class="legend">
         {#each puzzle.suspects as suspect (suspect.index)}<span class="who"
             ><b>{suspect.letter}</b> {suspect.name}</span
@@ -160,11 +160,19 @@
   .brief {
     margin: 0 0 5mm;
     max-width: 160mm;
-    font-size: 3.4mm;
+    font-size: 3.7mm;
     line-height: 1.45;
     color: #333333;
   }
 
+  /*
+    108 mm, soit des cases de 18 mm — largement de quoi écrire une initiale à la
+    main. Ce n'est pas la plus grande taille possible : la place est **réservée**
+    pour le cas le plus chargé que la fabrique puisse produire, douze
+    témoignages, soit trois lignes de plus que l'affaire mesurée. Dimensionner
+    sur le cas moyen ferait déborder une affaire sur dix dans la marge, et
+    `overflow: hidden` la couperait en silence.
+  */
   .plan-side {
     display: flex;
     flex-direction: column;
@@ -178,7 +186,7 @@
     justify-content: center;
     gap: 1mm 5mm;
     margin: 3mm 0 0;
-    width: 130mm;
+    width: 108mm;
     font-size: 3.2mm;
   }
 
@@ -213,7 +221,22 @@
     */
     break-inside: avoid;
     page-break-inside: avoid;
-    font-size: 3.5mm;
+    /*
+      3,9 mm, soit environ 11 points.
+
+      ⚠ Ce dossier **n'est pas** un document en gros caractères, et il ne
+      prétend pas l'être. Les guides « clear print » du RNIB et du CNIB
+      recommandent l'équivalent de 14 points, que cette mise en page ne tient
+      pas — neuf témoignages, un plan de 130 mm et un code sur une seule feuille
+      ne le permettent pas. Le chemin accessible est l'écran, dont tout le texte
+      suit le réglage de taille ; le papier est un tirage de confort.
+
+      Aucun texte de la famille WCAG ne vise le papier : WCAG2ICT, republié le
+      11 décembre 2025, borne explicitement sa portée au contenu présenté par un
+      agent utilisateur. Le seuil de contraste, lui, est le même des deux côtés —
+      4,5:1 — et le noir sur blanc du papier le dépasse largement.
+    */
+    font-size: 3.9mm;
     line-height: 1.4;
   }
 
@@ -228,8 +251,8 @@
     display: flex;
     gap: 5mm;
     align-items: center;
-    margin-top: 8mm;
-    padding-top: 4mm;
+    margin-top: 6mm;
+    padding-top: 3mm;
     border-top: 0.3mm solid #999999;
   }
 

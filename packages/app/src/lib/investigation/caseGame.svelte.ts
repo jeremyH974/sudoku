@@ -12,6 +12,10 @@ import {
   type Suspect,
 } from '@sudoku/engine/investigation';
 import { engine } from '../engineClient.js';
+import { Stopwatch } from '../stopwatch.svelte.js';
+import { localDayKey } from '../day.js';
+import type { DayKey } from '../day.js';
+import type { CaseRecord } from './records.js';
 import type { CaseSnapshot, RestoredCase } from './storage.js';
 
 /**
@@ -68,6 +72,35 @@ export class CaseGame {
   announcement = $state('');
 
   #history: { occupant: number[]; pencil: number[]; crossed: boolean[] }[] = [];
+
+  /**
+   * Le chronomètre de la partie.
+   *
+   * Le même que celui du sudoku, et pour ses deux qualités : il accumule des
+   * segments au lieu de soustraire deux instants — donc une partie reprise le
+   * lendemain ne dure pas quatorze heures —, et il **refuse** de rendre une
+   * durée dont il doute. Un onglet resté ouvert pendant le déjeuner donne
+   * `null`, jamais une durée inventée.
+   */
+  readonly clock = new Stopwatch();
+
+  /** Jour civil où la partie a commencé. C'est lui que la série compte. */
+  startedOn: DayKey = localDayKey();
+
+  /** Le jour dont c'est l'affaire, ou `null` pour une affaire libre. */
+  daily = $state<DayKey | null>(null);
+
+  /** Combien de fois le joueur a demandé à en savoir plus. Observable. */
+  hintsShown = $state(0);
+
+  /**
+   * Appelé **une seule fois** quand l'affaire est résolue.
+   *
+   * Le verrou est ici et non chez l'appelant : rouvrir le même dossier ou
+   * revalider deux fois ne doit pas compter deux parties.
+   */
+  onSolved: ((record: CaseRecord) => void) | null = null;
+  #recorded = false;
 
   /** Le nombre de cases du plateau, ou 0 avant chargement. */
   get cellCount(): number {
@@ -162,6 +195,12 @@ export class CaseGame {
     this.verdict = null;
     this.hintTier = 0;
     this.#history = [];
+    this.hintsShown = 0;
+    this.startedOn = localDayKey();
+    this.daily = null;
+    this.#recorded = false;
+    this.clock.reset();
+    this.clock.start();
     this.announcement = `${puzzle.scene.title} : ${String(puzzle.suspects.length)} suspects à placer.`;
   }
 
@@ -187,6 +226,10 @@ export class CaseGame {
       cursor: this.cursor,
       tool: this.tool,
       hintTier: this.hintTier,
+      elapsedMs: this.clock.currentMs(),
+      startedOn: this.startedOn,
+      daily: this.daily,
+      hintsShown: this.hintsShown,
     };
   }
 
@@ -207,6 +250,16 @@ export class CaseGame {
     this.cursor = saved.snapshot.cursor;
     this.tool = saved.snapshot.tool;
     this.hintTier = saved.snapshot.hintTier;
+    this.hintsShown = saved.snapshot.hintsShown ?? 0;
+    this.startedOn = saved.snapshot.startedOn ?? localDayKey();
+    this.daily = saved.snapshot.daily ?? null;
+    /*
+      Le chronomètre repart du total rangé, jamais d'un horodatage : `elapsedMs`
+      est une somme de segments, et l'instant d'ouverture du segment en cours
+      n'a de sens que dans la session qui l'a produit.
+    */
+    this.clock.reset(saved.snapshot.elapsedMs ?? 0);
+    this.clock.start();
     this.announcement = `Partie reprise — ${this.puzzle?.scene.title ?? 'affaire'}.`;
   }
 
@@ -308,7 +361,41 @@ export class CaseGame {
     const murderer = murdererOf(puzzle.scene, at, file.victim);
     this.verdict = { kind: 'solved', murderer };
     this.announcement = `Affaire résolue. Le meurtrier est ${this.#name(murderer)}.`;
+
+    /*
+      Le chronomètre s'arrête ici, et la partie n'est comptée qu'une fois. On
+      valide volontiers deux fois de suite pour relire le verdict ; deux entrées
+      d'historique pour une seule enquête fausseraient tout ce qui s'en déduit.
+    */
+    if (!this.#recorded) {
+      this.#recorded = true;
+      this.clock.pause();
+      this.onSolved?.(this.toRecord());
+    }
     return this.verdict;
+  }
+
+  /**
+   * La partie terminée, sous la forme qui se range.
+   *
+   * `recordableMs()` rend `null` quand le chronomètre doute de lui-même — et
+   * c'est ce `null` qui voyage, jamais une durée rattrapée au jugé. La règle est
+   * celle du sudoku : une durée non mesurable n'est pas approximée.
+   */
+  toRecord(): CaseRecord {
+    const file = this.file;
+    if (file === null) throw new Error('aucune affaire à enregistrer');
+    return {
+      code: encodeCase(file),
+      finishedAt: Date.now(),
+      day: this.startedOn,
+      daily: this.daily,
+      durationMs: this.clock.recordableMs(),
+      hintsShown: this.hintsShown,
+      hardest: file.hardest,
+      stepCount: file.stepCount,
+      registryVersion: file.registryVersion,
+    };
   }
 
   /**
@@ -345,7 +432,12 @@ export class CaseGame {
   }
 
   revealMore(): void {
-    if (this.hintTier < 3) this.hintTier = (this.hintTier + 1) as HintTier;
+    if (this.hintTier < 3) {
+      this.hintTier = (this.hintTier + 1) as HintTier;
+      // On compte ce que le joueur a **demandé**, pas ce qu'il a lu : c'est le
+      // geste qui est observable, l'attention ne l'est pas.
+      this.hintsShown++;
+    }
   }
 
   hideHint(): void {

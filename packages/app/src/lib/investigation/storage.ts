@@ -29,9 +29,11 @@ import type { HintTier, Tool } from './caseGame.svelte.js';
  * plateau tel qu'on l'a laissé, pas le droit de défaire ce qu'on avait fait
  * avant de fermer l'onglet.
  *
- * **La durée.** L'enquête n'a pas de chronomètre branché. Ranger un champ que
- * rien n'alimente donnerait un nombre qui a l'air mesuré — exactement ce que
- * l'onglet Progression refuse de faire.
+ * La **durée**, elle, est rangée depuis l'incrément 18, parce qu'un chronomètre
+ * l'alimente enfin. Ce qui voyage est le total des segments, jamais l'instant
+ * d'ouverture du segment en cours : celui-là n'a de sens que dans la session qui
+ * l'a produit, et le persister ferait durer quatorze heures une partie reprise
+ * le lendemain.
  */
 
 const KEY = 'enquete.game';
@@ -58,6 +60,17 @@ export interface CaseSnapshot {
   readonly cursor: number;
   readonly tool: Tool;
   readonly hintTier: HintTier;
+  /*
+    Ajoutés à l'incrément 18 avec le chronomètre et l'historique. **Optionnels
+    et lus avec un défaut** : c'est ce qui évite d'incrémenter la version et de
+    jeter les parties en cours. Le schéma reste additif tant que le sens d'un
+    champ existant ne change pas.
+  */
+  /** Total des segments chronométrés. Jamais un horodatage — voir `Stopwatch`. */
+  readonly elapsedMs?: number;
+  readonly startedOn?: string;
+  readonly daily?: string | null;
+  readonly hintsShown?: number;
 }
 
 interface StoredCase extends CaseSnapshot {
@@ -132,6 +145,13 @@ export function loadCase(): RestoredCase | null {
       cursor: Math.min(Math.max(0, parsed.cursor), cells - 1),
       tool,
       hintTier: tier,
+      elapsedMs: typeof parsed.elapsedMs === 'number' ? parsed.elapsedMs : 0,
+      // La clef est **omise** plutôt que posée à `undefined` : sous
+      // `exactOptionalPropertyTypes`, les deux ne sont pas la même chose, et
+      // c'est à l'appelant de décider du jour d'une partie sans jour rangé.
+      ...(typeof parsed.startedOn === 'string' ? { startedOn: parsed.startedOn } : {}),
+      daily: typeof parsed.daily === 'string' ? parsed.daily : null,
+      hintsShown: typeof parsed.hintsShown === 'number' ? parsed.hintsShown : 0,
     },
   };
 }

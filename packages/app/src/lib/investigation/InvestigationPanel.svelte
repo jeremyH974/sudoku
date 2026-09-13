@@ -7,6 +7,9 @@
   import { loadCase, saveCase } from './storage.js';
   import { caseCodeFor, loadCaseCorpus, today } from './daily.js';
   import CaseDossier from '../../print/CaseDossier.svelte';
+  import CaseProgress from './CaseProgress.svelte';
+  import { appendRecord, loadRecords } from './records.js';
+  import type { CaseRecord } from './records.js';
 
   interface Props {
     /**
@@ -187,6 +190,9 @@
       return;
     }
     game.load(file);
+    // Marqué **après** le chargement, qui remet tout à zéro : sans cela la série
+    // ne compterait jamais un seul jour.
+    game.daily = day;
   }
 
   /*
@@ -195,6 +201,46 @@
     parties ne s'imprime jamais.
   */
   let printing = $state(false);
+
+  /*
+    L'historique, relu une fois puis tenu à jour en mémoire. Aucun compteur n'est
+    rangé : tout ce qui s'affiche se recalcule depuis ces parties, parce que deux
+    sources de vérité finissent toujours par se contredire.
+  */
+  let records = $state<CaseRecord[]>(loadRecords());
+
+  /*
+    Le rappel est posé dans un effet, et non à la construction : `game` est une
+    propriété, que les tests remplacent par une partie à eux. Le brancher une
+    fois pour toutes le laisserait attaché à la première.
+  */
+  $effect(() => {
+    game.onSolved = (record: CaseRecord): void => {
+      if (appendRecord(record)) records = loadRecords();
+    };
+    return () => {
+      game.onSolved = null;
+    };
+  });
+
+  /*
+    Le chronomètre suit la visibilité de l'onglet : il accumule des segments, et
+    une partie laissée ouverte en arrière-plan ne doit pas se voir compter le
+    temps qu'on a passé ailleurs. Au-delà de ses propres seuils, il rend `null`
+    plutôt qu'une durée inventée.
+  */
+  $effect(() => {
+    const onVisibility = (): void => {
+      if (document.visibilityState === 'hidden') game.clock.pause();
+      else if (game.file !== null && game.verdict?.kind !== 'solved') game.clock.start();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', () => game.clock.pause());
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      game.clock.pause();
+    };
+  });
 
   /** Copie le lien de l'affaire, et dit ce qui s'est passé. */
   async function share(): Promise<void> {
@@ -463,6 +509,8 @@
       </p>
     </section>
   {/if}
+
+  <CaseProgress {records} />
 
   {#if printing && game.file !== null}
     <CaseDossier

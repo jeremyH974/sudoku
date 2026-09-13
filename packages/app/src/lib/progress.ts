@@ -82,7 +82,19 @@ export function completedDays(records: readonly GameRecord[]): Set<DayKey> {
  * suite » : c'est lui qui porte tout le sens.
  */
 export function currentStreak(records: readonly GameRecord[], today: DayKey): number {
-  const days = completedDays(records);
+  return streakEndingAt(completedDays(records), today);
+}
+
+/**
+ * La même série, à partir d'un ensemble de jours.
+ *
+ * Séparée de `currentStreak` parce qu'Enquête tient son propre historique —
+ * ses parties n'ont ni niveau ni leçon, donc pas la forme d'un `GameRecord`.
+ * L'algorithme, lui, ne parle que de jours : le recopier là-bas serait recopier
+ * une subtilité (remonter depuis hier tant que le jour n'est pas fait) qui
+ * dériverait au premier changement.
+ */
+export function streakEndingAt(days: ReadonlySet<DayKey>, today: DayKey): number {
   let cursor = days.has(today) ? today : previousDay(today);
   let streak = 0;
   while (days.has(cursor)) {
@@ -94,7 +106,11 @@ export function currentStreak(records: readonly GameRecord[], today: DayKey): nu
 
 /** La plus longue série jamais tenue. */
 export function longestStreak(records: readonly GameRecord[]): number {
-  const days = completedDays(records);
+  return longestStreakOf(completedDays(records));
+}
+
+/** La plus longue série d'un ensemble de jours — voir `streakEndingAt`. */
+export function longestStreakOf(days: ReadonlySet<DayKey>): number {
   let best = 0;
   for (const day of days) {
     // On ne compte une série que depuis son premier jour, sinon on la

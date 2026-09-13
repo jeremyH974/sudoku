@@ -80,6 +80,14 @@
 
   <p class="note">
     Deux feuilles : le dossier, puis le corrigé. Détachez la seconde avant de donner la première.
+    <!--
+      L'avertissement d'échelle n'est pas de la coquetterie : le plan est coté en
+      millimètres, et « Ajuster à la page » le rétrécit silencieusement. Chrome
+      ne mémorise pas ce réglage d'une impression à l'autre, Firefox mémorise le
+      dernier — donc parfois le mauvais.
+    -->
+    Dans la boîte d’impression, gardez l’échelle à <strong>100 %</strong> : « ajuster à la page »
+    rétrécirait le plan, qui est coté pour qu’on écrive dedans.
   </p>
 
   <div
