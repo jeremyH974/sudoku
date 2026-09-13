@@ -1,5 +1,6 @@
 import {
   deduce,
+  encodeCase,
   holds,
   murdererOf,
   openCase,
@@ -11,6 +12,7 @@ import {
   type Suspect,
 } from '@sudoku/engine/investigation';
 import { engine } from '../engineClient.js';
+import type { CaseSnapshot, RestoredCase } from './storage.js';
 
 /**
  * L'outil actif sous le doigt.
@@ -161,6 +163,51 @@ export class CaseGame {
     this.hintTier = 0;
     this.#history = [];
     this.announcement = `${puzzle.scene.title} : ${String(puzzle.suspects.length)} suspects à placer.`;
+  }
+
+  /**
+   * L'état rangeable de la partie.
+   *
+   * L'affaire y voyage sous forme de **code**, jamais de graine : une graine ne
+   * reproduit pas la même affaire d'une version du registre à l'autre, et une
+   * partie reprise sur une autre affaire serait pire qu'une partie perdue.
+   *
+   * `storage.ts` dit ce qui n'est délibérément pas rangé — l'historique
+   * d'annulation, et une durée que rien ne mesure.
+   */
+  snapshot(): CaseSnapshot | null {
+    const file = this.file;
+    if (file === null) return null;
+    return {
+      code: encodeCase(file),
+      occupant: [...this.occupant],
+      pencil: [...this.pencil],
+      crossed: [...this.crossed],
+      suspect: this.suspect,
+      cursor: this.cursor,
+      tool: this.tool,
+      hintTier: this.hintTier,
+    };
+  }
+
+  /**
+   * Reprend une partie rangée.
+   *
+   * On recharge l'affaire d'abord — ce qui dimensionne le plateau — puis on
+   * repose ce que le joueur avait fait. `loadCase` a déjà vérifié que les trois
+   * tableaux ont la taille de ce décor ; sans quoi la partie n'aurait pas été
+   * rendue du tout.
+   */
+  restore(saved: RestoredCase): void {
+    this.load(saved.file);
+    this.occupant = [...saved.snapshot.occupant];
+    this.pencil = [...saved.snapshot.pencil];
+    this.crossed = [...saved.snapshot.crossed];
+    this.suspect = saved.snapshot.suspect;
+    this.cursor = saved.snapshot.cursor;
+    this.tool = saved.snapshot.tool;
+    this.hintTier = saved.snapshot.hintTier;
+    this.announcement = `Partie reprise — ${this.puzzle?.scene.title ?? 'affaire'}.`;
   }
 
   select(cell: number): void {

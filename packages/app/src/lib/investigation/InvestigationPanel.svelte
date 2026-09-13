@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { cellsOf } from '@sudoku/engine/investigation';
+  import { cellsOf, encodeCase, tryDecodeCase } from '@sudoku/engine/investigation';
   import type { Step } from '@sudoku/engine/investigation';
   import { CaseGame } from './caseGame.svelte.js';
   import Portrait from './Portrait.svelte';
   import SceneBoard from './SceneBoard.svelte';
+  import { loadCase, saveCase } from './storage.js';
 
   interface Props {
     /**
@@ -40,9 +41,126 @@
     void game.compose(seed);
   }
 
+  /**
+   * L'affaire portée par l'adresse, s'il y en a une.
+   *
+   * Dans le **fragment**, jamais dans la requête : un fragment n'est pas envoyé
+   * au serveur, donc l'affaire qu'on se partage n'apparaît dans aucun journal
+   * d'accès et ne traverse pas le réseau. C'est aussi ce que fait déjà le
+   * sudoku avec `#g=`.
+   */
+  function sharedCode(): string | null {
+    const match = /^#a=(.+)$/.exec(window.location.hash);
+    return match === null ? null : decodeURIComponent(match[1]);
+  }
+
+  /**
+   * Ce qu'on ouvre en arrivant, dans l'ordre.
+   *
+   * Un lien l'emporte sur une partie en cours : quelqu'un qui clique veut
+   * *cette* affaire-là. La partie rangée n'est pas effacée pour autant — elle
+   * sera simplement recouverte au premier geste, ce qui est le comportement du
+   * sudoku.
+   */
+  function start(): void {
+    const shared = sharedCode();
+    if (shared !== null) {
+      const file = tryDecodeCase(shared);
+      if (file !== null) {
+        game.load(file);
+        return;
+      }
+      // Dire qu'un lien est illisible vaut mieux que d'ouvrir autre chose en
+      // silence : le joueur croirait jouer l'affaire qu'on lui a envoyée.
+      game.announcement = 'Ce lien ne désigne aucune affaire lisible. En voici une nouvelle.';
+    }
+
+    const saved = loadCase();
+    if (saved !== null) {
+      game.restore(saved);
+      return;
+    }
+    newCase();
+  }
+
   $effect(() => {
-    if (game.file === null && !game.composing && !game.failed) newCase();
+    if (game.file === null && !game.composing && !game.failed) start();
   });
+
+  /*
+    Un lien ouvert dans un onglet **déjà ouvert** ne recharge rien : changer de
+    fragment est une navigation dans le même document, donc aucun composant ne
+    se remonte. Sans cette écoute, cliquer le lien d'un ami pendant qu'on joue
+    ne ferait rien du tout — et c'est précisément le geste qu'on vient d'ajouter.
+    Le sudoku a tranché le même cas de la même façon.
+  */
+  $effect(() => {
+    const onHashChange = (): void => {
+      const shared = sharedCode();
+      if (shared === null) return;
+      const file = tryDecodeCase(shared);
+      if (file === null) {
+        game.announcement = 'Ce lien ne désigne aucune affaire lisible.';
+        return;
+      }
+      game.load(file);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => {
+      window.removeEventListener('hashchange', onHashChange);
+    };
+  });
+
+  /*
+    La sauvegarde : amortie de 400 ms, puis forcée aux trois événements qui
+    annoncent une fin de session.
+
+    `beforeunload` n'y est pas, et c'est délibéré. Il ne se déclenche pas quand
+    un navigateur mobile est fermé depuis le gestionnaire d'applications — le
+    cas le plus fréquent —, et sa seule présence rend la page inéligible au
+    cache avant-arrière. `visibilitychange`, `pagehide` et `freeze` couvrent ce
+    qu'il prétendait couvrir, ce que le sudoku a déjà tranché.
+
+    L'instantané est calculé **dans** l'effet, et non dans la minuterie : le
+    lire est ce qui abonne l'effet aux trois tableaux du plateau, et cela fige
+    au passage ce qu'il faudra écrire si l'onglet disparaît.
+  */
+  $effect(() => {
+    const snapshot = game.snapshot();
+    if (snapshot === null) return;
+
+    const write = (): void => saveCase(snapshot);
+    const timer = setTimeout(write, 400);
+    const onHidden = (): void => {
+      if (document.visibilityState === 'hidden') write();
+    };
+    document.addEventListener('visibilitychange', onHidden);
+    window.addEventListener('pagehide', write);
+    window.addEventListener('freeze', write);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener('pagehide', write);
+      window.removeEventListener('freeze', write);
+    };
+  });
+
+  /** Copie le lien de l'affaire, et dit ce qui s'est passé. */
+  async function share(): Promise<void> {
+    const file = game.file;
+    if (file === null) return;
+    const link = `${window.location.origin}${window.location.pathname}#a=${encodeCase(file)}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      game.announcement = 'Lien de l’affaire copié.';
+    } catch {
+      // Le presse-papier se refuse hors contexte sûr, ou sans geste reconnu.
+      // On met alors le lien dans l'adresse : il reste copiable à la main.
+      window.location.hash = `a=${encodeCase(file)}`;
+      game.announcement = 'Le lien est dans la barre d’adresse : copiez-le.';
+    }
+  }
 
   // L'aide ne se calcule que quand elle est demandée : le registre déroule tout
   // le chemin, ce qui n'a pas à tourner à chaque frappe.
@@ -82,9 +200,14 @@
         </p>
       {/if}
     </div>
-    <button type="button" class="action" onclick={newCase} disabled={game.composing}>
-      {game.composing ? 'Composition…' : 'Nouvelle affaire'}
-    </button>
+    <div class="header-actions">
+      <button type="button" class="action" onclick={() => void share()} disabled={game.file === null}>
+        Partager
+      </button>
+      <button type="button" class="action" onclick={newCase} disabled={game.composing}>
+        {game.composing ? 'Composition…' : 'Nouvelle affaire'}
+      </button>
+    </div>
   </header>
 
   <p class="announce" role="status" aria-live="polite">{game.announcement}</p>
@@ -315,6 +438,17 @@
 
   .tools,
   .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /*
+    Les deux boutons de l'en-tête. Ils s'empilent au lieu de se comprimer :
+    « Nouvelle affaire » ne doit jamais devenir une cible plus petite que la
+    règle des 44 px parce qu'un second bouton est arrivé à côté.
+  */
+  .header-actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
