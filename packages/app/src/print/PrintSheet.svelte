@@ -41,7 +41,7 @@
 
       <table class="toc">
         <tbody>
-          {#each summarise(sheet.puzzles) as row (row.levelLabel)}
+          {#each summarise(sheet.puzzles, (item) => item.levelLabel) as row (row.levelLabel)}
             <tr>
               <td>{row.levelLabel}</td>
               <td class="num">{row.count}</td>

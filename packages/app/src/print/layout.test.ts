@@ -146,7 +146,7 @@ describe('presets', () => {
 
 describe('summarise', () => {
   it('compte les grilles par niveau', () => {
-    const rows = summarise(makePuzzles(6));
+    const rows = summarise(makePuzzles(6), (puzzle) => puzzle.levelLabel);
     expect(rows.reduce((total, row) => total + row.count, 0)).toBe(6);
   });
 });

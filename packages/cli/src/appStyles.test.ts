@@ -98,6 +98,7 @@ const PAPER = [
   // c'est l'aperçu à l'écran qui entoure les feuilles, donc une vue ordinaire,
   // tenue aux jetons comme les autres.
   'print/CaseSheet.svelte',
+  'print/CaseSummary.svelte',
   'print/PrintableScene.svelte',
 ];
 

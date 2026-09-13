@@ -27,16 +27,28 @@ export interface PrintablePuzzle {
 
 export type SheetKind = 'summary' | 'puzzles' | 'solutions';
 
-export interface Sheet {
+/**
+ * Une feuille, quelle que soit la charge utile qu'elle porte.
+ *
+ * Le paramètre de type est arrivé à l'incrément 19, quand un second cahier a eu
+ * besoin de la même pagination pour une charge toute différente — un dossier
+ * d'enquête plutôt qu'une grille. Le corps de `paginate` n'a pas bougé d'une
+ * ligne : il ne lisait **aucun** champ de ce qu'il répartit, seulement la
+ * longueur du tableau. La dépendance n'était que dans les signatures.
+ *
+ * Le défaut par commodité reste `PrintablePuzzle`, pour que le chemin du sudoku
+ * s'écrive comme avant.
+ */
+export interface Sheet<T = PrintablePuzzle> {
   readonly kind: SheetKind;
   /** Numéro de page imprimé, à partir de 1. */
   readonly pageNumber: number;
-  readonly puzzles: readonly PrintablePuzzle[];
+  readonly puzzles: readonly T[];
 }
 
-export interface Booklet {
+export interface Booklet<T = PrintablePuzzle> {
   readonly title: string;
-  readonly sheets: readonly Sheet[];
+  readonly sheets: readonly Sheet<T>[];
   readonly puzzleCount: number;
   /** Première page de corrigés, celle où détacher. */
   readonly firstSolutionPage: number | null;
@@ -61,12 +73,12 @@ const chunk = <T>(items: readonly T[], size: number): T[][] => {
  * l'ensemble et détache les dernières pages. Intercaler les corrigés les
  * rendrait visibles par transparence, et impossibles à retirer.
  */
-export function paginate(
-  puzzles: readonly PrintablePuzzle[],
+export function paginate<T>(
+  puzzles: readonly T[],
   format: PrintFormat,
   options: PaginateOptions,
-): Booklet {
-  const sheets: Sheet[] = [];
+): Booklet<T> {
+  const sheets: Sheet<T>[] = [];
   let pageNumber = 1;
 
   if (format.showSummary && puzzles.length > 0) {
@@ -96,13 +108,21 @@ export function paginate(
   };
 }
 
-/** Répartition des grilles par niveau, pour le sommaire. */
-export function summarise(
-  puzzles: readonly PrintablePuzzle[],
+/**
+ * Répartition pour le sommaire, par la clef qu'on lui donne.
+ *
+ * C'est la seule fonction de ce module qui lisait vraiment un champ de sa charge
+ * utile — le niveau d'une grille. Un cahier d'enquêtes n'a pas de niveau et
+ * compte ses décors : la clef devient donc un paramètre, et non une hypothèse.
+ */
+export function summarise<T>(
+  items: readonly T[],
+  keyOf: (item: T) => string,
 ): { readonly levelLabel: string; readonly count: number }[] {
   const counts = new Map<string, number>();
-  for (const puzzle of puzzles) {
-    counts.set(puzzle.levelLabel, (counts.get(puzzle.levelLabel) ?? 0) + 1);
+  for (const item of items) {
+    const key = keyOf(item);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return [...counts.entries()].map(([levelLabel, count]) => ({ levelLabel, count }));
 }

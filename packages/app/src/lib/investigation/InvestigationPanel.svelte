@@ -6,7 +6,7 @@
   import SceneBoard from './SceneBoard.svelte';
   import { loadCase, saveCase } from './storage.js';
   import { caseCodeFor, loadCaseCorpus, today } from './daily.js';
-  import CaseDossier from '../../print/CaseDossier.svelte';
+  import CaseStudio from '../../print/CaseStudio.svelte';
   import CaseProgress from './CaseProgress.svelte';
   import { appendRecord, loadRecords } from './records.js';
   import type { CaseRecord } from './records.js';
@@ -513,11 +513,7 @@
   <CaseProgress {records} />
 
   {#if printing && game.file !== null}
-    <CaseDossier
-      file={game.file}
-      code={encodeCase(game.file)}
-      onClose={() => (printing = false)}
-    />
+    <CaseStudio current={game.file} onClose={() => (printing = false)} />
   {/if}
 </section>
 
