@@ -152,6 +152,26 @@ ressenties, et ce sont elles qui ont dicté ce qui suit.
 | Localisation fragile — des avis rapportent des traductions qui rendent une affaire insoluble | Leur propre corpus laisse fuiter `Room 2`, `Salle 6`, `Pièce 4`, `Grotte (copie)` | **Un indice n'est pas du texte, c'est une contrainte typée** ; le français en est un rendu |
 | Plan **inopérable au clavier et invisible au lecteur d'écran** | Sur la page : **0** élément focalisable dans le plan, **0** rôle de grille, **0** région `aria-live`, **225 `<img>` sur 226 sans `alt`**, trois `<canvas>` sans rôle ni nom | Chaque case est un élément réel, focalisable, dont le nom énonce la pièce, le mobilier et l'occupant |
 
+### La partie est gardée, et l'affaire se partage
+
+Jusqu'à l'incrément 18, rafraîchir l'onglet perdait l'affaire en cours, sans un mot. C'est réparé,
+et la réparation a demandé la pièce qui manquait à **quatre** ouvertures à la fois : un **code
+d'affaire**, 27 à 36 caractères, plus court qu'un code de grille.
+
+Il porte trois choses — le décor, la victime, les indices — et **recalcule** tout le reste à la
+lecture : la solution, le coupable, la difficulté. La graine, elle, n'y est pas : `composeCase`
+branche sur le registre de déduction, donc une graine ne reproduit pas la même affaire d'une
+version à l'autre. Ce qui doit être identique pour tout le monde et pour toujours porte donc
+**l'affaire elle-même** — la même règle que le code imprimé sous une grille.
+
+Le lien de partage s'écrit `#a=<code>`, dans le **fragment** : un fragment n'est jamais envoyé au
+serveur, donc l'affaire qu'on s'échange n'apparaît dans aucun journal d'accès.
+
+Pas de somme de contrôle, et c'est mesuré plutôt que supposé : une affaire décodée doit avoir
+exactement une solution, ce qui est un contrôle bien plus fort qu'un caractère de garde. Sur
+20 000 corruptions de chaque sorte, **0 troncature** et 1 insertion se relisent encore — et la
+troncature est justement le risque qu'un lien partagé court.
+
 ### L'aide ne peut pas se désynchroniser
 
 Elle n'est pas rangée à côté de l'affaire : elle se **recalcule**, et depuis l'état du joueur. Le
@@ -799,7 +819,8 @@ Progression du taux d'accord exact sous 4,0, d'un incrément à l'autre :
 | Incrément 3 | 91,4 % | Calibration initiale, ordre des techniques corrigé |
 | Incrément 6 | 93,3 % | Liens forts et wings (4,0 à 4,4) |
 | Incrément 7 | 94,6 % | Variantes « Direct » restreintes au single caché |
-| **Incrément 9** | **97,8 %** | Le single débloqué doit être trouvé dans une boîte ou dans une maison du motif |
+| Incrément 9 | 97,8 % | Le single débloqué doit être trouvé dans une boîte ou dans une maison du motif |
+| **Incrément 18** | **99,5 %** | Les sous-ensembles nus cessaient de chercher dans une unité dès que les **membres possibles** n'étaient pas plus nombreux que le motif — alors que les cases éliminées sont précisément celles que ce filtre écarte |
 
 ### Le README s'était trompé de coupable
 
@@ -815,8 +836,26 @@ sous-évaluations. L'accord valait 73,5 % quand notre pic était une variante Di
 
 Le mécanisme se lit tout seul : une variante Direct **pose une valeur**. Se déclencher là où
 l'oracle ne le fait pas court-circuite une étape chère plus loin, donc abaisse le pic. Cela ne
-peut produire que des sous-évaluations. Le résidu honnête de vraie bifurcation était de **quatre
-grilles**, mixtes en signe.
+peut produire que des sous-évaluations.
+
+### Et le résidu n'était pas une bifurcation non plus
+
+Ce qui restait — sept grilles — a été mis au compte d'un « résidu honnête de bifurcation ». C'était
+encore une explication plausible qu'on n'avait pas testée, et elle était fausse.
+
+Une bifurcation se mesure. Le solveur n'a **qu'un seul degré de liberté** : parmi les trouvailles
+de la technique la moins chère applicable, laquelle jouer. On l'a randomisé, 3 000 chemins par
+grille. Sur **21 000 chemins, le score de l'oracle n'est jamais atteint**, et cinq grilles sur
+sept ne produisent qu'une seule valeur de pic, 3 000 fois sur 3 000.
+
+La cause était un défaut de détection : la recherche de sous-ensembles nus abandonnait une unité
+dès que les cases **candidates à être membres** n'étaient pas plus nombreuses que le motif — alors
+que les cases qu'un sous-ensemble nu élimine sont celles qui portent **plus** de candidats, donc
+exactement celles que ce filtre venait d'écarter. Aucun test ne pouvait le voir : la grille
+finissait résolue, par une technique plus chère, et le seul symptôme était une note trop haute.
+
+Rejoué hors échantillon sur 460 grilles neuves, les deux détections sur les **mêmes** grilles :
+408/414 (98,6 %, dont 4 sur-évaluations) contre **413/415 (99,5 %, zéro sur-évaluation)**.
 
 ### La règle, et le doute qu'elle méritait
 
@@ -851,14 +890,19 @@ minutes chacune. Ce n'est pas une perte mais un **accord** : sur les 335 grilles
 l'oracle ne rapporte lui non plus aucune « Direct Claiming », là où il en rapporte quatre
 « Direct Pointing » et trente « Direct Hidden Pair ».
 
-État courant, sur 335 grilles :
+État courant, sur 441 grilles produites sous une graine neuve :
 
 | Mesure | Valeur |
 |---|---|
-| Accord exact, toutes grilles | 321/330 — **97,3 %** |
-| Accord exact, score ≤ 4,0 | 310/317 — **97,8 %** |
+| Accord exact, toutes grilles | 431/436 — **98,9 %** |
+| Accord exact, score ≤ 4,0 | 413/415 — **99,5 %** |
 | Grilles refusées à tort | **0** |
-| Surévaluations | **2 sur 330**, de 0,4 point |
+| Surévaluations | **0** |
+
+Les cinq grilles hors de notre portée demandent trois **Forcing Chain** (7,1 à 7,2), un
+**Bidirectional Y-Cycle** (6,8) et un **WXYZ-Wing** (5,6). Pas un Unique Rectangle : sur ces
+441 grilles, l'oracle n'en rapporte **aucun** comme technique de pic, ce qui est la raison
+mesurée pour laquelle il est écarté plutôt que reporté.
 
 Le corpus ciblé change avec la notation, si bien que deux campagnes ne portent pas exactement sur
 les mêmes grilles. Comparaison faite **grille par grille sur les 291 communes** aux deux, pour
@@ -1016,19 +1060,34 @@ précédente. Le port fait partie de l'origine ; en changer, c'est repartir d'un
 
 Ce qui reste ouvert, par ordre de valeur :
 
-- **Les chemins qui bifurquent.** Quatre grilles sur 317, mixtes en signe. Ce n'était **pas** la
-  source dominante des écarts — l'incrément 9 l'a mesuré et le README disait le contraire. Ce qui
-  reste est peut-être irréductible sans lire les sources de l'oracle, ce que nous nous interdisons.
-- **Unique Rectangle** (4,5 et au-delà). Plus aucune grille du corpus n'est refusée à tort, donc la
-  motivation immédiate a disparu ; la famille reste absente, et elle est fondée sur l'unicité de la
-  solution plutôt que sur l'élimination directe.
-- **La paire revendiquée directe n'a pas d'exercice**, et n'en aura peut-être jamais : la produire
-  demanderait une grille que ni notre générateur ni l'oracle ne rencontrent.
+- **L'affaire du jour, le dossier imprimé et les statistiques d'Enquête.** Le code d'affaire
+  (incrément 18) débloque les trois. Les statistiques demandent en plus une conception : contre ce
+  que supposait le plan d'incrément 11, `GameRecord` est plus spécifique au sudoku qu'il n'y
+  paraît — son niveau et sa leçon viennent de `logic/`, et l'enquête a son propre `TechniqueId`.
+- **WXYZ-Wing, puis les chaînes**, si l'on veut étendre la portée. C'est ce que la mesure
+  désigne — et **pas** l'Unique Rectangle, écarté sur preuve : zéro occurrence comme pic sur
+  441 grilles, et une déduction qui conclurait d'une *promesse* sur la grille plutôt que de la
+  grille.
+- **La paire revendiquée directe et le quadruplet caché n'ont pas d'exercice.** Le second a perdu
+  le sien à l'incrément 18, et c'est une conséquence plutôt qu'un défaut : un registre plus complet
+  rend les techniques les plus chères moins souvent *nécessaires*. Même accord dans les deux cas —
+  sur les 441 grilles de la référence, l'oracle n'en rapporte aucun non plus.
 - **Le paysage sur téléphone** : la grille à gauche, le pavé à droite. C'est une troisième
   disposition ; la barre basse s'y dégrade en « il faut un peu défiler », pas en « cassé ».
 - **La validation au lecteur d'écran de `role="grid"`**, que `CLAUDE.md` exige avant de le
-  considérer comme acquis. axe ne peut pas la fournir, et une CI verte ne doit pas être prise
-  pour elle.
+  considérer comme acquis. axe ne peut pas la fournir, et une CI verte ne doit pas être prise pour
+  elle. L'incrément 18 a lu l'arbre d'accessibilité d'un vrai Chromium — ce que jsdom ne calcule
+  jamais — et en a tiré une correction : `aria-selected` est retiré des deux plateaux, parce qu'il
+  décrivait une sélection qui n'existe pas et posait « non sélectionné » sur 35 cases sur 36. Mais
+  **rien n'a été entendu** : un arbre d'accessibilité dit ce qu'un lecteur d'écran a à sa
+  disposition, jamais ce qu'il annonce.
+- **Le rejet tardif de `carve`.** QuickXplain est fermé par le calcul — dans notre régime de
+  densité, la dichotomie est *plus mauvaise* que le parcours linéaire (Junker, AAAI 2004,
+  table 4) — et connaître la solution n'offre aucun raccourci de complexité (Yato & Seta, 2003 :
+  le problème est NP-complet). La seule piste vivante est constructive : carver contre `deduce`
+  plutôt que contre le comptage, ce qui rendrait l'unicité gratuite. `deduce` coûte 1,19 × un
+  `solveExact` plafonné, donc l'échange est plausible — mais il **changerait les affaires
+  produites**, ce qui n'est pas un arbitrage de vitesse.
 
 ### Le rating Glicko2 est écarté, et ce n'est plus un report
 

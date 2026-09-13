@@ -144,9 +144,19 @@ Le niveau affiché vient donc du solveur logique, et de lui seul. Trois conséqu
 - une grille que le registre ne sait pas résoudre ne reçoit **aucun** niveau ;
 - quand la génération n'atteint pas le palier demandé, l'application le **dit** et propose la
   grille la plus proche, au lieu de l'étiqueter au jugé ;
-- la notation est calibrée contre l'oracle (**97,8 % d'accord exact sous 4,0**, incrément 9,
-  **validé hors échantillon**), mais **pas parfaite** : il manque encore l'Unique Rectangle et les
-  variantes groupées au-delà de 4,3, et quatre grilles sur 317 viennent de chemins qui bifurquent.
+- la notation est calibrée contre l'oracle (**99,5 % d'accord exact sous 4,0**, incrément 18,
+  **validé hors échantillon**), mais **pas parfaite** : il manque les variantes groupées au-delà
+  de 4,3, et deux grilles sur 415 restent sous-évaluées par une variante « Direct ».
+
+  > ⚠ Le « résidu de bifurcation » n'existait pas. Randomiser le seul degré de liberté du
+  > solveur sur 21 000 chemins n'a **jamais** atteint le score de l'oracle : les sept désaccords
+  > venaient d'un défaut de détection des sous-ensembles nus, corrigé à l'incrément 18. Avant de
+  > mettre un écart sur le compte du hasard, le tester coûte une heure.
+  >
+  > L'**Unique Rectangle** est écarté sur mesure, et non reporté : sur 441 grilles, l'oracle ne
+  > le rapporte comme technique de pic **aucune fois**. Ce que la mesure désigne comme prochaine
+  > technique utile, c'est le WXYZ-Wing puis les chaînes.
+
   L'interface ne doit pas laisser croire à une exactitude totale.
 
 ## Honnêteté envers le joueur, volet statistique
