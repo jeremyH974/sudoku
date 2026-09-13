@@ -126,8 +126,10 @@ class EngineClient {
     this.#worker = null;
 
     /*
-      Rejeter à la main : `terminate()` ne touche pas aux promesses en attente
-      (Comlink #428 le documente comme une bonne surprise à ne pas attendre).
+      Rejeter à la main : `terminate()` ne touche pas aux promesses en attente,
+      et Comlink #428 le dit noir sur blanc. Sans cette boucle, un appelant
+      attendrait une réponse qui ne viendra jamais.
+
       Vidé **avant** de tuer, pour qu'aucun message en transit ne retrouve son
       entrée.
     */

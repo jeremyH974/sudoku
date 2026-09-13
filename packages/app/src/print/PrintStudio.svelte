@@ -131,9 +131,9 @@
    *
    * Quatre situations, et aucune ne se tait : le compte demandé atteint, un
    * niveau manqué dans le temps imparti, un arrêt volontaire, une panne du
-   * moteur. Le cas où la fabrique ne rend rien du tout est compté à part — il ne
-   * « ne devrait pas arriver », ce qui est précisément la raison de l'afficher
-   * s'il arrive.
+   * moteur. Le cas où la fabrique ne rend rien du tout est compté à part : il
+   * « ne devrait pas arriver », ce qui est précisément la raison de le dire s'il
+   * arrive.
    */
   function noticeOf(result: BatchResult<PrintablePuzzle>): string {
     const wanted = LEVELS.find((l) => l.id === asked.level)?.label ?? asked.level;
