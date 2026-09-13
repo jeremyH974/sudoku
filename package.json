@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@guidepup/guidepup": "0.34.0",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@types/node": "^22.20.2",
     "@vitest/coverage-v8": "^5.0.0",

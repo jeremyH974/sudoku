@@ -1,0 +1,110 @@
+# La validation au lecteur d'écran, exécutée par la machine.
+#
+# ─── Pourquoi ce n'est PAS dans `ci.yml` ──────────────────────────────────────
+#
+# `ci.yml` tourne en une minute sur Linux et garde la publication : c'est un
+# portail, et tout ce qui le franchit doit être rapide et sûr. Ce job-ci est
+# l'inverse — un runner Windows, quatre cents mégaoctets de NVDA portable, un
+# navigateur réel et un lecteur d'écran qui tape au clavier. Le mettre sur le
+# chemin de chaque poussée reviendrait à faire dépendre la mise en ligne d'un
+# logiciel tiers dont l'incrément 21 a mesuré qu'il n'annonce pas le rôle
+# `grid` — un échec en amont, que rien de notre côté ne rattraperait.
+#
+# Il tourne donc **à la demande** et **une fois par semaine**. C'est le motif
+# retenu partout pour les tests de technologie d'assistance : ils détectent les
+# dérives, ils ne gardent pas la porte.
+#
+# ─── Ce qu'il mesure, et que rien d'autre ne mesure ───────────────────────────
+#
+# Les tests `*.a11y.test.ts` voient l'arbre d'accessibilité ; ils ne disent rien
+# de ce qui est **prononcé**. Ce job écoute. Voir `docs/lecteur-decran.md` pour
+# le protocole, les relevés verbatim et les verdicts déjà rendus.
+name: Lecteur d'écran
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Lundi 6 h UTC. Un rendez-vous hebdomadaire suffit à voir une dérive, et
+    # ne consomme pas un runner Windows à chaque commit.
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  nvda:
+    runs-on: windows-latest
+    # NVDA met quelques secondes à démarrer, le navigateur aussi, et le
+    # protocole attend entre chaque frappe. Vingt minutes est large ; le but
+    # est qu'un blocage finisse par rendre la main plutôt que de tourner.
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # On mesure le site **de ce commit**, pas celui qui est en ligne : un job
+      # qui interrogerait l'adresse publique validerait la version précédente.
+      - run: pnpm build
+
+      # NVDA portable pèse 405 Mo une fois décompressé. La clé porte la version
+      # de `@guidepup/guidepup`, parce que c'est son `manifest.json` qui décide
+      # quelle archive est téléchargée : changer de version doit invalider le
+      # cache, et rien d'autre ne le doit.
+      - name: Cache de NVDA portable
+        id: cache-nvda
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\guidepup
+          key: nvda-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Installer NVDA portable
+        if: steps.cache-nvda.outputs.cache-hit != 'true'
+        run: npx guidepup install nvda
+
+      # Le serveur d'aperçu sert `packages/app/dist`, c'est-à-dire exactement ce
+      # que `pnpm build` vient de produire.
+      - name: Servir le site construit
+        run: Start-Process -NoNewWindow pnpm -ArgumentList '--filter','@sudoku/app','preview','--port','4181'
+        shell: pwsh
+
+      - name: Attendre que le serveur réponde
+        shell: pwsh
+        run: |
+          $limite = (Get-Date).AddSeconds(60)
+          do {
+            try {
+              $r = Invoke-WebRequest -UseBasicParsing http://localhost:4181/sudoku/sudoku/
+              if ($r.StatusCode -eq 200) { "Le serveur répond."; exit 0 }
+            } catch { Start-Sleep -Seconds 2 }
+          } while ((Get-Date) -lt $limite)
+          "Le serveur n'a jamais répondu."; exit 1
+
+      # `SANS_CLIC=1` : sur un runner, rien d'autre ne tourne, donc la fenêtre du
+      # navigateur a le focus. Le script le **vérifie** quand même en demandant
+      # son titre à NVDA, et refuse de mesurer sinon — c'est ce qui a évité un
+      # relevé faux à l'incrément 21, quand trois frappes étaient parties dans
+      # une autre application.
+      - name: Écouter
+        env:
+          BASE: http://localhost:4181/sudoku/
+          SANS_CLIC: '1'
+        run: node scripts/lecteur-decran.mjs
+
+      # Toujours, même en échec : le relevé verbatim est la seule chose qui
+      # permette de contester un verdict.
+      - name: Joindre le relevé
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: releve-lecteur-decran
+          path: releve-lecteur-decran.json
+          if-no-files-found: warn
