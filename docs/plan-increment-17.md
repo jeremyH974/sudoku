@@ -292,7 +292,7 @@ sous `node`, à code identique et configuration identique. Deux explications ava
 par la mesure — le tas retenu et la forme de `globalThis`. Il y en avait **deux autres**, et elles
 se cumulent.
 
-#### Première cause : les tableaux typés viennent d'un autre realm
+#### Première cause : la liaison globale, pour deux raisons à la fois
 
 Une micro-mesure des primitives que le moteur emploie a isolé une seule anomalie :
 
@@ -311,42 +311,81 @@ Une micro-mesure des primitives que le moteur emploie a isolé une seule anomali
 Buffer.from([1]) instanceof Uint8Array   →  jsdom : false   node : true
 ```
 
-`Buffer` est toujours celui de Node. S'il n'est plus un `Uint8Array`, c'est que la liaison globale
-`Uint8Array` a été remplacée. jsdom construit sa fenêtre dans un contexte `vm` — donc un autre
-realm — et vitest recopie ses globales sur `globalThis`. Sont ainsi remplacés **dix constructeurs de
-tableaux typés et `ArrayBuffer`** ; `Array`, `Object`, `Function`, `RegExp` et `Promise` ne le sont
-pas.
+`Buffer` est toujours celui de Node. S'il n'est plus un `Uint8Array`, c'est que la liaison globale a
+été remplacée. Deux mécanismes s'y superposent, et il a fallu les séparer pour les croire.
 
-Le prix de la traversée, mesuré **dans le même processus** jsdom, sur 200 000 allocations :
+jsdom construit sa fenêtre dans un contexte `vm` — donc un autre realm — et Vitest recopie ses
+globales sur `globalThis`, **sous forme d'accesseurs**. Chaque évaluation de l'identifiant
+`Uint32Array` exécute donc un *getter*, qui rend un constructeur *étranger*.
 
-| | |
-|---|---|
-| `new Uint8Array(2)` par la liaison globale | 16,7 ms |
-| `new Uint8Array(2)` par le constructeur de Node | **7,8 ms** |
+Mesuré sous jsdom, en remplaçant l'un puis l'autre :
 
-Un facteur deux, et il porte sur ce que le moteur fait le plus : un `CellSet` **est** un
-`Uint32Array`, et une composition en alloue plus d'un milliard.
-
-#### Seconde cause : le graphe d'objets vivants, et non le tas
-
-La première enquête avait testé le tas avec un **lest d'un seul gros tableau** de 125 Mo, sans effet
-(×1,11). Ce n'était pas le bon témoin : jsdom ne retient pas un gros objet, il en retient des
-centaines de milliers de petits, chaînés les uns aux autres.
-
-Refait avec un graphe touffu — 600 000 nœuds liés, attributs et parents —, dans l'environnement
-**node** propre :
-
-| | tas vivant | la même composition |
+| | médiane | écart |
 |---|---|---|
-| sans le graphe | 42 Mo | 549 ms |
-| avec le graphe | 217 Mo | **779 ms** |
+| accesseur + realm de jsdom *(tel quel)* | 1 483 ms | — |
+| **propriété de données** + realm de jsdom | 1 278 ms | **−13,9 %** |
+| propriété de données + **constructeur de Node** | 1 035 ms | **−30,2 %** |
 
-**+42 %**, sur du calcul qui ne touche à rien. La cause est le ramasse-miettes : un milliard de
-petites allocations déclenche des collectes de jeune génération sans arrêt, et chacune coûte
-d'autant plus cher que le graphe vivant à traverser est dense.
+**L'accesseur coûte 13,9 %, le franchissement de realm 16,3 % de plus.** Les deux se tiennent :
+V8 refuse catégoriquement d'inliner une fonction d'un autre *native context*
+(`js-inlining.cc`, « Disallow cross native-context inlining for now »), et ne replie en constante
+qu'une globale qui est une **cellule de données**, jamais un accesseur
+(`js-native-context-specialization.cc`).
 
-*(Le temps de GC n'a pas pu être lu directement : `PerformanceObserver` sur `entryTypes: ['gc']` ne
-rend aucune entrée dans un travailleur de vitest, même par `takeRecords()`.)*
+Sont ainsi remplacés **neuf constructeurs de tableaux typés et `ArrayBuffer`** — exactement
+l'intersection des soixante-six intrinsèques que jsdom installe depuis son realm avec la liste
+`KEYS` de Vitest. `Array`, `Object`, `Function`, `RegExp` et `Promise` ne le sont pas : le filtre de
+`populateGlobal` ne recopie une clef déjà présente chez Node que si elle figure dans cette liste.
+
+C'est un défaut connu — mais comme un défaut de **correction**, jamais de performance :
+[vitest#4043](https://github.com/vitest-dev/vitest/issues/4043) est ouverte depuis le 29 août 2023,
+et son mainteneur y écrit « I am not sure where the middle ground is ».
+
+#### Seconde cause : ce n'est **pas** le ramasse-miettes
+
+C'était l'hypothèse évidente, et elle est fausse. Hors de Vitest, avec une fenêtre jsdom vivante et
+**aucune globale touchée** — donc ni accesseur ni realm —, sous `--trace-gc` :
+
+| | médiane | scavenges | temps de GC |
+|---|---|---|---|
+| avant la fenêtre | 303 ms | 22 | **3,4 ms** |
+| après | 422 ms | 21 | **7,3 ms** |
+
+**+39 % de temps, soit 119 ms par passe, pour 3,9 ms de GC en plus.** Un ordre de grandeur d'écart.
+Figer le semi-espace ne change rien non plus : 58,6 % en adaptatif, 52,8 % à 16 Mo, 50,2 % à 4 Mo.
+
+C'est cohérent avec ce que V8 documente — le coût d'un *scavenge* est borné par les objets
+**survivants** et les pointeurs vieux→jeune, pas par la taille d'un graphe statique
+([v8.dev/blog/trash-talk](https://v8.dev/blog/trash-talk)).
+
+#### Ce que c'est, alors : le tas occupé, et la diversité des formes
+
+Le coût n'a même pas besoin d'une fenêtre. **Importer le module jsdom, sans rien construire**, suffit :
+
+| | médiane | tas | écart |
+|---|---|---|---|
+| nu | 304 ms | 21 Mo | — |
+| jsdom **importé**, aucune fenêtre | 509 ms | 126 Mo | **+67 %** |
+| + fenêtre minimale | 466 ms | 138 Mo | +56 % |
+| + `runScripts: 'dangerously'` | 502 ms | 142 Mo | +68 % |
+
+Deux témoins synthétiques, sans jsdom du tout, séparent ce qui compte :
+
+| ce qui remplit le tas | tas | écart |
+|---|---|---|
+| un graphe de 600 000 nœuds, **2 formes** | 205 Mo | **+29 %** |
+| 600 000 objets, **3 000 formes distinctes**, lues une fois | 274 Mo | **+42 %** |
+| jsdom importé | 127 Mo | **+46 %** |
+
+À taille de tas **moitié moindre**, jsdom coûte autant que trois mille formes — et deux fois plus
+qu'un gros tas de deux formes. La diversité des *hidden classes* compte donc autant que le volume :
+jsdom engendre des milliers de classes d'enveloppe, et le cache d'appoint mégamorphique de V8 est
+une table **de taille fixe partagée par tout l'isolat**. Le code sans rapport en paie les défauts.
+
+⚠ **Ce dernier point est une explication cohérente avec quatre mesures, pas une démonstration.** Je
+n'ai pas instrumenté V8 pour compter les défauts de cache ; les pourcentages de jsdom varient de 46
+à 67 % d'une passe à l'autre sur une machine occupée. Ce qui est **établi**, c'est que la seconde
+cause n'est ni le temps de GC, ni la taille du semi-espace, ni la présence d'une fenêtre.
 
 #### Ce qu'on en fait : rien, et c'est mesuré aussi
 
