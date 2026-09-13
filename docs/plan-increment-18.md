@@ -89,11 +89,12 @@ campagnes, 109 s puis 114 s, n'ont produit aucune grille où il soit le pic. L'a
 aussi — sur les 441 grilles de la référence, **l'oracle ne rapporte lui non plus aucun « Hidden
 Quad »**. Même figure que la paire revendiquée directe à l'incrément 9.
 
-### Un défaut trouvé en chemin, non corrigé
+### Un défaut trouvé en chemin
 
-**`pnpm dailies` ne converge pas en une passe** après un changement de barème : la première
-exécution a laissé deux jours dont le score attendu était périmé, et seule la seconde les a
-rafraîchis. Le test les a attrapés, donc rien n'a échappé — mais l'outil devrait converger seul.
+**`pnpm dailies` ne convergeait pas en une passe** après un changement de barème : la première
+exécution a laissé deux jours sur 369 dont le score attendu était périmé, et seule la seconde les
+a rafraîchis. Le test les a attrapés, donc rien n'a échappé — mais l'outil devait converger seul.
+Corrigé plus bas, avec sa preuve.
 
 ---
 
