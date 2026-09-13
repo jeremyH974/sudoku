@@ -55,20 +55,67 @@ jobs:
       # qui interrogerait l'adresse publique validerait la version précédente.
       - run: pnpm build
 
-      # NVDA portable pèse 405 Mo une fois décompressé. La clé porte la version
-      # de `@guidepup/guidepup`, parce que c'est son `manifest.json` qui décide
-      # quelle archive est téléchargée : changer de version doit invalider le
-      # cache, et rien d'autre ne le doit.
+      # La version de NVDA vient du `manifest.json` de `@guidepup/guidepup`, et de
+      # lui seul : c'est lui qui décide quelle archive le client sait piloter.
+      # On le lit pour la clé de cache **et** pour le téléchargement, de sorte
+      # qu'une montée de version invalide le cache toute seule.
+      - name: Version de NVDA attendue
+        id: nvda
+        shell: pwsh
+        run: |
+          $m = Get-Content node_modules/@guidepup/guidepup/manifest.json | ConvertFrom-Json
+          $a = ($m.screenReaders | Where-Object { $_.id -eq 'nvda' }).assets[0]
+          "version=$($a.version)"     >> $env:GITHUB_OUTPUT
+          "asset=$($a.asset)"         >> $env:GITHUB_OUTPUT
+          "repo=$($a.repository)"     >> $env:GITHUB_OUTPUT
+          "sha256=$($a.sha256)"       >> $env:GITHUB_OUTPUT
+          "NVDA attendu : $($a.version)"
+
+      # 405 Mo une fois décompressé : on le garde d'une semaine sur l'autre.
       - name: Cache de NVDA portable
         id: cache-nvda
         uses: actions/cache@v4
         with:
           path: ~\AppData\Local\guidepup
-          key: nvda-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: nvda-${{ runner.os }}-${{ steps.nvda.outputs.version }}
 
+      # ─── Pourquoi l'installation est écrite ici, en clair ──────────────────
+      #
+      # `@guidepup/setup` ferait exactement cela, en une ligne. Mais il dépend de
+      # `@guidepup/record`, qui dépend de `ffmpeg-static` : **quatre-vingts
+      # mégaoctets**, téléchargés à chaque installation du dépôt, y compris sur
+      # la CI Linux qui tourne en une minute et n'a que faire d'un encodeur
+      # vidéo. Pour un projet qui compte ses dépendances, c'était non.
+      #
+      # Ce qui reste est un téléchargement et une décompression — et l'écrire
+      # nous-mêmes ajoute ce que l'outil ne faisait pas voir : la **somme de
+      # contrôle est vérifiée**, et elle vient du manifeste, pas d'ici.
       - name: Installer NVDA portable
         if: steps.cache-nvda.outputs.cache-hit != 'true'
-        run: npx guidepup install nvda
+        shell: pwsh
+        run: |
+          $version = '${{ steps.nvda.outputs.version }}'
+          # Barres obliques : Windows les accepte, et aucune couche que ce
+          # fichier traverse ne les échappe.
+          $racine  = Join-Path $env:LOCALAPPDATA "guidepup/nvda/all/$version"
+          $zip     = Join-Path $racine '${{ steps.nvda.outputs.asset }}'
+          New-Item -ItemType Directory -Force $racine | Out-Null
+
+          $url = "https://github.com/${{ steps.nvda.outputs.repo }}/releases/download/$version/${{ steps.nvda.outputs.asset }}"
+          "Téléchargement : $url"
+          Invoke-WebRequest -UseBasicParsing $url -OutFile $zip
+
+          $vu = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+          if ($vu -ne '${{ steps.nvda.outputs.sha256 }}') {
+            "Somme de contrôle inattendue : $vu"
+            exit 1
+          }
+          "Somme de contrôle vérifiée."
+
+          Expand-Archive -Path $zip -DestinationPath (Join-Path $racine 'extracted') -Force
+          $exe = Join-Path $racine 'extracted/nvda.exe'
+          if (-not (Test-Path $exe)) { "nvda.exe introuvable après décompression."; exit 1 }
+          "NVDA en place : $exe"
 
       # Le serveur d'aperçu sert `packages/app/dist`, c'est-à-dire exactement ce
       # que `pnpm build` vient de produire.
