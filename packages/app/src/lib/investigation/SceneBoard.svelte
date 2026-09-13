@@ -250,6 +250,10 @@
           const inset = (WALL / size) * 100;
           return {
             name: zone.name,
+            // La teinte de la pièce, pour que l'étiquette repose sur son propre
+            // sol. Même modulo que les cases : un décor de plus de six pièces
+            // reste lisible, deux pièces partageront une teinte jamais un nom.
+            tint: zone.index % 6,
             x: (columnOf(anchor) / size) * 100 + inset,
             y: ((size - 1 - rowOf(anchor)) / size) * 100 + inset,
           };
@@ -379,7 +383,11 @@
       <!-- Clé par position : rien ne garantit qu'un décor ne nomme pas deux
            pièces pareillement, et le corpus de la référence du genre en compte. -->
       {#each roomLabels as label, label_index (label_index)}
-        <span class="room" style={`left: ${String(label.x)}%; bottom: ${String(label.y)}%`}>
+        <span
+          class="room"
+          data-zone={label.tint}
+          style={`left: ${String(label.x)}%; bottom: ${String(label.y)}%`}
+        >
           {label.name}
         </span>
       {/each}
@@ -629,10 +637,42 @@
   .room {
     position: absolute;
     padding: 0 var(--space-1);
+    border-radius: var(--radius-sm);
     color: var(--ink-soft);
     font-family: var(--font-hand);
     font-weight: 400;
     font-size: var(--text-sm);
     white-space: nowrap;
+  }
+
+  /*
+    Le nom repose sur un morceau du sol de sa propre pièce.
+
+    Il flottait au-dessus de ce qui s'y trouvait, et tombait régulièrement sur un
+    meuble — « Salon » posé sur un fauteuil, « Hall » sur une table. C'était déjà
+    vrai avant, et l'épaississement des murs l'a rendu voyant.
+
+    La teinte est celle de la pièce, jamais une couleur neutre : le nom donne
+    ainsi l'impression que le mobilier a été **écarté** pour le laisser passer,
+    ce qui est exactement ce que fait un plan d'architecte. Une plaque blanche,
+    elle, se lirait comme un objet posé sur le plan.
+  */
+  .room[data-zone='0'] {
+    background: var(--scene-zone-1);
+  }
+  .room[data-zone='1'] {
+    background: var(--scene-zone-2);
+  }
+  .room[data-zone='2'] {
+    background: var(--scene-zone-3);
+  }
+  .room[data-zone='3'] {
+    background: var(--scene-zone-4);
+  }
+  .room[data-zone='4'] {
+    background: var(--scene-zone-5);
+  }
+  .room[data-zone='5'] {
+    background: var(--scene-zone-6);
   }
 </style>
