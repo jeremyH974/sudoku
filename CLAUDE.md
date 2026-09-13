@@ -122,8 +122,11 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   conclusion sur le mode. Ne pas conclure d'un plateau ce qu'on a mesuré sur son conteneur.
 
   ⚠ La validation est **exécutée par la machine** depuis l'incrément 22 :
-  `.github/workflows/lecteur-decran.yml`, un runner Windows, 1 min 38 s, à la demande et une fois
-  par semaine. Elle est **délibérément hors de `ci.yml`** : une mise en ligne ne doit pas dépendre
+  `.github/workflows/lecteur-decran.yml`, un runner Windows, 1 min 49 s, à la demande et une fois
+  par semaine. Elle couvre **les deux plateaux**, avec les **mêmes** cinq assertions — le motif est
+  commun, donc l'expérience doit l'être. Y compris : sur le plan de la scène, le mobilier est
+  prononcé (« Atelier, étagère, libre »), ce qui vérifie à l'oreille la règle « la couleur n'est
+  jamais le seul porteur d'information ». Elle est **délibérément hors de `ci.yml`** : une mise en ligne ne doit pas dépendre
   d'un lecteur d'écran tiers. Relevés verbatim et harnais dans `docs/lecteur-decran.md` et
   `scripts/lecteur-decran.mjs`. Elle a confirmé que le nom de
   chaque case porte seul ce qu'il faut — « ligne 1, colonne 1, vide » est prononcé tel quel — et que

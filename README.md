@@ -1021,12 +1021,17 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   moteur en panne — dont trois n'étaient atteignables par aucun test avant l'incrément 20.
 - **Les régions vivantes existent avant leur texte.** Un `role="status"` créé en même temps que son
   message n'est pas annoncé ; un test l'exige désormais là où le message porte un échec.
-- **Un vrai NVDA parcourt le plateau, et la machine le vérifie.** Un runner Windows lance le lecteur
-  d'écran sur le site construit et écoute : le plateau ne consomme qu'un arrêt de tabulation, la
-  case focalisée prononce son nom, et les flèches annoncent la case voisine. 1 min 38 s, à la
-  demande et une fois par semaine — **volontairement hors du portail de publication**, parce qu'une
-  mise en ligne ne doit pas dépendre d'un lecteur d'écran tiers. Ce que cela ne dit pas : qu'une
-  personne s'en serve confortablement. Cela demande une personne.
+- **Un vrai NVDA parcourt les deux plateaux, et la machine le vérifie.** Un runner Windows lance le
+  lecteur d'écran sur le site construit et écoute : chaque plateau ne consomme qu'un arrêt de
+  tabulation, le conteneur annonce ses dimensions, la case focalisée prononce son nom, et les
+  flèches annoncent la case voisine — cinq assertions, les mêmes des deux côtés, parce que le motif
+  est le même. 1 min 49 s, à la demande et une fois par semaine, **volontairement hors du portail de
+  publication** : une mise en ligne ne doit pas dépendre d'un lecteur d'écran tiers.
+
+  Sur le plan de la scène, le mobilier est prononcé — « rangée 1, colonne 2, Atelier, étagère,
+  libre ». Ce que l'œil lit dans une icône, l'oreille l'obtient en mots.
+
+  Ce que cela ne dit pas : qu'une personne s'en serve confortablement. Cela demande une personne.
 
 > **Attention à la reproductibilité par graine.** Le PRNG est figé par des snapshots, mais cela ne
 > suffit pas : `generateAtLevel` dépend de `RATING_VERSION` *et* du temps réel écoulé sur la

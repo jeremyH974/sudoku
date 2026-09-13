@@ -282,7 +282,11 @@ Depuis l'incrément 22, le protocole s'exécute **tout seul** : `.github/workflo
 sur un runner Windows, à la demande et une fois par semaine. **1 min 38 s** au total, dont 34 s
 d'écoute. Le relevé est joint à chaque exécution.
 
-### Ce que la machine a entendu, mot pour mot
+Depuis peu, elle écoute **les deux plateaux** dans la même exécution — 1 min 49 s, dont 57 s
+d'écoute — et leur applique **les mêmes** cinq assertions. C'est le point : le motif est commun, donc
+l'expérience doit l'être.
+
+### Ce que la machine a entendu, mot pour mot — le sudoku
 
 ```
 [tab.7] « Imprimer, button »
@@ -313,9 +317,30 @@ Ce qui est donc établi, et vérifié à chaque exécution :
 | `→` annonce la case voisine | change de colonne, garde la ligne |
 | `↓` annonce la case du dessous | change de ligne |
 
+Et les cinq mêmes sur le plan de la scène.
+
 **Le plateau est parcourable au clavier avec NVDA.** Ce qui reste vrai du relevé précédent : le
 conteneur est annoncé « table », jamais « grid ». C'est l'échec ARIA-AT, et il coûte moins cher
 qu'on ne le croyait — il prive l'utilisateur de l'annonce du rôle, pas de la navigation.
+
+### Et le plan de la scène
+
+```
+[tab.6]  « Nouvelle affaire, button »
+[tab.7]  « Plan de la scène, 6 rangées sur 6 colonnes, table »      ← le plateau
+[tab.8]  « Outils, grouping, Placer poser la personne choisie, … »  ← on l'a dépassé
+[ou]     « rangée 1, colonne 1, Atelier, libre, cell, focused »
+[droite] « rangée 1, colonne 2, Atelier, étagère, libre, row 1, column 2 »
+[bas]    « rangée 2, colonne 2, Atelier, tapis, libre, row 2, column 2 »
+```
+
+Mêmes conclusions que le sudoku, au mot près : un arrêt de tabulation, le nom prononcé, les flèches
+qui annoncent la voisine. Et le conteneur annoncé « table » — l'échec ARIA-AT ne dépend pas de nous,
+il frappe les deux.
+
+**Un détail vaut d'être relevé.** Le mobilier est prononcé : « étagère », « tapis ». Ce que le
+joueur voyant lit dans une icône, celui qui écoute l'obtient en mots — c'est la règle « la couleur
+n'est jamais le seul porteur d'information » vérifiée à l'oreille, et pas seulement dans l'arbre.
 
 ### Pourquoi ce job n'est pas dans `ci.yml`
 

@@ -105,6 +105,7 @@ Elles sont notées parce qu'aucune n'était devinable :
 
 - **L'écoute par une personne.** Une CI verte dit que la parole n'a pas régressé. Elle ne dit pas
   que l'interface est utilisable — cela demande quelqu'un qui s'en serve.
-- **Un seul plateau est écouté**, celui du sudoku. Celui d'Enquête ne l'est pas encore.
+- ~~Un seul plateau est écouté~~ — **fait** : les deux le sont, dans la même exécution et avec les
+  mêmes cinq assertions. 1 min 49 s au total.
 - **La fragilité n'est pas mesurée.** Guidepup encaisse la sienne avec cinq essais par test ; notre
   job n'en fait aucun. Deux exécutions vertes ne sont pas un taux.
