@@ -18,15 +18,15 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # La version de pnpm vient du champ `packageManager` de `package.json`, et de
       # lui seul. La déclarer aussi ici en faisait deux sources de vérité — et
       # l'action refuse de démarrer quand elles coexistent, ce que la toute
       # première exécution de ce workflow, à la mise en ligne, a révélé.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm

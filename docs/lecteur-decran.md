@@ -365,6 +365,28 @@ Linux qui n'a que faire d'un encodeur vidéo. Le workflow télécharge donc l'ar
 gagne ce que l'outil ne montrait pas — **la somme de contrôle est vérifiée**, et elle vient du
 manifeste de guidepup, pas de nous.
 
+### Les réessais, et pourquoi ils se comptent
+
+Chaque plateau est retenté jusqu'à **trois** fois avant d'être déclaré manqué. Piloter un lecteur
+d'écran est fragile par nature — une fenêtre lente, un focus qui s'échappe — et sans réessai le
+rendez-vous du lundi rougirait pour des raisons qui n'apprennent rien.
+
+⚠ Mais **un réessai cache ce qu'il absorbe.** Le nombre de tentatives part donc dans le relevé, dans
+la console, et dans le résumé de l'exécution :
+
+| plateau | verdict | tentatives |
+| --- | --- | --- |
+| sudoku | tenu | 1 |
+| enquête | tenu | 1 |
+
+Un plateau tenu au troisième essai donne le même job vert qu'un plateau tenu du premier coup ; il ne
+dit pas la même chose, et l'écrit. Ce qui est retenté est un **plateau entier**, jamais une
+assertion isolée : une mesure perdue l'est pour une raison qui précède les assertions, et
+recommencer une assertion sur un état dérivé ne mesurerait rien. Chaque tentative repart d'un `F5`.
+
+**Un point n'est pas une courbe.** Les premières exécutions ne montrent aucun réessai ; cela ne
+constitue pas encore un taux de fragilité.
+
 ### Ce que cela ne remplace toujours pas
 
 Une CI verte dit que la parole **n'a pas régressé**. Elle ne dit pas que l'interface est utilisable :

@@ -40,11 +40,11 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -74,7 +74,7 @@ jobs:
       # 405 Mo une fois décompressé : on le garde d'une semaine sur l'autre.
       - name: Cache de NVDA portable
         id: cache-nvda
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~\AppData\Local\guidepup
           key: nvda-${{ runner.os }}-${{ steps.nvda.outputs.version }}
@@ -157,7 +157,7 @@ jobs:
       # permette de contester un verdict.
       - name: Joindre le relevé
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: releve-lecteur-decran
           path: releve-lecteur-decran.json

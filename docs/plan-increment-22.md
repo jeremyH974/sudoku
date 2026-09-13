@@ -107,5 +107,10 @@ Elles sont notées parce qu'aucune n'était devinable :
   que l'interface est utilisable — cela demande quelqu'un qui s'en serve.
 - ~~Un seul plateau est écouté~~ — **fait** : les deux le sont, dans la même exécution et avec les
   mêmes cinq assertions. 1 min 49 s au total.
-- **La fragilité n'est pas mesurée.** Guidepup encaisse la sienne avec cinq essais par test ; notre
-  job n'en fait aucun. Deux exécutions vertes ne sont pas un taux.
+- ~~La fragilité n'est pas mesurée~~ — **traité, et pas en la cachant.** Chaque plateau est retenté
+  jusqu'à trois fois, **et les tentatives sont comptées** : dans le relevé, dans la console, et dans
+  le résumé de l'exécution. Guidepup absorbe la sienne avec cinq essais et n'en publie aucun taux ;
+  ARIA-AT rejoue cinq fois pour la mesurer. On fait les deux.
+
+  Ce qui reste vrai : **un taux se construit dans le temps.** Les premières exécutions donnent
+  « tenu du premier coup » des deux côtés, zéro réessai. C'est un point, pas une courbe.
