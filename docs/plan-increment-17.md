@@ -220,7 +220,72 @@ n'est pas un arbitrage qu'on tranche sur un gain de vitesse.
 
 ---
 
-### Le délai des tests, et une piste que vitest suggère lui-même
+### Le délai des tests d'accessibilité, supprimé
+
+Trois tests de ce fichier avaient fait tomber la publication en dépassant les cinq secondes du
+défaut de vitest, sur le coureur et nulle part ailleurs. On a posé trente secondes, puis quinze, en
+écrivant que « le rendu et `axe` dominent désormais ».
+
+**C'était faux.** Il a fallu chronométrer chaque phase **dans** vitest pour le voir :
+
+| phase | part |
+|---|---|
+| `composeCase` | **87,7 %** |
+| `render()` | 7,8 % |
+| `axe` | 4,3 % |
+| chargement de l'affaire | 0,04 % |
+
+Le rendu d'un plan coûte 43 à 88 ms ; charger une affaire, moins d'une milliseconde. L'apparente
+incohérence — les deux tests qui exécutent `axe` n'étaient pas les plus lents — tenait entièrement
+aux graines : ces deux-là tiraient les deux affaires les moins chères du fichier.
+
+#### Pourquoi la composition coûtait quatre fois son prix
+
+Le facteur se scinde en deux, mesurés sur le **même code gelé**, douze graines :
+
+| | total |
+|---|---|
+| `tsx` + node | 1 956 ms |
+| vitest, environment node | 3 636 ms — **×1,86**, la tuyauterie de vitest |
+| vitest, environment jsdom | 7 766 ms — **×2,14**, jsdom sur du calcul pur |
+
+Un calcul qui ne touche à aucun DOM coûte deux fois plus cher sous jsdom. Le mécanisme n'est **pas
+identifié** : ni le tas retenu ni la forme de `globalThis` ne l'expliquent, tous deux écartés par
+mesure. C'est une question ouverte, pas une piste.
+
+#### Ce qui a été fait
+
+**Une affaire par décor, et non une par test.** Chaque test composait la sienne sur une graine
+nommée d'après lui — `a11y-noms`, `a11y-plan`… — d'où une répartition en décors purement
+accidentelle : cinq fois l'atelier, trois fois le manoir, deux fois le reste. Quatre affaires, une
+par plan, couvrent mieux en coûtant quatre fois moins.
+
+**La graine, choisie par la mesure.** Aucune assertion n'en dépend : c'est un paramètre de coût, et
+un paramètre de coût se mesure. Huit mots quelconques passés sur les quatre décors :
+
+| graine | total des quatre | le pire |
+|---|---|---|
+| `test` | 4 955 ms | 2 692 ms |
+| `a11y` (l'ancienne) | 2 161 ms | 1 287 ms |
+| **`fiche`** | **686 ms** | **378 ms** |
+
+#### Le résultat, et la preuve
+
+| | avant | après |
+|---|---|---|
+| le fichier, ici | 11,93 s | **3,15 s** |
+| le pire test, ici | 2 190 ms | **518 ms** |
+| **le fichier, sur le coureur** | **41 519 ms, trois échecs** | **5 153 ms, tout vert** |
+
+Le délai explicite est **supprimé**. Ce n'est pas une estimation : le journal du coureur ne signale
+plus aucun test de ce fichier comme lent, et les cinq secondes du défaut protègent désormais seules.
+
+Ce que cela coûte, dit franchement : douze jeux d'indices distincts deviennent quatre. La variété
+des énoncés se vérifie dans `clues.test.ts`, qui est fait pour ça.
+
+---
+
+### Une piste que vitest suggère lui-même, et qui ne donne rien
 
 Le journal de la CI imprime un conseil à chaque exécution :
 
@@ -370,8 +435,9 @@ de contrôle.
 
 ## Ce qui reste ouvert
 
-- **Le délai des tests d'accessibilité n'a pas disparu**, il est passé de 30 à 15 s. Ce qui domine
-  maintenant n'est plus la composition mais le rendu et `axe` : le pire test reste à 2,05 s ici.
+- **Le facteur jsdom — ×2,14 sur du calcul pur — n'est pas expliqué.** C'est le plus gros
+  multiplicateur non compris de la suite, et le comprendre vaudrait la moitié du temps des tests
+  d'accessibilité. Tas retenu et forme de `globalThis` sont écartés par mesure.
 - **Le rejet tardif de `carve` reste entier** — 91,3 % du travail est jeté, et la seule borne
   exacte disponible ne récupère que 1,17 % (mesurée, puis retirée). Le gisement demande un
   changement de conception qui changerait les affaires.
