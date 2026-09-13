@@ -180,7 +180,7 @@ function main(): void {
     de laisser les autres intacts — un corpus qui se réécrirait en entier à
     chaque version se retéléchargerait en entier à chaque mise à jour.
   */
-  const slotsToRedo = new Map<string, number[]>();
+  const slotsToRedo = new Map<string, { wrong: number[]; measured: number[] }>();
   let refreshed = 0;
   for (const day of wanted) {
     const codes = corpus.days[day] ?? [];
@@ -215,11 +215,22 @@ function main(): void {
         refreshed++;
       }
     } else {
-      slotsToRedo.set(day, wrong);
+      /*
+        Les scores **mesurés à l'instant** voyagent avec la liste des créneaux à
+        refaire, et ce n'est pas une commodité.
+
+        Jusqu'à l'incrément 18, la boucle de régénération repartait des scores
+        du fichier et n'écrasait que ceux des créneaux régénérés. Un jour qui
+        avait à la fois un créneau à refaire **et** un autre dont le score avait
+        bougé sans changer de palier gardait donc une étiquette périmée — et il
+        fallait une seconde exécution pour la rattraper. Deux jours sur 369
+        étaient dans ce cas au passage de la version 5 à la 6.
+      */
+      slotsToRedo.set(day, { wrong, measured: scores });
     }
   }
   const missing = [...slotsToRedo.keys()];
-  const slotCount = [...slotsToRedo.values()].reduce((n, list) => n + list.length, 0);
+  const slotCount = [...slotsToRedo.values()].reduce((n, entry) => n + entry.wrong.length, 0);
   console.log(
     `Corpus quotidien : ${String(Object.keys(corpus.days).length)} jours déjà présents, ` +
       `${String(missing.length)} jour(s) à retoucher, ${String(slotCount)} créneau(x) à produire, ` +
@@ -243,11 +254,12 @@ function main(): void {
 
   for (const day of missing) {
     const codes = [...(corpus.days[day] ?? [])];
-    const scores = [...(verification.scores[day] ?? [])];
+    // Les scores fraîchement mesurés, jamais ceux du fichier : voir ci-dessus.
+    const scores = [...(slotsToRedo.get(day)?.measured ?? [])];
     while (codes.length < levels.length) codes.push('');
     while (scores.length < levels.length) scores.push(0);
 
-    for (const index of slotsToRedo.get(day) ?? []) {
+    for (const index of slotsToRedo.get(day)?.wrong ?? []) {
       const level = levels.at(index);
       if (level === undefined) continue;
       // La graine porte le rang de la retouche : sans cela, régénérer un créneau
