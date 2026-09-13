@@ -1008,8 +1008,13 @@ Un changement d'ordre ou de détection fait chuter le taux et casse la suite.
   fichier, **ni désigner un fichier absent.**
 - **Une position n'a pas de niveau, et n'en reçoit aucun.** Un exercice affiche la technique qu'il
   enseigne, jamais la difficulté de la grille dont il est extrait.
-- **La structure d'accessibilité est vérifiée par axe sur les cinq onglets** — mais ni le
-  contraste ni la taille des cibles, qui restent mesurés à la main.
+- **La structure d'accessibilité est vérifiée par axe sur les cinq onglets.**
+- **Le contraste de la palette est calculé, pas constaté** : chaque niveau de texte contre chaque
+  fond, dans les trois blocs de `app.css`, plus l'égalité des deux palettes sombres. C'est ce qui
+  manquait — à l'incrément 21, la mesure dans un vrai navigateur a trouvé deux jetons sous le
+  minimum de 4,5:1, présents depuis l'origine. Ce qui reste manuel, c'est la **composition
+  rendue** : quelle couleur atterrit sur quel fond. Relevé à cette occasion sur quatorze
+  combinaisons page × thème, aucune violation de contraste ni de taille de cible.
 - **Un arrêt ne se présente jamais comme une panne, et un échec ne se tait jamais.** La boucle qui
   produit les deux cahiers distingue les deux cas, garde ce qui a été produit avant l'incident, et
   le montre. Vérifié sur les quatre situations — compte atteint, palier manqué, arrêt volontaire,

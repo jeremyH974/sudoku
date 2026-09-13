@@ -105,9 +105,25 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   + Chrome échoue l'assertion « annoncer le rôle grid » sur sa **propre** implémentation de
   référence — aucune correction de notre côté ne rattraperait cela. **`axe` ne peut pas le
   faire** — et plus généralement, un DOM simulé ne calcule aucune mise en page : les tests
-  `*.a11y.test.ts` voient les rôles, les noms accessibles et l'ordre des titres, **jamais le
-  contraste ni la taille des cibles**. Ces deux-là se mesurent à la main, et une CI verte ne vaut
-  pas mesure.
+  `*.a11y.test.ts` voient les rôles, les noms accessibles et l'ordre des titres, **jamais la
+  taille des cibles**.
+- **Le contraste se coupe en deux, et une moitié se calcule.** Jusqu'à l'incrément 21, le projet
+  écrivait que le contraste « se mesure à la main ». C'était vrai de la **composition rendue** —
+  quelle couleur atterrit sur quel fond — et faux de la **palette**, dont chaque paire est de
+  l'arithmétique pure. `packages/cli/src/contrast.test.ts` la calcule désormais sans navigateur :
+  chaque jeton de texte contre chaque fond, dans les trois blocs de palette, plus l'égalité des
+  deux blocs sombres.
+
+  Ce que cette lacune coûtait, mesuré dans un vrai Chromium sur le site publié : `--text-faint`
+  ne tenait 4,5:1 sur **aucun** des quatre fonds clairs (3,10 à 3,51), et `--accent`, employé
+  comme couleur de texte par six vues, tombait à 3,50 sur une carte survolée en sombre. Les deux
+  étaient là depuis l'origine.
+
+  ⚠ Deux pièges de méthode, tous deux rencontrés. **Un jeton est soumis aux règles de l'usage
+  qu'on en fait, pas de son nom** : `--accent` est un texte. Et **`--surface-hover` est un fond** :
+  un texte survolé reste du texte, et c'est le fond qu'on oublie — un premier correctif calé sur
+  les trois autres laissait encore 4,48. La mesure dans un vrai navigateur reste due pour le
+  reste, et une CI verte ne vaut pas mesure.
 - **Une région vivante doit exister avant son texte.** Un `role="status"` créé en même temps que
   son message n'est **pas** annoncé : le lecteur d'écran doit avoir vu la région vide pour
   remarquer qu'elle change. Donc jamais de `<p role="status">` sous un `{#if}` qui dépend du

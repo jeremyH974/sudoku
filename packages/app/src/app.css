@@ -71,7 +71,25 @@
 
   --text: #1a1a18;
   --text-muted: #5c5b56;
-  --text-faint: #8a8983;
+  /*
+    ⚠ Ce niveau a été **mesuré faux** à l'incrément 21, et pendant longtemps.
+    `#8a8983` ne tenait 4,5:1 sur **aucun** des quatre fonds de la palette claire
+    — 3,27 sur `--bg`, 3,51 sur `--surface`, 3,10 sur `--surface-sunken`, 3,19 sur
+    `--surface-hover` — alors que le contraste minimum est une règle écrite et non
+    négociable. Dix-sept endroits citaient ce jeton, dont la description du niveau
+    choisi et toute la légende de l'onglet Analyse.
+
+    Rien ne pouvait l'attraper : un DOM simulé ne calcule aucune couleur
+    effective, et « mesuré à la main » voulait dire « jamais mesuré ». La teinte
+    est conservée, seule la clarté descend — le pire des quatre fonds passe
+    maintenant à 4,55, et `contrast.test.ts` refuse désormais toute régression.
+
+    ⚠ Le fond survolé est celui qu'on oublie, et c'est lui le pire des deux
+    côtés : un premier correctif calé sur trois fonds seulement laissait 4,48 en
+    clair et 3,93 en sombre. C'est le test, à sa toute première exécution, qui
+    l'a dit.
+  */
+  --text-faint: #6e6d67;
 
   --grid-strong: #2f2e2b;
   --cell-bg: #ffffff;
@@ -344,7 +362,10 @@
 
     --text: #ecedef;
     --text-muted: #a8abb1;
-    --text-faint: #7e828a;
+    /* Passait sur `--bg` (4,65) mais pas sur `--surface` (4,08), `--surface-sunken`
+       (4,33) ni `--surface-hover` (3,54) : le pire des quatre est ce qui compte.
+       Voir la palette claire. */
+    --text-faint: #91959d;
 
     --grid-strong: #6a6f78;
     --cell-bg: #212327;
@@ -358,7 +379,18 @@
     --value-note: #969aa2;
     --value-conflict: #f0946a;
 
-    --accent: #4b82cf;
+    /*
+      ⚠ Cet accent est aussi une **couleur de texte** — six vues l'emploient
+      ainsi, dont les deux accroches de l'accueil. Il est donc soumis au 4,5:1
+      comme n'importe quel texte, et `#4b82cf` ne le tenait pas : 4,60 sur
+      `--bg`, mais 4,04 sur `--surface` et **3,50 sur `--surface-hover`** — ce
+      dernier n'ayant rien d'hypothétique, `.game:hover` de l'accueil pose
+      exactement cette paire. Mesuré dans un vrai Chromium à l'incrément 21.
+
+      Toute l'échelle monte d'un cran pour rester ordonnée ; `--accent-text`,
+      qui est presque noir, n'y gagne que du contraste (4,89 → 6,33).
+    */
+    --accent: #6198d7;
     --accent-text: #0e1013;
     --accent-soft: #1e2a3a;
     --focus: #e0913f;
@@ -378,9 +410,9 @@
     --hint-target-bg: #1e3a2a;
     --hint-target-border: #62c295;
 
-    /* États pressés : --accent-text y garde 5,7:1 au survol, 6,5:1 à l'appui. */
-    --accent-hover: #5b8ed6;
-    --accent-active: #6b99da;
+    /* États pressés : --accent-text y garde 7,7:1 au survol, 8,8:1 à l'appui. */
+    --accent-hover: #79a8de;
+    --accent-active: #8ab4e4;
     --surface-pressed: #34383e;
 
 
@@ -480,7 +512,8 @@
 
   --text: #ecedef;
   --text-muted: #a8abb1;
-  --text-faint: #7e828a;
+  /* Doit rester identique au bloc `@media` ci-dessus — `contrast.test.ts` l'exige. */
+  --text-faint: #91959d;
 
   --grid-strong: #6a6f78;
   --cell-bg: #212327;
@@ -494,7 +527,8 @@
   --value-note: #969aa2;
   --value-conflict: #f0946a;
 
-  --accent: #4b82cf;
+  /* Identique au bloc `@media` ci-dessus — `contrast.test.ts` l'exige. */
+  --accent: #6198d7;
   --accent-text: #0e1013;
   --accent-soft: #1e2a3a;
   --focus: #e0913f;
@@ -515,8 +549,8 @@
   --hint-target-border: #62c295;
 
   /* États pressés : --accent-text y garde 5,7:1 au survol, 6,5:1 à l'appui. */
-  --accent-hover: #5b8ed6;
-  --accent-active: #6b99da;
+  --accent-hover: #79a8de;
+  --accent-active: #8ab4e4;
   --surface-pressed: #34383e;
 
 
