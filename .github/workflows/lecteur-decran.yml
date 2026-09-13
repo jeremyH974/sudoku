@@ -119,21 +119,28 @@ jobs:
 
       # Le serveur d'aperçu sert `packages/app/dist`, c'est-à-dire exactement ce
       # que `pnpm build` vient de produire.
+      # `bash` et `&`, non `Start-Process` : celui-ci ne survivait pas à la fin de
+      # son étape, et l'attente ci-dessous expirait sur un serveur mort-né. Un
+      # processus lancé en arrière-plan depuis bash, lui, traverse les étapes.
       - name: Servir le site construit
-        run: Start-Process -NoNewWindow pnpm -ArgumentList '--filter','@sudoku/app','preview','--port','4181'
-        shell: pwsh
+        shell: bash
+        run: |
+          pnpm --filter @sudoku/app preview --port 4181 > preview.log 2>&1 &
+          echo "Serveur lancé."
 
       - name: Attendre que le serveur réponde
-        shell: pwsh
+        shell: bash
         run: |
-          $limite = (Get-Date).AddSeconds(60)
-          do {
-            try {
-              $r = Invoke-WebRequest -UseBasicParsing http://localhost:4181/sudoku/sudoku/
-              if ($r.StatusCode -eq 200) { "Le serveur répond."; exit 0 }
-            } catch { Start-Sleep -Seconds 2 }
-          } while ((Get-Date) -lt $limite)
-          "Le serveur n'a jamais répondu."; exit 1
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null http://localhost:4181/sudoku/sudoku/; then
+              echo "Le serveur répond."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Le serveur n'a jamais répondu. Son journal :"
+          cat preview.log || echo "(aucun journal)"
+          exit 1
 
       # `SANS_CLIC=1` : sur un runner, rien d'autre ne tourne, donc la fenêtre du
       # navigateur a le focus. Le script le **vérifie** quand même en demandant

@@ -21,8 +21,8 @@
  *
  * ⚠ NVDA ré-injecte les frappes dans la fenêtre qui a le focus, et Windows
  * interdit à un processus d'arrière-plan de faire passer une fenêtre devant :
- * `AppActivate` rend `True` et ne change rien. Sur un poste de travail il faut
- * donc **un clic humain**, et le script l'attend plutôt que de ruser.
+ * `AppActivate` rend `True` et ne change rien. La parade n'est pas de ruser avec
+ * l'OS mais de **cycler les fenêtres depuis NVDA** — voir `amenerDevant`.
  *
  * ─── Trois pièges de méthode, payés comptant à l'incrément 21 ───────────────
  *
@@ -84,6 +84,37 @@ async function titreCourant() {
   return (await nvda.spokenPhraseLog()).join(' / ');
 }
 
+/**
+ * Amener le navigateur au premier plan — **sans le demander à Windows**.
+ *
+ * C'est là que l'incrément 21 s'est cassé les dents. `AppActivate` et
+ * `SetForegroundWindow` rendent `True` et ne font rien : Windows interdit à un
+ * processus d'arrière-plan de voler le premier plan. Il a fallu cinq clics
+ * humains pour obtenir une seule mesure valable.
+ *
+ * La solution est celle de la fixture Playwright de guidepup : on ne demande
+ * rien à l'OS, on **cycle les fenêtres** avec `Alt+Échap` — une frappe injectée
+ * par NVDA, qui lui en a le droit — et l'on **vérifie par la parole** que l'on
+ * est arrivé. Dix tentatives à une demi-seconde, comme leur
+ * `MAX_APPLICATION_SWITCH_RETRY_COUNT`.
+ *
+ * Le point qui change tout : cela marche aussi sur un poste de travail. Le clic
+ * humain n'est plus qu'un dernier recours.
+ */
+async function amenerDevant(reconnaitre, tentatives = 10) {
+  for (let i = 1; i <= tentatives; i++) {
+    const titre = await titreCourant();
+    if (reconnaitre.test(titre)) {
+      console.log(`  → « ${titre} » (après ${String(i - 1)} bascule(s))`);
+      return true;
+    }
+    console.log(`  [${String(i)}] « ${titre} » — on cycle`);
+    await nvda.press('Alt+Escape');
+    await attendre(500);
+  }
+  return false;
+}
+
 async function main() {
   console.log(`Page mesurée : ${URL_PAGE}\n`);
   const profil = mkdtempSync(join(tmpdir(), 'chrome-lecteur-'));
@@ -117,20 +148,21 @@ async function main() {
   await attendre(3000);
 
   try {
-    if (!SANS_CLIC) {
-      console.log('\n──────────────────────────────────────────────');
-      console.log('  CLIQUE SUR LA FENÊTRE CHROME « Sudoku ».');
-      console.log('──────────────────────────────────────────────\n');
-    }
-    let auPoint = false;
-    const essais = SANS_CLIC ? 15 : 90;
-    for (let i = 0; i < essais && !auPoint; i++) {
-      const titre = await titreCourant();
-      auPoint = /sudoku/i.test(titre);
-      if (auPoint) console.log(`  → « ${titre} »`);
-      else {
-        if (i % 6 === 0) console.log(`  …focus ailleurs : « ${titre} »`);
-        await attendre(1200);
+    console.log('── Amener le navigateur devant ──');
+    let auPoint = await amenerDevant(/sudoku/i);
+
+    /*
+      Le clic humain n'est plus qu'un dernier recours : le cyclage y arrive seul
+      dans le cas normal. On ne le propose donc que sur un poste de travail, et
+      jamais sur une machine d'intégration où personne ne lit la sortie.
+    */
+    if (!auPoint && !SANS_CLIC) {
+      console.log('');
+      console.log('  Le cyclage n’a pas suffi. CLIQUE SUR LA FENÊTRE CHROME « Sudoku ».');
+      console.log('');
+      for (let i = 0; i < 60 && !auPoint; i++) {
+        auPoint = /sudoku/i.test(await titreCourant());
+        if (!auPoint) await attendre(1200);
       }
     }
     if (!auPoint) throw new Error('La fenêtre du navigateur n’a jamais eu le focus.');
@@ -139,7 +171,7 @@ async function main() {
     // début du document, quel que soit l'endroit où le clic est tombé.
     await nvda.press('F5');
     await attendre(5000);
-    if (!/sudoku/i.test(await titreCourant())) throw new Error('Focus perdu au rechargement.');
+    if (!(await amenerDevant(/sudoku/i, 4))) throw new Error('Focus perdu au rechargement.');
     console.log('\n→ Ne touche plus à rien.\n');
 
     /* ── 1. Atteindre le plateau, en comptant ce qu'il coûte ──────────────── */
