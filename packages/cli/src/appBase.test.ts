@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { extname, join, relative, resolve } from 'node:path';
+import { extname, join, relative, resolve, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -244,11 +244,24 @@ describe('adresses de l’application sous son sous-chemin', () => {
 
       Le plafond porte sur **chaque fichier**, pas sur le total, parce que c'est
       la forme que prend la faute : on dépose un fichier source dans le dossier
-      servi. Le plus gros fichier légitime est le corpus du défi du jour, pesé à
-      66,7 ko ; 96 ko lui laissent de quoi grandir de moitié et arrêtent un
-      master par un facteur de deux.
+      servi.
+
+      Deux corpus quotidiens en sont exemptés **nommément**, et la liste est ici
+      plutôt qu'en commentaire — comme celle du papier dans `appStyles.test.ts` :
+      un fichier renommé retombe sous la règle au lieu d'en sortir en silence.
+      Ce sont des données livrées à dessein, dont la croissance est une
+      fonction du nombre de jours couverts : le corpus du sudoku pèse 87,7 Kio
+      pour 369 jours (≈ 244 octets par jour), celui des affaires 17,1 Kio pour
+      370. Le plafond de 96 ko, posé quand le premier en pesait 66,7, aurait
+      cassé au prochain allongement de l'horizon — sur une croissance prévue,
+      pas sur une faute.
+
+      Pour tout le reste, 96 ko arrêtent un master de portrait (230 ko) par un
+      facteur de deux et demi.
     */
     const PLAFOND = 96_000;
+    /** Les corpus dont la taille suit le calendrier, pas une erreur de dépôt. */
+    const CORPUS = ['daily/corpus.json', 'daily/cases.json'];
     const files: string[] = [];
     const walk = (dir: string): void => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -267,8 +280,31 @@ describe('adresses de l’application sous son sous-chemin', () => {
       // passe de toute façon sous le plafond : la note est là pour le jour où
       // elle grossira.
       .filter((file) => !file.endsWith('og-image.png'))
+      .filter((file) => {
+        // Séparateur normalisé : ce test tourne aussi bien sous Windows.
+        const chemin = relative(APP, file).split(sep).join('/');
+        return !CORPUS.some((corpus) => chemin.endsWith(corpus));
+      })
       .map((file) => `${relative(APP, file)} : ${String(Math.round(statSync(file).size / 1000))} ko`);
     expect(heavy).toEqual([]);
+
+    /*
+      Le total, lui, est ce que paie une première visite — et c'est la forme
+      qu'avait prise l'incident de l'incrément 17 : 4 266 Kio précachés sans que
+      rien ne le signale. Mesuré aujourd'hui à 341 Kio ; 900 Kio laissent deux
+      ans de calendrier et arrêtent net un dossier d'images déposé par mégarde.
+    */
+    const total = files.reduce((sum, file) => sum + statSync(file).size, 0);
+    expect(
+      total,
+      `public/ pèse ${String(Math.round(total / 1024))} Kio — c'est ce que porte une première visite`,
+    ).toBeLessThan(900_000);
+
+    // Les corpus exemptés doivent exister : une liste qui ne désigne rien
+    // laisserait le plafond sans exception et personne ne le saurait.
+    for (const corpus of CORPUS) {
+      expect(existsSync(join(APP, 'public', corpus)), corpus).toBe(true);
+    }
   });
 
   it('garde les négatifs des portraits hors du dossier servi', () => {

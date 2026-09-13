@@ -19,6 +19,7 @@
     "calibrate": "tsx packages/cli/src/main.ts",
     "diagnose": "tsx packages/cli/src/diagnose.ts",
     "dailies": "tsx packages/cli/src/dailies.ts",
+    "cases": "tsx packages/cli/src/cases.ts",
     "lessons": "tsx packages/cli/src/lessons.ts",
     "portraits": "tsx packages/cli/src/portraits.ts"
   },

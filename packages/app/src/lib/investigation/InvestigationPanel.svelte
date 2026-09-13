@@ -5,6 +5,7 @@
   import Portrait from './Portrait.svelte';
   import SceneBoard from './SceneBoard.svelte';
   import { loadCase, saveCase } from './storage.js';
+  import { caseCodeFor, loadCaseCorpus, today } from './daily.js';
 
   interface Props {
     /**
@@ -146,6 +147,47 @@
     };
   });
 
+  /*
+    L'affaire du jour : son code, chargé une fois, ou `null` si le corpus ne
+    répond pas. On ne compose rien ici — le code vient d'un fichier vérifié,
+    précaché, donc disponible hors ligne.
+  */
+  let dailyCode = $state<string | null>(null);
+  const day = today();
+  /*
+    Midi, comme partout ailleurs dans le projet : c'est la seule heure qui ne
+    tombe jamais dans un changement d'heure, donc la seule qui ne déplace jamais
+    une date d'un jour.
+  */
+  const dayLabel = new Date(`${day}T12:00:00`).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+  });
+
+  $effect(() => {
+    void (async () => {
+      const corpus = await loadCaseCorpus();
+      dailyCode = corpus === null ? null : caseCodeFor(corpus, day);
+    })();
+  });
+
+  /** L'affaire en cours est-elle celle du jour ? Comparé par le code, pas par la date. */
+  const isDaily = $derived(
+    game.file !== null && dailyCode !== null && encodeCase(game.file) === dailyCode,
+  );
+
+  function openDaily(): void {
+    if (dailyCode === null) return;
+    const file = tryDecodeCase(dailyCode);
+    if (file === null) {
+      // Un corpus livré illisible est une faute de construction, pas une
+      // situation de jeu. On le dit plutôt que d'ouvrir autre chose.
+      game.announcement = 'L’affaire du jour est illisible. Signalez-le.';
+      return;
+    }
+    game.load(file);
+  }
+
   /** Copie le lien de l'affaire, et dit ce qui s'est passé. */
   async function share(): Promise<void> {
     const file = game.file;
@@ -201,6 +243,14 @@
       {/if}
     </div>
     <div class="header-actions">
+      <button
+        type="button"
+        class="action"
+        onclick={openDaily}
+        disabled={dailyCode === null || isDaily}
+      >
+        Affaire du jour
+      </button>
       <button type="button" class="action" onclick={() => void share()} disabled={game.file === null}>
         Partager
       </button>
@@ -209,6 +259,15 @@
       </button>
     </div>
   </header>
+
+  {#if isDaily}
+    <!--
+      Dit en toutes lettres, et non par l'état grisé du bouton : un bouton
+      désactivé sans explication laisse le joueur chercher pourquoi. La date est
+      celle du jour civil **local** — `day.ts` dit pourquoi jamais UTC.
+    -->
+    <p class="daily-mark">Vous jouez l’affaire du jour, celle du {dayLabel}.</p>
+  {/if}
 
   <p class="announce" role="status" aria-live="polite">{game.announcement}</p>
 
@@ -452,6 +511,12 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+  }
+
+  .daily-mark {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
   }
 
   /*
