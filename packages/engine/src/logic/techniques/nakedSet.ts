@@ -43,7 +43,22 @@ function* nakedSetsOfSize(state: LogicStateView, size: number): Generator<Step> 
       const count = countDigits(state.candidatesAt(cell));
       return count >= 2 && count <= size;
     });
-    if (cells.length <= size) continue;
+    if (cells.length < size) continue;
+
+    /*
+      Les victimes d'un sous-ensemble nu sont les **autres** cases de l'unité, et
+      celles-là portent forcément plus de `size` candidats : le filtre ci-dessus
+      vient donc de les écarter. Compter les cases retenues reviendrait à exiger
+      qu'une victime soit elle-même un membre possible — ce qu'elle n'est jamais.
+
+      Ce test portait sur `cells` jusqu'à l'incrément 18, et c'était un défaut :
+      une colonne à quatre cases vides dont deux seulement tenaient en deux
+      candidats était abandonnée, alors que la paire nue y éliminait bel et bien.
+      La condition d'existence porte sur les cases **vides de l'unité**.
+    */
+    let unsolved = 0;
+    for (const cell of unit.cells) if (state.isEmpty(cell)) unsolved++;
+    if (unsolved <= size) continue;
 
     for (const combo of combinations(cells, size)) {
       let union: DigitMask = 0;

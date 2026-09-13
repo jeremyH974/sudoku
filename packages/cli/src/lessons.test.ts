@@ -70,9 +70,17 @@ describe('corpus des leçons', () => {
 
       Si une évolution du registre en rendait une autre inatteignable, ce test le
       dirait au lieu de laisser l'interface perdre une leçon en silence.
+
+      Le quadruplet caché (5,4) a rejoint cette liste à l'incrément 18, et pour la
+      même raison retournée : en corrigeant la détection des sous-ensembles nus,
+      le registre est devenu **plus complet**, donc les techniques les plus
+      chères sont moins souvent *nécessaires*. Deux campagnes — 109 s puis
+      114 s — n'en ont produit aucune où il soit le pic. L'accord vaut là aussi :
+      sur les 441 grilles de la référence, l'oracle ne rapporte **aucun** « Hidden
+      Quad » non plus.
     */
     const empty = TECHNIQUE_CATALOGUE.filter((info) => (corpus.grids[info.id] ?? []).length === 0);
-    expect(empty.map((info) => info.id)).toEqual(['direct-claiming']);
+    expect(empty.map((info) => info.id)).toEqual(['direct-claiming', 'hidden-quad']);
   });
 
   it('livre des grilles décodables, à solution unique, résolues sans deviner', () => {

@@ -25,8 +25,14 @@ import type { TechniqueEntry, TechniqueId } from './types.js';
  * Version 5 : ce single doit en outre être trouvé dans une boîte, ou dans l'une
  * des maisons que nomme le motif de base — trouvé ailleurs, l'oracle ne crédite
  * pas de coup direct.
+ * Version 6 : correction d'une détection, non d'un barème. Les sous-ensembles
+ * nus abandonnaient une unité dès que les cases **candidates à être membres**
+ * n'étaient pas plus nombreuses que le motif — alors que les victimes, elles,
+ * sont par définition en dehors de ce compte. Aucune valeur ni aucun rang n'a
+ * bougé ; des motifs simplement invisibles sont devenus visibles, et le pic de
+ * certaines grilles baisse en conséquence.
  */
-export const RATING_VERSION = 5;
+export const RATING_VERSION = 6;
 
 /**
  * Ordre d'essai des techniques : **par difficulté croissante**.

@@ -161,7 +161,7 @@ describe('solveLogically', () => {
   });
 
   it('estampille la version du barème', () => {
-    expect(solveLogically(parseGrid(SOLVED)).ratingVersion).toBe(5);
+    expect(solveLogically(parseGrid(SOLVED)).ratingVersion).toBe(6);
   });
 
   it('accepte un registre restreint, pour isoler une technique', () => {
