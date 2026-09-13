@@ -160,6 +160,10 @@ Il ne dit pas que les plateaux sont accessibles. Il dit :
 - et ce que **l'écoute a effectivement donné** : voir le relevé ci-dessous. C'est la seule ligne de
   ce document qui a changé.
 
+Une phrase pour résumer les trois heures : **l'application expose tout ce qu'il faut, et NVDA +
+Chrome n'en engage qu'une partie.** Le plateau se parcourt, après un `NVDA+Espace` que rien
+n'annonce.
+
 ---
 
 ## Le relevé — 13 septembre 2026
@@ -213,15 +217,33 @@ parviennent au plateau. La moitié « les flèches appartiennent à NVDA en mode
 bascule » n'a **pas** été observée, ce qui est cohérent : un rôle annoncé « tableau » ne déclenche
 pas le traitement réservé aux grilles.
 
-### Ce qui reste à mesurer
+### Le verdict, en deux moitiés
 
-**Les flèches sur une case focalisée, en mode formulaire.** Les deux exécutions ont focalisé le
-*conteneur* de la grille, jamais une case, au moment d'essayer les flèches — et sur le conteneur
-elles ne produisent rien. La question « une fois dans une case, les flèches déplacent-elles le
-curseur du plateau pour un utilisateur de NVDA ? » **n'est donc pas tranchée**, et c'est la plus
-importante qui reste.
+La question décisive — « les flèches déplacent-elles le curseur du plateau pour quelqu'un qui
+utilise NVDA ? » — se coupe en deux, et chaque moitié a été mesurée séparément.
 
-Ne pas conclure d'ici que le plateau est utilisable, ni qu'il ne l'est pas.
+**Côté application : tout fonctionne.** Une case ayant le focus DOM, une flèche déplace le curseur
+**et** le focus, case par case. Relevé sur le site publié, en partant de la case 1 :
+
+| touche | case atteinte | focus DOM |
+|---|---|---|
+| → | « ligne 1, colonne 2, 7, indice de départ » | suit |
+| ↓ | « ligne 2, colonne 2, 2, indice de départ » | suit |
+| ← | « ligne 2, colonne 1, vide » | suit |
+| ↑ | « ligne 1, colonne 1, vide » | suit |
+
+Le focus suivant le curseur, **un lecteur d'écran qui suit le focus annonce la nouvelle case**. Et
+NVDA le fait : en mode formulaire, il a prononcé « ligne 1, colonne 1, vide » en arrivant sur une
+case.
+
+**Côté lecteur : le traitement des grilles ne s'engage jamais.** En mode navigation — celui où NVDA
+arrive sur une page — tabuler sur une case n'annonce que « principale région », dans un sens comme
+dans l'autre (au retour, `Maj+Tab` annonce le conteneur : « Grille de sudoku, 9 lignes sur
+9 colonnes, tableau »). Et les flèches restent au curseur virtuel.
+
+**Donc : le plateau est parcourable avec NVDA, mais seulement après `NVDA+Espace`.** Ce n'est ni
+« cassé » ni « bon » : c'est utilisable au prix d'un geste que rien n'annonce, parce que le rôle
+n'est pas transmis comme une grille.
 
 ### Trois pièges de méthode, payés comptant
 

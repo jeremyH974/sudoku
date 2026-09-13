@@ -108,9 +108,11 @@ Non négociable, et traitée dès l'écriture, jamais en rattrapage :
   pas, en pratique, ce qu'on croyait lui devoir.
 
   C'est l'échec ARIA-AT *Convey role 'grid'* reproduit sur notre plateau, et **rien de notre côté ne
-  le rattraperait**. Ne pas en conclure qu'il faut changer de rôle : la question décisive — une fois
-  une **case** focalisée en mode formulaire, les flèches déplacent-elles le curseur du plateau ? —
-  **n'est pas tranchée**, les deux exécutions ayant focalisé le conteneur et non une case.
+  le rattraperait**. Le rôle est néanmoins **gardé**, et pour une raison mesurée : côté application
+  tout fonctionne — une flèche sur une case focalisée déplace le curseur **et** le focus, donc un
+  lecteur qui suit le focus annonce la nouvelle case, et NVDA le fait en mode formulaire. Ce qui
+  manque est en amont. Verdict : **le plateau est parcourable avec NVDA, au prix d'un `NVDA+Espace`
+  que rien n'annonce.** Ni cassé, ni bon ; et ce n'est pas un choix de rôle qui le changerait.
 
   ⚠ La validation a été **exécutée** le 13 septembre 2026 : relevé verbatim et harnais rejouable
   dans `docs/lecteur-decran.md` et `scripts/lecteur-decran*.mjs`. Elle a confirmé que le nom de

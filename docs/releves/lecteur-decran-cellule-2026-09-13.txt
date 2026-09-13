@@ -1,0 +1,21 @@
+Démarrage de NVDA (muet)…
+
+──────────────────────────────────────────────
+  CLIQUE SUR LA FENÊTRE CHROME « Sudoku ».
+──────────────────────────────────────────────
+
+  → « Sudoku - Google Chrome »
+
+→ Ne touche plus à rien.
+
+[tab.1] Tab n°1
+      « principale région »
+[tab.2] Tab n°2
+      « Saisie des chiffres, groupe, Placer le 1, 5 restants, bouton »
+[retour] Maj+Tab (on avait dépassé)
+      « Grille de sudoku, 9 lignes sur 9 colonnes, tableau »
+
+INTERROMPU : Aucune case n’a pu être focalisée — rien à mesurer.
+
+Arrêt de NVDA…
+Relevé écrit dans cellule.json
