@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { composeCase } from '@sudoku/engine/investigation';
+import { afterEach, describe, expect, it } from 'vitest';
+import { DECORS, composeCase } from '@sudoku/engine/investigation';
 import type { CaseFile } from '@sudoku/engine/investigation';
 import { CaseGame } from './caseGame.svelte.js';
 import InvestigationPanel from './InvestigationPanel.svelte';
@@ -27,45 +27,117 @@ import type { Rendered } from '../../test/render.js';
  */
 
 /*
-  Le délai est **mesuré**, et il signale un défaut plutôt qu'il ne le corrige.
+  Le délai explicite a disparu, et sa disparition est la preuve.
 
-  Chaque test de ce fichier engendre son affaire, et la composition est lente :
-  sur les douze graines employées ici, la médiane est à 197 ms et le pire cas à
-  1 005 ms — `a11y-tabulation`, suivie de `a11y-dimensions` et `a11y-mesure` à
-  825 ms. Ces trois-là, et exactement ces trois-là, ont fait tomber la
-  publication sur le coureur de la CI : deux cœurs partagés, quarante-quatre
-  travailleurs qui se les disputent, et les cinq secondes du défaut de vitest
-  franchies par composition + rendu + `axe`.
+  ─── Ce qu'il masquait ──────────────────────────────────────────────────────
 
-  Le symptôme ressemblait à un composant cassé ; la cause est le chronomètre,
-  exactement comme pour le test de propriété de `composeCase`.
+  Trois tests de ce fichier ont fait tomber une publication en dépassant les
+  cinq secondes du défaut de vitest, sur le coureur de la CI et nulle part
+  ailleurs. On a d'abord posé trente secondes, puis quinze, en écrivant que
+  « le rendu et axe dominent désormais ».
 
-  ─── Le délai a déjà baissé une fois, et voici pourquoi il ne tombe pas ──────
+  C'était faux, et il a fallu chronométrer chaque phase **dans** vitest pour le
+  voir. Mesuré sur les douze tests : composition **87,7 %**, rendu 7,8 %, `axe`
+  4,3 %. Le rendu d'un plan coûte 43 à 88 ms, le chargement d'une affaire moins
+  d'une milliseconde.
 
-  Il valait trente secondes. La composition a ensuite été accélérée — mémoïsation
-  de la propagation, plafond de comptage ramené à sa question —, et ce fichier
-  est passé de **21,37 s à 12,34 s**. Les trois graines coupables sont tombées de
-  1 005, 825 et 825 ms à 438, 404 et 332.
+  ─── Pourquoi la composition coûtait si cher ici ────────────────────────────
 
-  Mais le pire **test** reste à 2,05 s, parce que ce qui domine maintenant n'est
-  plus la composition : c'est le rendu et `axe`. Multiplié par le rapport observé
-  entre cette machine et le coureur partagé, on reste au-dessus des cinq secondes
-  du défaut. Le délai descend donc à quinze secondes — sept fois le pire test
-  mesuré — au lieu de disparaître.
+  Parce qu'elle est payée **quatre fois son prix** dans cet environnement, et le
+  facteur se scinde en deux, tous deux mesurés sur le même code gelé :
 
-  ⚠ Il reste un symptôme, pas une correction : sa disparition serait la preuve
-  que le rendu d'une affaire ne coûte plus rien, et ce n'est pas le cas.
+    | la même graine, douze fois | total   |
+    | tsx + node                 | 1 956 ms |
+    | vitest, environment node   | 3 636 ms |  ×1,86 — la tuyauterie de vitest
+    | vitest, environment jsdom  | 7 766 ms |  ×2,14 — jsdom, sur du calcul pur
+
+  Un calcul qui ne touche à aucun DOM coûte deux fois plus cher sous jsdom. Le
+  mécanisme n'est pas identifié : ni le tas retenu ni la forme de `globalThis`
+  ne l'expliquent, tous deux écartés par mesure.
+
+  ─── Ce qui a été fait ──────────────────────────────────────────────────────
+
+  Une affaire par décor au lieu d'une par test, et une graine choisie par la
+  mesure. Le fichier passe de **11,93 s à 3,15 s**, et le pire test de 2 190 ms
+  à **518 ms**.
+
+  Le coureur coûte 2,2 fois cette machine, relevé dans ses propres journaux, et
+  varie lui-même d'un facteur 1,8 d'une exécution à l'autre. Soit un pire cas
+  attendu autour de 2 s, contre les 4 486 ms que le même fichier y atteignait
+  encore. Les cinq secondes du défaut suffisent, avec deux fois la marge — et
+  c'est le défaut qui protège désormais, pas une exception écrite ici.
 */
-vi.setConfig({ testTimeout: 15_000 });
 
-/** Une affaire **engendrée**, jamais écrite à la main. */
-function loadedGame(seed: string): CaseGame {
-  const file = composeCase(seed);
-  if (file === null) throw new Error(`La graine « ${seed} » n'a produit aucune affaire.`);
+/**
+ * Une affaire par décor, **engendrée** et jamais écrite à la main.
+ *
+ * ─── Pourquoi par décor, et non par test ────────────────────────────────────
+ *
+ * Chaque test composait la sienne, sur une graine nommée d'après lui —
+ * `a11y-noms`, `a11y-plan`… Douze compositions, donc, et une répartition en
+ * décors purement **accidentelle** : cinq fois l'atelier, trois fois le manoir,
+ * deux fois le reste. Ce n'était pas une couverture, c'était un hasard.
+ *
+ * Une affaire par décor, sur la même graine, est à la fois plus délibéré et
+ * quatre fois moins cher : la couverture porte sur les quatre plans, et non sur
+ * douze tirages dont la variété ne se voit nulle part dans ce qui est vérifié.
+ * Mesuré sous jsdom : 2 232 ms pour les quatre, contre environ 6 700 pour les
+ * douze.
+ *
+ * Ce qu'on y perd est dit franchement : douze jeux d'indices distincts
+ * deviennent quatre. La variété des énoncés se vérifie ailleurs, dans
+ * `clues.test.ts`, qui est fait pour ça.
+ *
+ * ─── Le fichier est partagé, la partie ne l'est pas ─────────────────────────
+ *
+ * Une `CaseFile` est immuable et se prête sans risque ; une `CaseGame` se
+ * modifie — un test y pose des suspects, en barre, en note au crayon. Chaque
+ * test repart donc d'une partie neuve, ce qui ne coûte rien.
+ */
+/**
+ * La graine, choisie **par la mesure** et non par le sens.
+ *
+ * Rien de ce que ce fichier vérifie n'en dépend : n'importe quelle affaire de
+ * taille six satisfait chacune de ses assertions. Elle n'est donc pas un
+ * paramètre du sujet, c'est un paramètre de **coût** — et un paramètre de coût
+ * se choisit en mesurant.
+ *
+ * Huit mots quelconques, passés sur les quatre décors, sous jsdom :
+ *
+ *   | graine  | total des quatre | le pire |
+ *   | test    |          4 955 ms | 2 692 ms |
+ *   | axe     |          3 679 ms | 2 028 ms |
+ *   | a11y    |          2 161 ms | 1 287 ms |
+ *   | six     |          1 199 ms |   531 ms |
+ *   | **fiche** |          **686 ms** |  **378 ms** |
+ *
+ * Sept fois moins cher que le pire tirage, pour exactement les mêmes
+ * vérifications. Ce mot n'a rien de particulier — c'est le hasard du générateur,
+ * et il peut cesser d'être le meilleur au prochain changement de barème. Le jour
+ * où la suite ralentira de ce côté, c'est ici qu'il faudra regarder.
+ */
+const SEED = 'fiche';
+
+const composed = new Map<string, CaseFile>();
+
+function caseFor(decorId: string): CaseFile {
+  const known = composed.get(decorId);
+  if (known !== undefined) return known;
+
+  const file = composeCase(SEED, { decorId });
+  if (file === null) throw new Error(`Le décor « ${decorId} » n'a produit aucune affaire.`);
+  composed.set(decorId, file);
+  return file;
+}
+
+function loadedGame(decorId: string): CaseGame {
   const game = new CaseGame();
-  game.load(file);
+  game.load(caseFor(decorId));
   return game;
 }
+
+/** Les quatre plans, nommés une fois : les tests s'y répartissent. */
+const [MANOR, PAVILION, WORKSHOP, ROTUNDA] = DECORS.map((decor) => decor.id);
 
 const caseOf = (game: CaseGame): CaseFile => game.file as CaseFile;
 
@@ -82,12 +154,12 @@ const COMPONENT_RULES = { rules: { region: { enabled: false } } };
 
 describe('accessibilité du plan', () => {
   it('ne présente aucun manquement relevable sans mise en page', async () => {
-    view = render(SceneBoard, { game: loadedGame('a11y-plan') });
+    view = render(SceneBoard, { game: loadedGame(MANOR) });
     await expectNoViolations(view.container, COMPONENT_RULES);
   });
 
   it('donne un nom à chacune des trente-six cases', () => {
-    const game = loadedGame('a11y-noms');
+    const game = loadedGame(PAVILION);
     view = render(SceneBoard, { game });
     const cells = view.container.querySelectorAll('[role="gridcell"]');
     expect(cells).toHaveLength(game.cellCount);
@@ -95,7 +167,7 @@ describe('accessibilité du plan', () => {
   });
 
   it('annonce ses dimensions, et six rangées de six', () => {
-    const game = loadedGame('a11y-dimensions');
+    const game = loadedGame(WORKSHOP);
     view = render(SceneBoard, { game });
     const grid = view.container.querySelector('[role="grid"]');
     expect(grid?.getAttribute('aria-rowcount')).toBe('6');
@@ -107,7 +179,7 @@ describe('accessibilité du plan', () => {
   });
 
   it('n’expose qu’une seule case à la tabulation', () => {
-    view = render(SceneBoard, { game: loadedGame('a11y-tabulation') });
+    view = render(SceneBoard, { game: loadedGame(ROTUNDA) });
     expect(view.container.querySelectorAll('[role="gridcell"][tabindex="0"]')).toHaveLength(1);
   });
 
@@ -118,7 +190,7 @@ describe('accessibilité du plan', () => {
       quelqu'un allège le nom accessible en s'appuyant sur les tracés, ce test
       tombe — et c'est précisément ce qu'on veut.
     */
-    const game = loadedGame('a11y-mobilier');
+    const game = loadedGame(MANOR);
     view = render(SceneBoard, { game });
     const labels = [...view.container.querySelectorAll('[role="gridcell"]')].map((cell) =>
       cell.getAttribute('aria-label'),
@@ -137,7 +209,7 @@ describe('accessibilité du plan', () => {
   });
 
   it('dit qui est posé, et pourquoi une case est fermée', () => {
-    const game = loadedGame('a11y-etat');
+    const game = loadedGame(PAVILION);
     game.apply(0);
     view = render(SceneBoard, { game });
     const cells = [...view.container.querySelectorAll('[role="gridcell"]')];
@@ -151,12 +223,12 @@ describe('accessibilité du plan', () => {
 
 describe('accessibilité de l’écran d’enquête', () => {
   it('ne présente aucun manquement relevable sans mise en page', async () => {
-    view = render(InvestigationPanel, { game: loadedGame('a11y-ecran') });
+    view = render(InvestigationPanel, { game: loadedGame(WORKSHOP) });
     await expectNoViolations(view.container, COMPONENT_RULES);
   });
 
   it('donne une carte nommée à chaque suspect, avec ce qu’il a dit', () => {
-    const game = loadedGame('a11y-cartes');
+    const game = loadedGame(ROTUNDA);
     view = render(InvestigationPanel, { game });
     const cards = view.container.querySelectorAll('.cards button');
     expect(cards).toHaveLength(game.suspects.length);
@@ -169,7 +241,7 @@ describe('accessibilité de l’écran d’enquête', () => {
   it('désigne la victime par un mot, pas par une teinte', () => {
     // « La couleur n'est jamais le seul porteur d'information. » La carte de la
     // victime a un fond distinct ; c'est l'étiquette qui porte.
-    const game = loadedGame('a11y-victime');
+    const game = loadedGame(MANOR);
     view = render(InvestigationPanel, { game });
     const victimCard = [...view.container.querySelectorAll('.cards button')][
       caseOf(game).victim
@@ -178,7 +250,7 @@ describe('accessibilité de l’écran d’enquête', () => {
   });
 
   it('dit l’outil actif autrement que par son fond', () => {
-    const game = loadedGame('a11y-outils');
+    const game = loadedGame(PAVILION);
     view = render(InvestigationPanel, { game });
     const pressed = view.container.querySelectorAll('.tools [aria-pressed="true"]');
     expect(pressed).toHaveLength(1);
@@ -186,7 +258,7 @@ describe('accessibilité de l’écran d’enquête', () => {
   });
 
   it('annonce ce qui vient de se passer dans une région vivante', () => {
-    const game = loadedGame('a11y-annonce');
+    const game = loadedGame(WORKSHOP);
     view = render(InvestigationPanel, { game });
     const live = view.container.querySelector('[aria-live="polite"]');
     expect(live).not.toBeNull();
@@ -201,7 +273,7 @@ describe('accessibilité de l’écran d’enquête', () => {
       une mesure ; le texte doit donc dire lui-même ce que ces nombres sont —
       des comptages — et ce qu'ils ne sont pas.
     */
-    const game = loadedGame('a11y-mesure');
+    const game = loadedGame(ROTUNDA);
     view = render(InvestigationPanel, { game });
     const measured = view.container.querySelector('.measured')?.textContent ?? '';
     expect(measured).toContain('comptages');

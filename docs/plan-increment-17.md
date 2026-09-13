@@ -220,6 +220,31 @@ n'est pas un arbitrage qu'on tranche sur un gain de vitesse.
 
 ---
 
+### Le délai des tests, et une piste que vitest suggère lui-même
+
+Le journal de la CI imprime un conseil à chaque exécution :
+
+> `44 workers spawned · ~316ms startup each` — *at least ~4.31s faster with `isolate: false`*
+
+Quarante-quatre travailleurs à trois cent seize millisecondes, c'est quatorze secondes de démarrage
+pour une suite qui en dure vingt-six. Sur le coureur, à deux cœurs partagés, la part est pire.
+
+Mesuré, la suite entière, deux exécutions consécutives :
+
+| | durée |
+|---|---|
+| avec isolation (défaut) | 36,12 s |
+| `--no-isolate` | **36,82 s** |
+
+**Aucun gain**, et les 547 tests passent dans les deux cas. Le conseil ne se vérifie pas ici : il
+chiffre le démarrage des travailleurs, pas ce qu'on récupère en les réutilisant — le temps repart
+ailleurs, probablement dans le registre de modules qui cesse d'être remis à neuf.
+
+C'est une piste fermée, et c'est utile de l'écrire : elle est visible dans chaque journal de CI, et
+quelqu'un la rouvrira.
+
+---
+
 ## 4. Les portes
 
 ### Pourquoi elles manquaient
