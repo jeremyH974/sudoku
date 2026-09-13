@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { propsOfCell } from '@sudoku/engine/investigation';
-  import type { PropId } from '@sudoku/engine/investigation';
+  import { doorwaysOf, propsOfCell } from '@sudoku/engine/investigation';
+  import type { PropId, Scene } from '@sudoku/engine/investigation';
   import type { CaseGame } from './caseGame.svelte.js';
   import { FILL, FURNITURE, FURNITURE_LABEL, LAYER_ORDER } from './furniture.js';
 
@@ -43,17 +43,115 @@
   const rowOf = (cell: number): number => Math.floor(cell / size);
   const columnOf = (cell: number): number => cell % size;
 
-  /** Un mur là où la case voisine est d'une autre pièce — ou n'existe pas. */
-  function wall(cell: number, side: 'top' | 'right' | 'bottom' | 'left'): boolean {
-    if (scene === null) return false;
-    const row = rowOf(cell);
-    const column = columnOf(cell);
-    if (side === 'top') return row === 0 || scene.zoneOf[cell - size] !== scene.zoneOf[cell];
-    if (side === 'bottom')
-      return row === size - 1 || scene.zoneOf[cell + size] !== scene.zoneOf[cell];
-    if (side === 'left') return column === 0 || scene.zoneOf[cell - 1] !== scene.zoneOf[cell];
-    return column === size - 1 || scene.zoneOf[cell + 1] !== scene.zoneOf[cell];
+  /**
+   * L'épaisseur d'un mur, en fraction de case.
+   *
+   * Les murs étaient des **bordures de case** : deux pixels de chaque côté,
+   * donc quatre entre deux pièces, et aucun moyen d'y ménager une ouverture —
+   * une bordure CSS est pleine ou n'est pas. C'est cela qui a fait passer le
+   * plan au tracé.
+   *
+   * La valeur suit la hiérarchie d'ISO 128-23 : sur un plan de bâtiment, le mur
+   * coupé porte le trait le plus fort et le symbole de porte le plus fin, dans
+   * un rapport de **quatre pour un**. C'est le seuil du seuil ci-dessous.
+   */
+  const WALL = 0.12;
+
+  /** Le seuil d'une porte : le quart du mur, exactement, et c'est la norme. */
+  const SILL = WALL / 4;
+
+  /**
+   * Les murs du plan, en tracés d'un seul tenant.
+   *
+   * ─── Pourquoi un seul chemin, et pas un segment par case ────────────────
+   *
+   * Parce qu'à cette échelle un pixel change le sens du dessin. Les moteurs
+   * anticrénèlent **chaque forme séparément contre le canevas** au lieu de
+   * faire un anticrénelage de scène : deux segments exactement jointifs
+   * laissent apparaître une couture claire, qui va et vient selon le zoom et la
+   * densité d'écran. Des pans d'un seul tenant n'ont pas de jonction à trahir.
+   *
+   * ─── Les coins ──────────────────────────────────────────────────────────
+   *
+   * Les bouts sont carrés (`stroke-linecap: square`), donc chaque pan déborde
+   * d'un demi-mur : c'est ce qui remplit les angles en L et en T sans un seul
+   * tracé de plus. En contrepartie, l'ouverture d'une porte est **élargie d'un
+   * demi-mur de chaque côté** avant d'être retranchée, pour que le vide visible
+   * mesure exactement ce que le moteur a calculé.
+   */
+  function wallRuns(plan: Scene): string {
+    const n = plan.size;
+    const doors = doorwaysOf(plan);
+    const parts: string[] = [];
+
+    for (const axis of ['vertical', 'horizontal'] as const) {
+      // Seules les lignes intérieures : le pourtour est la bordure d'encre du
+      // plateau, qui est aussi ce qui le fait lire comme un objet posé.
+      for (let line = 1; line < n; line++) {
+        const openings = doors
+          .filter((door) => door.axis === axis && door.line === line)
+          .map((door) => ({ from: door.from - WALL / 2, to: door.to + WALL / 2 }))
+          .sort((left, right) => left.from - right.from);
+
+        let start = -1;
+        for (let step = 0; step <= n; step++) {
+          const solid =
+            step < n &&
+            (axis === 'vertical'
+              ? plan.zoneOf[step * n + line - 1] !== plan.zoneOf[step * n + line]
+              : plan.zoneOf[(line - 1) * n + step] !== plan.zoneOf[line * n + step]);
+
+          if (solid && start === -1) start = step;
+          if (!solid && start !== -1) {
+            // Le pan court de `start` à `step` ; on en retire les ouvertures.
+            let cursor = start;
+            for (const hole of openings) {
+              if (hole.to <= cursor || hole.from >= step) continue;
+              if (hole.from > cursor) parts.push(segment(axis, line, cursor, hole.from));
+              cursor = Math.max(cursor, hole.to);
+            }
+            if (cursor < step) parts.push(segment(axis, line, cursor, step));
+            start = -1;
+          }
+        }
+      }
+    }
+    return parts.join('');
   }
+
+  /** Un pan de mur, le long de sa ligne de grille. */
+  const segment = (axis: 'vertical' | 'horizontal', line: number, from: number, to: number): string =>
+    axis === 'vertical'
+      ? `M${String(line)} ${String(from)}V${String(to)}`
+      : `M${String(from)} ${String(line)}H${String(to)}`;
+
+  /**
+   * Les seuils, tracés dans le vide des portes.
+   *
+   * Une ouverture nue n'est couverte par aucun des deux objets qu'ISO 7519
+   * distingue — ni la porte, ni la baie marquée : un vide sans marque se lit
+   * aussi bien comme « une fin de mur ». Le seuil lève l'ambiguïté avec un seul
+   * trait, quatre fois plus fin que le mur.
+   *
+   * Le vantail et son arc de débattement ont été écartés, et pas par paresse :
+   * ils codent un **sens d'ouverture** dont aucune donnée de décor ne dispose.
+   * Les dessiner au hasard mettrait une information fausse sur un plan par
+   * ailleurs exact — la même règle que « ne jamais afficher une difficulté
+   * qu'on n'a pas mesurée ».
+   *
+   * À la plus petite taille de plan, le seuil descend sous le pixel et
+   * s'estompe. C'est voulu : l'information est portée par **le vide**, que
+   * l'élément le plus épais du dessin encadre ; le seuil n'est qu'une précision
+   * qui s'efface proprement.
+   */
+  function sills(plan: Scene): string {
+    return doorwaysOf(plan)
+      .map((door) => segment(door.axis, door.line, door.from, door.to))
+      .join('');
+  }
+
+  const wallPath = $derived(scene === null ? '' : wallRuns(scene));
+  const sillPath = $derived(scene === null ? '' : sills(scene));
 
   /**
    * Les meubles d'une case, dans l'ordre où on les dessine.
@@ -135,10 +233,25 @@
               anchor = Math.min(anchor, cell);
             }
           }
+          /*
+            Décalé d'un demi-mur, et c'est une correction.
+
+            L'étiquette s'ancre au coin bas-gauche de la pièce — donc pile sur
+            les deux murs qui s'y croisent. Avec des bordures de deux pixels,
+            elle les effleurait ; avec un mur épais, elle est posée dessus et
+            devient illisible. Le décalage la fait entrer **dans** la pièce,
+            qui est de toute façon là qu'un plan d'architecte l'écrit.
+
+            La valeur vient de `WALL`, jamais recopiée : une épaisseur de mur
+            rapportée à la largeur du plateau, en pourcentage. Un mur entier et
+            non un demi : le demi suffit à ne pas chevaucher, et laisse le nom
+            collé au trait. Celui-ci lui donne un demi-mur d'air.
+          */
+          const inset = (WALL / size) * 100;
           return {
             name: zone.name,
-            x: (columnOf(anchor) / size) * 100,
-            y: ((size - 1 - rowOf(anchor)) / size) * 100,
+            x: (columnOf(anchor) / size) * 100 + inset,
+            y: ((size - 1 - rowOf(anchor)) / size) * 100 + inset,
           };
         }),
   );
@@ -207,10 +320,6 @@
               tabindex={game.cursor === cell ? 0 : -1}
               class="cell"
               data-zone={scene.zoneOf[cell] % 6}
-              class:wall-top={wall(cell, 'top')}
-              class:wall-right={wall(cell, 'right')}
-              class:wall-bottom={wall(cell, 'bottom')}
-              class:wall-left={wall(cell, 'left')}
               class:cursor={game.cursor === cell}
               class:marked={marked.has(cell)}
               class:target={targets.has(cell)}
@@ -251,6 +360,19 @@
           {/each}
         </div>
       {/each}
+
+      <!--
+        Les murs, par-dessus les cases et sous tout le reste.
+
+        `aria-hidden` le retire de l'arbre d'accessibilité, donc la grille ne
+        voit que ses rangées : un `role="grid"` n'accepte pas d'autre enfant.
+        Et il ne coûte rien au lecteur d'écran, puisque chaque case dit déjà sa
+        pièce — un mur n'ajoute aucune information qu'un nom de case ne porte.
+      -->
+      <svg class="walls" viewBox="0 0 {size} {size}" aria-hidden="true">
+        <path class="wall" d={wallPath} stroke-width={WALL} />
+        <path class="sill" d={sillPath} stroke-width={SILL} />
+      </svg>
     </div>
 
     <div class="rooms" aria-hidden="true">
@@ -286,6 +408,7 @@
     un objet posé plutôt qu'à une zone de la page.
   */
   .board {
+    position: relative;
     display: grid;
     aspect-ratio: 1;
     border: 3px solid var(--ink);
@@ -309,13 +432,15 @@
     cursor: pointer;
     user-select: none;
     /*
-      Un liseré transparent sur les quatre côtés, dont seuls ceux qui portent un
-      mur reçoivent une couleur. La **largeur** est la même partout : la piste de
-      grille garde donc exactement la même taille qu'il y ait un mur ou non. Un
-      `gap`, ou une largeur variable, aurait décalé les cases d'un demi-pixel
-      selon la parité — et c'est visible sur un plan.
+      Aucune bordure : les teintes de pièce se touchent, et les murs passent
+      **par-dessus** en SVG.
+
+      Les cases portaient un liseré transparent de deux pixels, coloré sur les
+      côtés qui faisaient mur. Cela tenait tant qu'un mur était plein ; une
+      bordure CSS ne sait pas s'interrompre au milieu, donc une porte y était
+      impossible. La largeur constante que ce liseré garantissait est désormais
+      obtenue gratuitement : le calque ne touche pas la piste de grille.
     */
-    border: 2px solid transparent;
     font-size: min(calc(7cqi * var(--text-scale, 1)), 2.2rem);
     transition: background-color var(--dur-instant) var(--ease);
   }
@@ -344,18 +469,39 @@
     background: var(--scene-zone-6);
   }
 
-  /* Les murs : c'est eux qui font qu'« à côté de » veut dire quelque chose. */
-  .cell.wall-top {
-    border-top-color: var(--scene-wall);
+  /*
+    Les murs : c'est eux qui font qu'« à côté de » veut dire quelque chose.
+
+    Le calque couvre exactement la piste de grille — le plateau est carré
+    (`aspect-ratio: 1`) et la vue SVG compte une unité par case, donc le tracé
+    tombe sur les lignes de grille sans aucun calcul de position.
+
+    Il ne reçoit jamais le pointeur : ce sont les cases qu'on clique, et un mur
+    posé par-dessus ne doit pas avaler un clic près d'un bord.
+  */
+  .walls {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
   }
-  .cell.wall-right {
-    border-right-color: var(--scene-wall);
+
+  /*
+    L'épaisseur n'est **pas** écrite ici : elle vient de `WALL`, porté par
+    l'attribut du tracé. La recopier en CSS en ferait une seconde source de
+    vérité, et la géométrie du script calcule déjà avec — l'ouverture d'une
+    porte est élargie d'un demi-mur avant d'être retranchée.
+  */
+  .wall {
+    fill: none;
+    stroke: var(--scene-wall);
+    stroke-linecap: square;
   }
-  .cell.wall-bottom {
-    border-bottom-color: var(--scene-wall);
-  }
-  .cell.wall-left {
-    border-left-color: var(--scene-wall);
+
+  /* Le seuil d'une porte, quatre fois plus fin que le mur — ISO 128-23. */
+  .sill {
+    fill: none;
+    stroke: var(--scene-wall);
+    stroke-linecap: butt;
   }
 
   /*
