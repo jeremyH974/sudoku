@@ -1118,24 +1118,14 @@ Ce qui reste ouvert, par ordre de valeur :
   sur les 441 grilles de la référence, l'oracle n'en rapporte aucun non plus.
 - **Le paysage sur téléphone** : la grille à gauche, le pavé à droite. C'est une troisième
   disposition ; la barre basse s'y dégrade en « il faut un peu défiler », pas en « cassé ».
-- **La validation au lecteur d'écran**, que `CLAUDE.md` exige, et que personne n'a encore faite.
-  `docs/lecteur-decran.md` la rend exécutable en une demi-heure — commandes NVDA, capture du
-  journal, verdicts à remplir — et tranche au passage la question du rôle : `role="grid"` est gardé
-  parce que c'est lui qui fait passer NVDA en mode formulaire, seul mode où les flèches parviennent
-  au plateau. Le document mesure aussi ce qu'aucune correction de notre côté ne rattraperait : sur
-  l'implémentation de référence du W3C, NVDA + Chrome n'annonce déjà pas le rôle. axe ne peut pas la fournir, et une CI verte ne doit pas être prise pour
-  elle. L'incrément 18 a lu l'arbre d'accessibilité d'un vrai Chromium — ce que jsdom ne calcule
-  jamais — et en a tiré une correction : `aria-selected` est retiré des deux plateaux, parce qu'il
-  décrivait une sélection qui n'existe pas et posait « non sélectionné » sur 35 cases sur 36. Mais
-  **rien n'a été entendu** : un arbre d'accessibilité dit ce qu'un lecteur d'écran a à sa
-  disposition, jamais ce qu'il annonce.
-- **Le rejet tardif de `carve`.** QuickXplain est fermé par le calcul — dans notre régime de
-  densité, la dichotomie est *plus mauvaise* que le parcours linéaire (Junker, AAAI 2004,
-  table 4) — et connaître la solution n'offre aucun raccourci de complexité (Yato & Seta, 2003 :
-  le problème est NP-complet). La seule piste vivante est constructive : carver contre `deduce`
-  plutôt que contre le comptage, ce qui rendrait l'unicité gratuite. `deduce` coûte 1,19 × un
-  `solveExact` plafonné, donc l'échange est plausible — mais il **changerait les affaires
-  produites**, ce qui n'est pas un arbitrage de vitesse.
+- **L'écoute par une personne qui s'en sert vraiment.** La machine écoute désormais chaque semaine
+  — voir plus haut —, et cela dit seulement que la parole n'a pas régressé. Que l'interface soit
+  *confortable* demande quelqu'un dont c'est l'outil quotidien. C'est la seule partie de la
+  validation qui reste due, et aucun runner ne la rendra.
+- **Les régions vivantes conditionnelles** de `LearnPanel.svelte` et `UpdateBanner.svelte` : un
+  `role="status"` créé en même temps que son texte n'est pas annoncé. Même défaut que celui corrigé
+  dans le studio d'impression à l'incrément 20, moins grave — ces bandeaux paraissent au chargement
+  plutôt qu'en réponse à une action — mais c'est le même, et il reste.
 
 ### Le rating Glicko2 est écarté, et ce n'est plus un report
 
